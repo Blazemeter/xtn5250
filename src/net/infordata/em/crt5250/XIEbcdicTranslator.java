@@ -13,12 +13,6 @@
 package net.infordata.em.crt5250;
 
 
-import java.util.*;
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * Singleton class used to translate chars to EBCDIC and vice-versa.
  * Future releases will support multiple convertion tables.
