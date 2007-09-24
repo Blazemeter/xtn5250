@@ -1,4 +1,20 @@
 /*
+Copyright 2007 Infordata S.p.A.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+/*
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
     30/07/99 rel. 1.14b- removed statusbar.* sub package. 
@@ -7,8 +23,6 @@
 package net.infordata.em.tn5250; 
 
 import java.awt.*;						 
-import java.awt.event.*;
-import java.applet.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -21,6 +35,9 @@ import net.infordata.em.util.*;
  * The 5250 status bar.
  */
 public class XI5250StatusBar extends JPanel {
+
+  private static final long serialVersionUID = 1L;
+
   //
   public final static int SHIFT_UP             =  0;
   public final static int SHIFT_DOWN           =  1;

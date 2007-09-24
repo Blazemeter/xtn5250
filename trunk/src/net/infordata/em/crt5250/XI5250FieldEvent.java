@@ -1,4 +1,20 @@
 /*
+Copyright 2007 Infordata S.p.A.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+/*
 !!V 14/05/97 rel. 0.96d- removed SIZE_CHANGED.
     27/05/97 rel. 1.00 - first release.
     03/03/98 rel. _.___- SWING and reorganization.
@@ -10,7 +26,6 @@
 package net.infordata.em.crt5250;
 
 
-import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
 
@@ -22,6 +37,9 @@ import java.awt.event.*;
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250FieldEvent extends EventObject {
+
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * The field has been activated (ie. the cursor enters the field area)
