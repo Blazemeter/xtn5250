@@ -23,10 +23,11 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
-import net.infordata.em.crt5250.*;
+import net.infordata.em.crt5250.XI5250Field;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,8 +76,8 @@ public class XIWriteToDisplayCmd extends XICCCmd {
         // search first not bypass field
         XI5250Field field;
         boolean     found = false;
-        for (Enumeration e = ivEmulator.getFields(); e.hasMoreElements(); ) {
-          field = (XI5250Field)e.nextElement();
+        for (Iterator<XI5250Field> e = ivEmulator.getFields().iterator(); e.hasNext(); ) {
+          field = e.next();
           if (!field.isBypassField()) {
             ivEmulator.setCursorPos(field.getCol(), field.getRow());
             found = true;

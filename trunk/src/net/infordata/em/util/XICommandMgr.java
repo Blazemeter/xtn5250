@@ -22,31 +22,41 @@ limitations under the License.
 
 package net.infordata.em.util;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.Button;
+import java.awt.CheckboxMenuItem;
+import java.awt.MenuItem;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
 
 
 /**
  */
 public class XICommandMgr {
+  
+  private static final Logger LOGGER = Logger.getLogger(XICommandMgr.class.getName());
 
-  // Debug level 0 = none, 1 = , 2 = detailed
-  static final int DEBUG = 0;
-
-  // relazione action-command -> XACommand
-  private Hashtable       ivActCmd2Cmd = new Hashtable();
+  // relazione action-command -> XICommand
+  private Map<String, XICommand> ivActCmd2Cmd = new HashMap<String, XICommand>();
 
   // action-commands disabilitati
-  private Vector          ivDisabledActCmd = new Vector();
+  private List<String> ivDisabledActCmd = new ArrayList<String>();
 
   // relazione oggetto -> action-command
-  private Hashtable       ivObj2ActCmd = new Hashtable();
+  private Map<Object, String> ivObj2ActCmd = new HashMap<Object, String>();
 
   // action-command -> boolean value
-  private Hashtable       ivActCmd2Value = new Hashtable();
+  private Map<String, Boolean> ivActCmd2Value = new HashMap<String, Boolean>();
 
   // lock per gestione action commands
   private Object          ivActCmdLock = new Object();
@@ -90,9 +100,9 @@ public class XICommandMgr {
   /**
    */
   private void actionPerformed(ActionEvent e) {
-  
-    if (DEBUG >= 2)
-      Diagnostic.getOut().println(e);
+
+    if (LOGGER.isLoggable(Level.FINER))
+      LOGGER.finer("" + e);
 
     String actCmd = (String)ivObj2ActCmd.get(e.getSource());
     
@@ -117,8 +127,8 @@ public class XICommandMgr {
    */
   protected void dispatchCommand(Object cmp, String cmd) {
     
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println("dispatchCommand " + cmp + " " + cmd);
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine("dispatchCommand " + cmp + " " + cmd);
 
     boolean flag;
     
@@ -147,8 +157,8 @@ public class XICommandMgr {
    */
   public void setCommandState(String cmd, boolean value) {
     
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println("setCommandState " + cmd + " " + value);
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine("setCommandState " + cmd + " " + value);
 
     boolean oldCmdState;
     
@@ -160,8 +170,8 @@ public class XICommandMgr {
       
       // sincronizzo lo stato di tutti gli oggetti associati al comando
       Object obj;
-      for (Enumeration e = ivObj2ActCmd.keys(); e.hasMoreElements(); ) {
-        obj = e.nextElement();
+      for (Iterator<Object> e = ivObj2ActCmd.keySet().iterator(); e.hasNext(); ) {
+        obj = e.next();
       
         if (cmd.equals(ivObj2ActCmd.get(obj))) {
       
@@ -202,8 +212,8 @@ public class XICommandMgr {
    */
   protected void processCommand(String anActCmd) {
   
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println("processActionCommand " + anActCmd);
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine("processActionCommand " + anActCmd);
 
     XICommand command = getCommand(anActCmd);
     if (command != null)
@@ -319,20 +329,18 @@ public class XICommandMgr {
       if (toBeEnabled == isCommandEnabled(anActionCommand))   
         return;
 
-      if (DEBUG >= 1)
-        Diagnostic.getOut().println(
-            anActionCommand + " " + (toBeEnabled ? "enabled" :
-                                                   "disabled"));
+      if (LOGGER.isLoggable(Level.FINE))
+        LOGGER.fine(anActionCommand + " " + (toBeEnabled ? "enabled" : "disabled"));
 
       if (toBeEnabled)
-        ivDisabledActCmd.removeElement(anActionCommand);
+        ivDisabledActCmd.remove(anActionCommand);
       else
-        ivDisabledActCmd.addElement(anActionCommand);
+        ivDisabledActCmd.add(anActionCommand);
     
       // abilito/disabilito tutti gli oggetti associati ad un determinato action-command
       Object obj;
-      for (Enumeration e = ivObj2ActCmd.keys(); e.hasMoreElements(); ) {
-        obj = e.nextElement();
+      for (Iterator<Object> e = ivObj2ActCmd.keySet().iterator(); e.hasNext(); ) {
+        obj = e.next();
       
         if (anActionCommand.equals(ivObj2ActCmd.get(obj))) {
       
@@ -382,9 +390,8 @@ public class XICommandMgr {
     if (anActionCommand == null)
       throw new IllegalArgumentException("The ActionCommand can't be null.");
 
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println(
-         aCommand + " -> " + anActionCommand);
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine(aCommand + " -> " + anActionCommand);
     
     ivActCmd2Cmd.put(anActionCommand, aCommand);
   }

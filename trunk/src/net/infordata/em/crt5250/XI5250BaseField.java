@@ -23,17 +23,8 @@ limitations under the License.
 
 package net.infordata.em.crt5250;
 
+import java.io.IOException;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
-
-import net.infordata.em.tnprot.*;
-
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Common base interface for XI5250FieldsList and XI5250Field.

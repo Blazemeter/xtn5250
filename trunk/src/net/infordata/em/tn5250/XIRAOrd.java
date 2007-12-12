@@ -23,9 +23,8 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
-
-import net.infordata.em.crt5250.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +44,7 @@ public class XIRAOrd extends XI5250Ord {
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     ivEndRow = Math.max(0, inStream.read());
     ivEndCol = Math.max(0, inStream.read());
-    ivChar = XIEbcdicTranslator.
+    ivChar = ivEmulator.
                  getTranslator().toChar((byte)Math.max(0, inStream.read()));
     //!!V effettuare check dei parametri
   }

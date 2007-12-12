@@ -43,11 +43,13 @@ package net.infordata.em.crt5250;
 import java.awt.AWTEvent;
 import java.awt.AWTEventMulticaster;
 import java.awt.AWTKeyStroke;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -62,13 +64,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -158,6 +157,12 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   transient private final CursorShape ivFixedCursorShape = new FixedCursorShape();
 
+  public static final String CODE_PAGE = "codePage";
+  
+  public static final String DEFAULT_CODE_PAGE = "CP1144";
+  private  String ivCodePage = DEFAULT_CODE_PAGE;
+  transient private XIEbcdicTranslator ivTranslator = 
+    XIEbcdicTranslator.getTranslator(DEFAULT_CODE_PAGE);
 
   /**
    * Default constructor.
@@ -343,7 +348,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
-  public Enumeration getFields() {
+  public List<XI5250Field> getFields() {
     return ivFields.getFields();
   }
 
@@ -453,6 +458,32 @@ public class XI5250Crt extends XICrt implements Serializable {
    */
   public int getSBARow() {
     return toRowPos(ivSBA);
+  }
+  
+  
+  public void setCodePage(String cp) {
+    if (cp == null)
+      cp = DEFAULT_CODE_PAGE;
+    if (cp.equals(ivCodePage))
+      return;
+    String old = ivCodePage;
+    ivTranslator = XIEbcdicTranslator.getTranslator(cp);
+    ivCodePage = cp;
+    
+    firePropertyChange(CODE_PAGE, old, ivCodePage);
+  }
+  
+  
+  public String getCodePage() {
+    return ivCodePage;
+  }
+  
+  
+  public final XIEbcdicTranslator getTranslator() {
+    if (ivTranslator != null)
+      return ivTranslator;
+    ivTranslator = XIEbcdicTranslator.getTranslator(ivCodePage);
+    return ivTranslator;
   }
 
 
@@ -817,27 +848,41 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    */
   private static void drawHorzLine(int inc, Graphics gc, int x, int y, int dx) {
-    boolean draw = true;
-
-    for (int i = 0; i < dx; i += inc)	{
-      if (draw)
-        gc.drawLine(x + i, y, x + i + inc, y);
-
-      draw = !draw;
-    }
+    Graphics2D g2 = (Graphics2D)gc;
+    float dash[] = { 6f };
+    BasicStroke b = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, 
+                        BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+    g2.setStroke(b);
+    g2.drawLine(x, y, x + dx, y);
+    
+//    boolean draw = true;
+//
+//    for (int i = 0; i < dx; i += inc)	{
+//      if (draw)
+//        gc.drawLine(x + i, y, x + i + inc, y);
+//
+//      draw = !draw;
+//    }
   }
 
   /**
    */
   private static void drawVertLine(int inc, Graphics gc, int x, int y, int dy) {
-    boolean draw = true;
-
-    for (int i = 0; i < dy; i += inc)	{
-      if (draw)
-        gc.drawLine(x, y + i, x, y + i + inc);
-
-      draw = !draw;
-    }
+    Graphics2D g2 = (Graphics2D)gc;
+    float dash[] = { 6f };
+    BasicStroke b = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, 
+                        BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+    g2.setStroke(b);
+    g2.drawLine(x, y, x, y + dy);
+    
+//    boolean draw = true;
+//
+//    for (int i = 0; i < dy; i += inc)	{
+//      if (draw)
+//        gc.drawLine(x, y + i, x, y + i + inc);
+//
+//      draw = !draw;
+//    }
   }
 
 
@@ -1066,7 +1111,7 @@ public class XI5250Crt extends XICrt implements Serializable {
         return true;
       case KeyEvent.CTRL_MASK:
         if (DEBUG >= 1) {
-          getCrtBuffer().dumpBuffer();
+          getCrtBuffer().dumpBuffer(System.out);
           return true;
         }
         break;
@@ -1264,7 +1309,7 @@ public class XI5250Crt extends XICrt implements Serializable {
     */
 
     //!!V To be replaced
-    StringBuffer strBuf = new StringBuffer();
+    StringBuilder strBuf = new StringBuilder();
     for (int r = ivSelectedArea.y;
          r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
       strBuf.append(getString(ivSelectedArea.x, r, ivSelectedArea.width));
@@ -1347,15 +1392,15 @@ public class XI5250Crt extends XICrt implements Serializable {
   }
 
 
-  /**
-   */
-  void writeObject(ObjectOutputStream oos) throws IOException {
-    oos.defaultWriteObject();
-  }
-
-  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-    ois.defaultReadObject();
-  }
+//  /**
+//   */
+//  void writeObject(ObjectOutputStream oos) throws IOException {
+//    oos.defaultWriteObject();
+//  }
+//
+//  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+//    ois.defaultReadObject();
+//  }
 
 
   /**
@@ -1441,12 +1486,12 @@ public class XI5250Crt extends XICrt implements Serializable {
 
     frm.setBounds(0, 0, 728, 512);
     frm.centerOnScreen();
-    frm.show();
+    frm.setVisible(true);
 
     crt.setReferenceCursor(true);
 
-    int i = 0;
-    XI5250Crt sCrt = null;
+//    int i = 0;
+//    XI5250Crt sCrt = null;
 
     crt.setBlinkingCursor(true);
 
@@ -1656,6 +1701,8 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    */
   public static class SupportPanel extends JPanel {
+
+    private static final long serialVersionUID = 1L;
 
     private XI5250Crt ivCrt;
 

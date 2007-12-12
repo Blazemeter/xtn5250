@@ -26,9 +26,12 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import net.infordata.em.crt5250.*;
+import net.infordata.em.crt5250.XI5250Field;
+import net.infordata.em.crt5250.XI5250FieldSaver;
+import net.infordata.em.crt5250.XIEbcdicTranslator;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +69,7 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
     if (ivOnlyMDT && !aField.isMDTOn())
       return;
 
-    XIEbcdicTranslator translator = XIEbcdicTranslator.getTranslator();
+    XIEbcdicTranslator translator = ivEmulator.getTranslator();
 
     // requires some special handling
     // see IBM 5250 function reference manual page 2-70

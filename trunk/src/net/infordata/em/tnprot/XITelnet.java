@@ -30,11 +30,15 @@ limitations under the License.
 package net.infordata.em.tnprot;
 
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
-import net.infordata.em.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -52,8 +56,8 @@ import net.infordata.em.util.*;
  */
 public class XITelnet {
 
-  static final int DEBUG = 0;
-
+  private static final Logger LOGGER = Logger.getLogger(XITelnet.class.getName());
+  
   /**
    * Telnet options or flags.
    */
@@ -374,8 +378,8 @@ public class XITelnet {
   private void closeSocket() {
     if (ivSocket != null) {
       try {
-        if (DEBUG >= 1) 
-          Diagnostic.getOut().println("closing...");
+        if (LOGGER.isLoggable(Level.FINE))
+          LOGGER.fine("closing...");
         ivSocket.close();
       }
       catch (IOException ex) {
@@ -413,8 +417,8 @@ public class XITelnet {
       case SIAC_START:
         switch (bb) {
           case IAC:
-            if (DEBUG >= 1)
-              Diagnostic.getOut().println();
+            if (LOGGER.isLoggable(Level.FINE))
+              LOGGER.fine("IAC");
 
             ivIACParserStatus = SIAC_WCMD;
             res = 0;
@@ -423,13 +427,15 @@ public class XITelnet {
         break;
       // CMD
       case SIAC_WCMD:
-        if (DEBUG >= 1) {
-          Diagnostic.getOut().print(" r " + bb + " ");
+        if (LOGGER.isLoggable(Level.FINE)) {
+          StringBuilder sb = new StringBuilder();
+          sb.append(" r " + bb + " ");
           try {
-            Diagnostic.getOut().print(TELCMD[-(bb + 1)] + " ");
+            sb.append(TELCMD[-(bb + 1)] + " ");
           }
           catch (Exception ex) {
           }
+          LOGGER.fine(sb.toString());
         }
 
         switch (bb) {
@@ -464,8 +470,8 @@ public class XITelnet {
           case SE:
             ivIACParserStatus = SIAC_START;
 
-            if (DEBUG >= 1)
-              Diagnostic.getOut().print("SE " + TELOPT[ivIACOpt]);
+            if (LOGGER.isLoggable(Level.FINE))
+              LOGGER.fine("SE " + TELOPT[ivIACOpt]);
 
             res = 0;
             if (ivLocalFlags[ivIACOpt]) {
@@ -493,8 +499,8 @@ public class XITelnet {
       case SIAC_WOPT:
         ivIACOpt = bb;
 
-        if (DEBUG >= 1)
-          Diagnostic.getOut().print(TELOPT[ivIACOpt]);
+        if (LOGGER.isLoggable(Level.FINE))
+          LOGGER.fine(TELOPT[ivIACOpt]);
 
         res = 0;
         switch (ivIACCmd) {
@@ -587,9 +593,8 @@ public class XITelnet {
    * Sends a telnet IAC sequence.
    */
   public void sendIACCmd(byte aCmd, byte aOpt) {
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println(
-          " t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine(" t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
           TELOPT[aOpt]);
 
     byte[] buf = {IAC, aCmd, aOpt};
@@ -608,9 +613,8 @@ public class XITelnet {
    * Sends a telnet IAC sequence with a string argument.
    */
   public void sendIACStr(byte aCmd, byte aOpt, String aString) {
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println(
-          "t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.fine("t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
           TELOPT[aOpt] + " " + aString);
 
     byte[] endBuf = {IAC, SE};
@@ -700,8 +704,8 @@ public class XITelnet {
    * Called when an IOException is catched.
    */
   protected synchronized void catchedIOException(IOException ex) {
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println(ex);
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.log(Level.FINE, "" , ex);
 
     try {
       if (ivEmulator != null)
@@ -746,10 +750,12 @@ public class XITelnet {
    * NOTE: receivedData is always callend in the receiving thread.
    */
   protected void receivedData(byte[] buf, int len) {
-    if (DEBUG >= 1) {
+    if (LOGGER.isLoggable(Level.FINE)) {
+      StringBuilder sb = new StringBuilder();
       for (int i = 0; i < len; i++) {
-        Diagnostic.getOut().print((char)buf[i]);
+        sb.append((char)buf[i]);
       }
+      LOGGER.fine(sb.toString());
     }
 
     if (ivEmulator != null)
@@ -762,8 +768,8 @@ public class XITelnet {
    * NOTE: receivedEOR is always called in the receiving thread.
    */
   protected void receivedEOR() {
-    if (DEBUG >= 1)
-      Diagnostic.getOut().println("EOR");
+    if (LOGGER.isLoggable(Level.FINE)) 
+      LOGGER.fine("EOR");
 
     if (ivEmulator != null)
       ivEmulator.receivedEOR();
@@ -781,14 +787,14 @@ public class XITelnet {
   /**
    * Only for test purposes.
    */
-  private static void showFlagsStatus(boolean[] aFlags) {
-    for (int i = TELOPT_BINARY; i <= TELOPT_NEW_ENVIRON; i++) {
-      Diagnostic.getOut().print(TELOPT[i] + " " + aFlags[i] + "  -  ");
-      if ((i % 3) == 0)
-        Diagnostic.getOut().println();
-    }
-    Diagnostic.getOut().println();
-  }
+//  static void showFlagsStatus(boolean[] aFlags) {
+//    for (int i = TELOPT_BINARY; i <= TELOPT_NEW_ENVIRON; i++) {
+//      Diagnostic.getOut().print(TELOPT[i] + " " + aFlags[i] + "  -  ");
+//      if ((i % 3) == 0)
+//        Diagnostic.getOut().println();
+//    }
+//    Diagnostic.getOut().println();
+//  }
 
 
   /**

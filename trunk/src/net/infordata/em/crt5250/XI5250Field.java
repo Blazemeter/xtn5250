@@ -32,12 +32,16 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.AWTEventMulticaster;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.EventListener;
 
-import net.infordata.em.tnprot.*;
+import net.infordata.em.tnprot.XITelnet;
 
 
 
@@ -658,11 +662,11 @@ public class XI5250Field implements XI5250BaseField {
       // send auto enter (-1 as modifier)
       if (isAutoEnter())
         ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0,
-                                             -1, KeyEvent.VK_ENTER));
+                                             -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_TAB));
       // send auto tab
       else if (!isExitRequired())
         ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0, 0,
-                                             KeyEvent.VK_TAB));
+                                             KeyEvent.VK_TAB, (char)KeyEvent.VK_TAB));
     }
 
     return true;
@@ -806,7 +810,7 @@ public class XI5250Field implements XI5250BaseField {
   /**
    */
   private void doFieldExit(boolean isMinus) {
-    XIEbcdicTranslator translator = XIEbcdicTranslator.getTranslator();
+    XIEbcdicTranslator translator = getCrt().getTranslator();
 
     updateStr();
     StringBuffer strBuf = new StringBuffer(ivStr);
@@ -863,7 +867,7 @@ public class XI5250Field implements XI5250BaseField {
 
     // send tab
     ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0, 0,
-                                         KeyEvent.VK_TAB));
+                                         KeyEvent.VK_TAB, (char)KeyEvent.VK_TAB));
   }
 
 
@@ -920,7 +924,7 @@ public class XI5250Field implements XI5250BaseField {
    */
   public Rectangle[] getRows() {
     int         rows = getNRows();
-    Dimension   charSize = ivCrt.getCharSize();
+    //Dimension   charSize = ivCrt.getCharSize();
     Rectangle[] rcts = new Rectangle[rows];
 
     // split line to handle wrap

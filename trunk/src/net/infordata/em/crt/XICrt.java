@@ -49,15 +49,16 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.VolatileImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -92,7 +93,7 @@ public class XICrt extends JComponent implements Serializable {
   public static final int  MAX_FONT_SIZE = 30;    //!!V 03/03/98
 
   //
-  transient private Image       ivImage;
+  transient private VolatileImage ivImage;
 
   // The offscreen buffer.
   private XICrtBuffer ivCrtBuffer;
@@ -195,26 +196,28 @@ public class XICrt extends JComponent implements Serializable {
   }
 
 
+  private Graphics initializeVolatileImage() {
+    Font font = getFont();
+    FontMetrics fontMetrics = getFontMetrics(font);
+
+    int ww = fontMetrics.charWidth('W');
+    int hh = fontMetrics.getHeight();
+    ivImage = createVolatileImage(ivCrtBuffer.getCrtSize().width * ww,
+                                  ivCrtBuffer.getCrtSize().height * hh);
+    Graphics gr = ivImage.getGraphics();
+    gr.setFont(font);
+
+    fontMetrics = getFontMetrics(new Font(font.getName(), font.getStyle(), MIN_FONT_SIZE));
+    ivMinCharW = fontMetrics.charWidth('W');
+    ivMinCharH = fontMetrics.getHeight();
+    return gr;
+  }
+  
   /**
    */
   private void initializeCrtBuffer() {
     synchronized (this) {
-      Font font = getFont();
-      FontMetrics fontMetrics = getFontMetrics(font);
-
-      int ww = fontMetrics.charWidth('W');
-      int hh = fontMetrics.getHeight();
-      ivImage = createImage(ivCrtBuffer.getCrtSize().width * ww,
-                            ivCrtBuffer.getCrtSize().height * hh);
-      Graphics gr = ivImage.getGraphics();
-      gr.setFont(font);
-
-      ivCrtBuffer.setGraphics(gr);
-
-      fontMetrics = getFontMetrics(new Font(font.getName(), font.getStyle(), MIN_FONT_SIZE));
-      ivMinCharW = fontMetrics.charWidth('W');
-      ivMinCharH = fontMetrics.getHeight();
-
+      ivCrtBuffer.setGraphics(initializeVolatileImage());
       repaint();
     }
     // request parent layout recalc.
@@ -370,10 +373,25 @@ public class XICrt extends JComponent implements Serializable {
    * @see    #foregroundPaint
    */
   public synchronized void paintComponent(Graphics g) {
-    ivCrtBuffer.sync();  //!!1.06
-
-    if (ivImage != null)
-      g.drawImage(ivImage, 0, 0, null);
+    if (ivImage != null) {
+      synchronized (ivCrtBuffer) {
+        do {
+          int returnCode = ivImage.validate(getGraphicsConfiguration());
+          if (returnCode == VolatileImage.IMAGE_RESTORED) {
+            // Contents need to be restored
+            ivCrtBuffer.invalidateAll();
+          } 
+          else if (returnCode == VolatileImage.IMAGE_INCOMPATIBLE) {
+            // old vImg doesn't work with new GraphicsConfig; re-create it
+            ivCrtBuffer.setGraphics(initializeVolatileImage());
+            ivCrtBuffer.invalidateAll();
+          }
+          ivCrtBuffer.sync();  //!!1.06
+          g.drawImage(ivImage, 0, 0, null);
+          if (true) break;
+        } while (ivImage.contentsLost());
+      }
+    }
 
     if (isOpaque()) {
       Dimension crtBuf = getCrtBufferSize();
@@ -801,7 +819,7 @@ public class XICrt extends JComponent implements Serializable {
     frm.getContentPane().add(crt);
     frm.setBounds(0, 0, 600, 500);
 
-    frm.show();
+    frm.setVisible(true);
 
     crt.setCursorVisible(true);
     crt.drawString("CIAO", 0, 0);
@@ -927,7 +945,9 @@ public class XICrt extends JComponent implements Serializable {
    */
   private class Cursor implements Serializable {
 
-    transient private Vector  ivCursorsPH = new Vector(10, 10);
+    private static final long serialVersionUID = 1L;
+
+    transient private List<CursorPlaceHolder> ivCursorsPH = new ArrayList<CursorPlaceHolder>(10);
 
     private CursorPlaceHolder ivCurrentCursorPH = new CursorPlaceHolder(0, 0);
 
@@ -978,7 +998,7 @@ public class XICrt extends JComponent implements Serializable {
       synchronized (ivCursorsPH) {
         if (col == getCol() && row == getRow())
           return;
-        ivCursorsPH.addElement(ivCurrentCursorPH);
+        ivCursorsPH.add(ivCurrentCursorPH);
         ivCurrentCursorPH = new CursorPlaceHolder(col, row);
       }
       resync();
@@ -991,7 +1011,7 @@ public class XICrt extends JComponent implements Serializable {
         if (flag == ivVisible)
           return;
         ivVisible = flag;
-        ivCursorsPH.addElement(ivCurrentCursorPH);
+        ivCursorsPH.add(ivCurrentCursorPH);
         ivCurrentCursorPH = new CursorPlaceHolder(getCol(), getRow());
       }
       resync();
@@ -1024,11 +1044,10 @@ public class XICrt extends JComponent implements Serializable {
             (XIUtil.is1dot2 && !XIUtil.is1dot3) ? null : getGraphics();
         try {
           // remove old place-holders
-          for (Enumeration e = ivCursorsPH.elements(); e.hasMoreElements(); ) {
-            ((CursorPlaceHolder)e.nextElement()).drawShapes(false,
-                                                            gc, false);
+          for (Iterator<CursorPlaceHolder> e = ivCursorsPH.iterator(); e.hasNext(); ) {
+            e.next().drawShapes(false, gc, false);
           }
-          ivCursorsPH.setSize(0);
+          ivCursorsPH.clear();
           // draw (or hide) the current one
           ivCurrentCursorPH.drawShapes(blinkingShapeOnly, gc, showIt);
         }
@@ -1054,8 +1073,8 @@ public class XICrt extends JComponent implements Serializable {
           throw new IllegalStateException();
       }
       // remove old place-holders
-      for (Enumeration e = ivCursorsPH.elements(); e.hasMoreElements(); ) {
-        ((CursorPlaceHolder)e.nextElement()).syncShapesAfterPaint(g);
+      for (Iterator<CursorPlaceHolder> e = ivCursorsPH.iterator(); e.hasNext(); ) {
+        e.next().syncShapesAfterPaint(g);
       }
       ivCurrentCursorPH.syncShapesAfterPaint(g);
     }
@@ -1066,6 +1085,8 @@ public class XICrt extends JComponent implements Serializable {
   /**
    */
   private class CursorPlaceHolder implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int ivCol;
     private int ivRow;

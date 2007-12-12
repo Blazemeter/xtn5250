@@ -28,73 +28,78 @@ limitations under the License.
  
 package net.infordata.em.crt5250;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 /**
- * Singleton class used to translate chars to EBCDIC and vice-versa.
- * Future releases will support multiple convertion tables.
- *
  * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
-public class XIEbcdicTranslator {
-
-  /**
-   * EBCDIC to char translation table.
-   * CP280 (Italian) (see http://www.easymarketplace.de/codepages.php for others)
-   */
-  protected static final char[] EBCDIC2CHAR =
-    //     0        1        2        3        4        5        6        7        8        9        A        B        C        D        E        F
-    {'\u0000','\u0001','\u0002','\u0003','\u0004','\u0005','\u0006','\u0007','\u0008','\u0009',    '\n','\u000B','\u000C',    '\r','\u000E','\u000F',
-     '\u0010','\u0011','\u0012','\u0013','\u0014','\u0015','\u0016','\u0017','\u0018','\u0019','\u001A','\u001B','\u001C','\u001D','\u001E','\u001F',
-     '\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000',
-     '\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000','\u0000',
-          ' ','\u0000','\u00e2','\u00e4',     '{','\u00e1','\u00e3','\u00e5',    '\\','\u00f1','\u00ba',     '.',     '<',     '(',     '+',     '!',
-          '&',     ']','\u00ea','\u00eb',     '}','\u00ed','\u00ee','\u00ef',     '~','\u00df','\u00e8',     '$',     '*',     ')',     ';',     '^',
-          '-',     '/','\u00c2','\u00c4','\u00c0','\u00c1','\u00c3','\u00c5','\u00c7','\u00d1','\u00f2',     ',',     '%',     '_',     '>',     '?',
-     '\u00f8','\u00c9','\u00ca','\u00cb','\u00c8','\u00cd','\u00ce','\u00cf','\u00cc','\u00f9',     ':','\u00a3','\u00a7',    '\'',     '=',    '\"',
-     '\u00d8',     'a',     'b',     'c',     'd',     'e',     'f',     'g',     'h',     'i','\u00ab','\u00bb','\u00f0','\u0000','\u00de','\u00b1',
-          '[',     'j',     'k',     'l',     'm',     'n',     'o',     'p',     'q',     'r','\u0000','\u0000','\u00e6','\u0000','\u00c6','\u00a4',
-     '\u00b5','\u00ec',     's',     't',     'u',     'v',     'w',     'x',     'y',     'z',     '¡','\u00bf','\u00d0','\u0000','\u00fe','\u00ae',
-     '\u00a2',     '#','\u00a5','\u0000','\u0000',     '@','\u00b6','\u00bc','\u00bd','\u00be','\u00ac',     '|','\u0000','\u00a8','\u00b4','\u0000',
-     '\u00e0',     'A',     'B',     'C',     'D',     'E',     'F',     'G',     'H',     'I','\u00ad','\u00f4','\u00f6','\u00a6','\u00f3','\u00f5',
-     '\u00e8',     'J',     'K',     'L',     'M',     'N',     'O',     'P',     'Q',     'R','\u0000','\u00fb','\u00fc',     '`','\u00fa','\u00ff',
-     '\u00e7','\u0000',     'S',     'T',     'U',     'V',     'W',     'X',     'Y',     'Z','\u00b2','\u00d4','\u00d6','\u00d2','\u00d3','\u00d5',
-          '0',     '1',     '2',     '3',     '4',     '5',     '6',     '7',     '8',     '9','\u00b3','\u00db','\u00dc','\u00d9','\u00da','\u0000'};
-
-  /**
-   * Char to EBCDIC translation table.
-   */
-  protected static int[] CHAR2EBCDIC = new int[512];
+public abstract class XIEbcdicTranslator {
 
 
-  private static XIEbcdicTranslator cvTranslator;
+  private static final Map<String,XIEbcdicTranslator> cvRegistry = 
+      Collections.synchronizedMap(new LinkedHashMap<String,XIEbcdicTranslator>());
+  private static final Map<String,XIEbcdicTranslator> cvRORegistry = 
+      Collections.unmodifiableMap(cvRegistry);
 
-
-  /**
-   */
+  
   static {
-    // inverts conversion table
-    for (int i = EBCDIC2CHAR.length - 1; i >=0; i--)
-      CHAR2EBCDIC[(int)EBCDIC2CHAR[i]] = i;
+    registerTranslator("CP37", XIEbcdicNTranslator.TRANSLATOR_CP37);
+    registerTranslator("CP273", XIEbcdicNTranslator.TRANSLATOR_CP273);
+    registerTranslator("CP277", XIEbcdicNTranslator.TRANSLATOR_CP277);
+    registerTranslator("CP278", XIEbcdicNTranslator.TRANSLATOR_CP278);
+    registerTranslator("CP280", XIEbcdicNTranslator.TRANSLATOR_CP280);
+    registerTranslator("CP284", XIEbcdicNTranslator.TRANSLATOR_CP284);
+    registerTranslator("CP285", XIEbcdicNTranslator.TRANSLATOR_CP285);
+    registerTranslator("CP297", XIEbcdicNTranslator.TRANSLATOR_CP297);
+    registerTranslator("CP424", XIEbcdicNTranslator.TRANSLATOR_CP424);
+    registerTranslator("CP500", XIEbcdicNTranslator.TRANSLATOR_CP500);
+    registerTranslator("CP1140", XIEbcdicNTranslator.TRANSLATOR_CP1140);
+    registerTranslator("CP1141", XIEbcdicNTranslator.TRANSLATOR_CP1141);
+    registerTranslator("CP1144", XIEbcdicNTranslator.TRANSLATOR_CP1144);
+    registerTranslator("CP1147", XIEbcdicNTranslator.TRANSLATOR_CP1147);
   }
-
-
+  
+  
   /**
    */
-  private XIEbcdicTranslator() {
+  protected XIEbcdicTranslator() {
   }
-
-
+  
+  
   /**
-   * Returns the XIEbcdicTranslator single instance.
    */
-  public static XIEbcdicTranslator getTranslator() {
-    if (cvTranslator == null)
-      cvTranslator = new XIEbcdicTranslator();
-    return cvTranslator;
+  public static synchronized void registerTranslator(String id, 
+      XIEbcdicTranslator tr) {
+    if (id == null)
+      throw new NullPointerException("id is null");
+    if (tr == null)
+      throw new NullPointerException("tr is null");
+    if (cvRegistry.containsKey(id.toLowerCase()))
+      throw new IllegalArgumentException("Translator " + id.toLowerCase() + " already registered");
+    cvRegistry.put(id.toLowerCase(), tr);
+  }
+  
+  
+  /**
+   * @return a read-only map of registered translators
+   */
+  public static Map<String,XIEbcdicTranslator> getRegisteredTranslators() {
+    return cvRORegistry;
   }
 
+  
+  /**
+   * Returns the XIEbcdicTranslator.
+   */
+  public static XIEbcdicTranslator getTranslator(String id) {
+    return cvRegistry.get(id.toLowerCase());
+  }
 
+  
   /**
    * Converts byte to int without sign.
    */
@@ -115,17 +120,13 @@ public class XIEbcdicTranslator {
   /**
    * From ebcdic code to char
    */
-  public char toChar(byte aEbcdicChar) {
-    return EBCDIC2CHAR[toInt(aEbcdicChar)];
-  }
+  public abstract char toChar(byte aEbcdicChar);
 
 
   /**
    * From char to ebcdic code
    */
-  public byte toEBCDIC(char aChar) {
-    return (byte)CHAR2EBCDIC[Math.max(0, Math.min(CHAR2EBCDIC.length - 1, (int)aChar))];
-  }
+  public abstract byte toEBCDIC(char aChar);
 
 
   /**

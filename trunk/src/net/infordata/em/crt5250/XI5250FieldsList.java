@@ -25,9 +25,13 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 
 
@@ -44,8 +48,8 @@ import java.util.*;
  */
 public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   private XI5250Crt   ivCrt;
-  private Vector      ivFields = new Vector(40, 20);
-
+  private ArrayList<XI5250Field> ivFields = new ArrayList<XI5250Field>(40);
+  private List<XI5250Field> ivROFields = Collections.unmodifiableList(ivFields);
 
   /**
    */
@@ -57,11 +61,13 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   /**
    * Returns a cloned XI5250FieldList
    */
+  @SuppressWarnings("unchecked")
   public Object clone() {
     try {
       XI5250FieldsList aClone = (XI5250FieldsList)super.clone();
       // non clono singoli campi perchè vengono sempre ricreati da 0 e mai modificati
-      aClone.ivFields = (Vector)ivFields.clone();
+      aClone.ivFields = (ArrayList<XI5250Field>)ivFields.clone();
+      aClone.ivROFields = Collections.unmodifiableList(aClone.ivFields);
       return aClone;
     }
     catch (CloneNotSupportedException e) {
@@ -76,7 +82,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
    */
   public void init() {
     for (int i = 0; i < ivFields.size(); i++)
-      ((XI5250Field)ivFields.elementAt(i)).init();
+      ivFields.get(i).init();
   }
 
 
@@ -85,7 +91,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
    */
   public void removeNotify() {
     for (int i = 0; i < ivFields.size(); i++)
-      ((XI5250Field)ivFields.elementAt(i)).removeNotify();
+      ivFields.get(i).removeNotify();
   }
 
 
@@ -95,7 +101,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
    */
   public void saveTo(XI5250FieldSaver aSaver) throws IOException {
     for (int i = 0; i < ivFields.size(); i++)
-      ((XI5250Field)ivFields.elementAt(i)).saveTo(aSaver);
+      ivFields.get(i).saveTo(aSaver);
   }
 
 
@@ -105,7 +111,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
    */
   public void resized() {
     for (int i = 0; i < ivFields.size(); i++)
-      ((XI5250Field)ivFields.elementAt(i)).resized();
+      ivFields.get(i).resized();
   }
 
 
@@ -117,7 +123,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     Rectangle   clip = g.getClipBounds();
 
     for (int i = 0; i < ivFields.size(); i++) {
-      field = (XI5250Field)ivFields.elementAt(i);
+      field = ivFields.get(i);
       Rectangle fr = field.getBoundingRect();
 
       if (clip.intersects(fr)) {
@@ -147,7 +153,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     XI5250Field field;
     // ricerca binaria
     while ((med < ivFields.size()) && (min <= max)) {
-      field = (XI5250Field)ivFields.elementAt(med);
+      field = ivFields.get(med);
       if (field.getSortKey() == kk)
         return med;
       else if (field.getSortKey() > kk)
@@ -177,12 +183,12 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     // viene sostituito il campo
     XI5250Field field = fieldFromPos(aField.getCol(), aField.getRow());
     if (field != null) {
-      ivFields.setElementAt(aField, fromFieldToIdx(field));
+      ivFields.set(fromFieldToIdx(field), aField);
     }
     else {
       int idx = searchField(aField.getCol(), aField.getRow());
       idx = (-idx) - 1;
-      ivFields.insertElementAt(aField, idx);
+      ivFields.add(idx, aField);
     }
   }
 
@@ -193,7 +199,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   private XI5250Field prevFieldFromPosInternal(int aCol, int aRow) {
     int idx = searchField(aCol, aRow);
     if (idx >= 0)
-      return (XI5250Field)ivFields.elementAt(idx);
+      return ivFields.get(idx);
 
     idx = (-idx) - 1;
 
@@ -201,7 +207,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
       return null;
 
     // accedo al precedente
-    return (XI5250Field)ivFields.elementAt(idx - 1);
+    return ivFields.get(idx - 1);
   }
 
 
@@ -211,8 +217,8 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   protected int fromFieldToIdx(XI5250Field aField) {
     XI5250Field field;
     int i = 0;
-    for (Enumeration e = ivFields.elements(); e.hasMoreElements(); i++) {
-      field = (XI5250Field)e.nextElement();
+    for (Iterator<XI5250Field> e = ivFields.iterator(); e.hasNext(); i++) {
+      field = e.next();
       if (field == aField)
         return i;
     }
@@ -242,47 +248,49 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   /**
    */
   public XI5250Field nextFieldFromPos(int aCol, int aRow) {
+    if (ivFields.isEmpty())
+      return null;
     // accedo al precedente
     XI5250Field field = prevFieldFromPosInternal(aCol, aRow);
-    if (field == null || field == ivFields.lastElement())
-      return ((!ivFields.isEmpty()) ? (XI5250Field)ivFields.firstElement() :
+    if (field == null || field == ivFields.get(ivFields.size() - 1))
+      return ((!ivFields.isEmpty()) ? ivFields.get(0) :
                                       null);
 
     int idx = fromFieldToIdx(field);
-    return (XI5250Field)ivFields.elementAt(idx + 1);
+    return ivFields.get(idx + 1);
   }
 
 
   /**
    */
   public XI5250Field prevFieldFromPos(int aCol, int aRow) {
+    if (ivFields.isEmpty())
+      return null;
     XI5250Field field = fieldFromPos(aCol, aRow);
     // caso cursore sul campo
     if (field != null) {
-      if (field == ivFields.firstElement())
-        return (XI5250Field)ivFields.lastElement();
+      if (field == ivFields.get(0))
+        return ivFields.get(ivFields.size() - 1);
 
       int idx = fromFieldToIdx(field);
       idx = (idx == 0) ? (ivFields.size() - 1) : idx - 1;
-      return (XI5250Field)ivFields.elementAt(idx);
+      return ivFields.get(idx);
     }
 
     // caso cursore non sul campo
     // accedo al precedente
     field = prevFieldFromPosInternal(aCol, aRow);
     if (field == null)
-      return ((!ivFields.isEmpty()) ? (XI5250Field)ivFields.lastElement() : null);
+      return ((!ivFields.isEmpty()) ? ivFields.get(ivFields.size() - 1) : null);
 
     return field;
   }
 
 
   /**
-   * Returns the fields enumeration.
-   * Fields enumeration is based on their linear buffer position.
    */
-  public Enumeration getFields() {
-    return ivFields.elements();
+  public List<XI5250Field> getFields() {
+    return ivROFields;
   }
 
 
@@ -292,7 +300,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
    */
   public XI5250Field getField(int idx) {
     try {
-      return (XI5250Field)ivFields.elementAt(idx);
+      return (XI5250Field)ivFields.get(idx);
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       return null;

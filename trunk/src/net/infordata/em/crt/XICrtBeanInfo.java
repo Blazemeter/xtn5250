@@ -16,10 +16,14 @@ limitations under the License.
 
 package net.infordata.em.crt;
 
-import java.beans.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.SimpleBeanInfo;
 
 public class XICrtBeanInfo extends SimpleBeanInfo {
-  Class beanClass = XICrt.class;
+  Class<XICrt> beanClass = XICrt.class;
   String iconColor16x16Filename;
   String iconColor32x32Filename;
   String iconMono16x16Filename;
@@ -62,7 +66,7 @@ public class XICrtBeanInfo extends SimpleBeanInfo {
   }
 
   public BeanInfo[] getAdditionalBeanInfo() {
-    Class superclass = beanClass.getSuperclass();
+    Class<?> superclass = beanClass.getSuperclass();
     try  {
       BeanInfo superBeanInfo = Introspector.getBeanInfo(superclass);
       return new BeanInfo[] { superBeanInfo };

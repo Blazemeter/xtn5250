@@ -25,7 +25,7 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.util.*;
+import java.util.EventListener;
 
 
 /**

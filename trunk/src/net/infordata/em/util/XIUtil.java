@@ -24,10 +24,17 @@ limitations under the License.
 package net.infordata.em.util;
 
 
-import java.awt.*;
-import java.applet.*;
-import java.io.*;
-import java.lang.reflect.*;
+import java.applet.Applet;
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 
 
 /**
@@ -41,7 +48,7 @@ public class XIUtil {
   private static boolean is1dot2() {
     try {
       // Test if method introduced in 1.2 is available.
-      Method m = Class.class.getMethod("getProtectionDomain", null);
+      Method m = Class.class.getMethod("getProtectionDomain");
       return (m != null);
     }
     catch (NoSuchMethodException e) {
@@ -100,7 +107,7 @@ public class XIUtil {
 
   /**
    */
-  public static Image createImage(final Class baseClass,
+  public static Image createImage(final Class<?> baseClass,
                                   final String gifFile) {
     byte[] buffer = null;
     try {

@@ -24,12 +24,13 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
-import net.infordata.em.crt5250.*;
-import net.infordata.em.tnprot.*;
+import net.infordata.em.crt5250.XI5250Field;
+import net.infordata.em.tnprot.XITelnet;
 
 
 
@@ -88,8 +89,8 @@ public abstract class XICCCmd extends XI5250Cmd {
     if (cc1 == 0x40 || cc1 == 0xA0 || cc1 == 0xC0) {
       //!!V gestire master mdt
       XI5250Field field;
-      for (Enumeration e = ivEmulator.getFields(); e.hasMoreElements(); ) {
-        field = (XI5250Field)e.nextElement();
+      for (Iterator<XI5250Field> e = ivEmulator.getFields().iterator(); e.hasNext(); ) {
+        field = e.next();
         if (!field.isOrgBypassField())
           field.resetMDT();
       }
@@ -99,8 +100,8 @@ public abstract class XICCCmd extends XI5250Cmd {
     if (cc1 == 0x60 || cc1 == 0xE0) {
       //!!V gestire master mdt
       XI5250Field field;
-      for (Enumeration e = ivEmulator.getFields(); e.hasMoreElements(); ) {
-        field = (XI5250Field)e.nextElement();
+      for (Iterator<XI5250Field> e = ivEmulator.getFields().iterator(); e.hasNext(); ) {
+        field = e.next();
         field.resetMDT();
       }
     }
@@ -108,8 +109,8 @@ public abstract class XICCCmd extends XI5250Cmd {
     // null nonbypass-fields with mdt on
     if (cc1 == 0x80 || cc1 == 0xC0) {
       XI5250Field field;
-      for (Enumeration e = ivEmulator.getFields(); e.hasMoreElements(); ) {
-        field = (XI5250Field)e.nextElement();
+      for (Iterator<XI5250Field> e = ivEmulator.getFields().iterator(); e.hasNext(); ) {
+        field = e.next();
         if (!field.isOrgBypassField() && field.isMDTOn())
           field.clear();
       }
@@ -118,8 +119,8 @@ public abstract class XICCCmd extends XI5250Cmd {
     // null all nonbypass-fields
     if (cc1 == 0xA0 || cc1 == 0xE0) {
       XI5250Field field;
-      for (Enumeration e = ivEmulator.getFields(); e.hasMoreElements(); ) {
-        field = (XI5250Field)e.nextElement();
+      for (Iterator<XI5250Field> e = ivEmulator.getFields().iterator(); e.hasNext(); ) {
+        field = e.next();
         if (!field.isBypassField())
           field.clear();
       }

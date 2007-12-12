@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 
 /*
 !!V 26/03/97 rel. 0.90 - start of revisions history.
@@ -24,7 +24,7 @@ limitations under the License.
     13/01/98 rel. 1.05d- NT painting bug.
     14/01/98 rel. 1.06 - asynchronous paint on off-screen image.
     03/03/98 rel. _.___- SWING and reorganization.
-    ***
+ ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
     29/07/99 rel. 1.14 - Rework on 3d look&feel.
  */
@@ -33,12 +33,20 @@ limitations under the License.
 package net.infordata.em.crt;
 
 
-import java.util.*;
-import java.awt.*;
-
-import java.io.*;
-
-import net.infordata.em.util.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +80,7 @@ public class XICrtBuffer implements Serializable {
   private int[][]  ivAttrBuffer;
 
   //!!1.06
-  transient private Vector ivDirtyAreas = new Vector(20, 10);
+  transient private List<Rectangle> ivDirtyAreas = new ArrayList<Rectangle>(20);
 
   //!!1.14
   transient private XICrt  ivCrt;
@@ -111,7 +119,7 @@ public class XICrtBuffer implements Serializable {
     /* !!1.04
     XICrtBuffer aClone = new XICrtBuffer(ivNCols, ivNRows);
     aClone.copyFrom(this);
-    */
+     */
     return aClone;
   }
 
@@ -160,15 +168,15 @@ public class XICrtBuffer implements Serializable {
    * Dumps the buffer on System.out stream.
    * Usefull for debugging.
    */
-  public void dumpBuffer() {
-    Diagnostic.getOut().println("BUFFER DUMP");
+  public void dumpBuffer(PrintStream out) {
+    out.println("BUFFER DUMP");
     for (int r = 0; r < ivNRows; r++)
     {
       for (int c = 0; c < ivNCols; c++)
-        Diagnostic.getOut().print(ivCharBuffer[r][c]);
-      Diagnostic.getOut().println();
+        out.print(ivCharBuffer[r][c]);
+      out.println();
     }
-    Diagnostic.getOut().println("END BUFFER DUMP");
+    out.println("END BUFFER DUMP");
   }
 
 
@@ -191,8 +199,8 @@ public class XICrtBuffer implements Serializable {
    * @param    aH      the source dimension.
    */
   public synchronized void copyFrom(int col, int row,
-                                    XICrtBuffer from,
-                                    int aC, int aR, int aW, int aH) {
+      XICrtBuffer from,
+      int aC, int aR, int aW, int aH) {
     aW = Math.min(aW, from.ivNCols - aC);
     aH = Math.min(aH, from.ivNRows - aR);
     int          nCols = Math.min(ivNCols - col, aW);
@@ -200,14 +208,14 @@ public class XICrtBuffer implements Serializable {
     int          lastAttr;
     int          lastCol;
     int          lastRow;
-    StringBuffer str;
+    StringBuilder str;
 
     for (int r = 0; r < nRows; r++) {
       for (int c = 0; c < nCols; ) {
         lastCol = col + c;
         lastRow = row + r;
         lastAttr = from.getAttrInternal(aC + c, aR + r);
-        str = new StringBuffer();
+        str = new StringBuilder();
 
         // group chars with the same attribute
         for ( ; c < nCols && lastAttr == from.getAttrInternal(aC + c, aR + r); c++)
@@ -218,6 +226,9 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
+  public synchronized void invalidateAll() {
+    addDirtyArea(new Rectangle(0, 0, ivNCols, ivNRows));
+  }
 
   /**
    * Clears the screen buffer.
@@ -229,11 +240,11 @@ public class XICrtBuffer implements Serializable {
         ivAttrBuffer[r][c] = ivDefAttr;
       }
 
-    ivDirtyAreas.removeAllElements();
+    ivDirtyAreas.clear();
 
     if (ivGr != null) {
-    	Graphics gr = ivGr.create();  //!!1.05d
-    	try {
+      Graphics gr = ivGr.create();  //!!1.05d
+      try {
         gr.setColor(getBackground(ivDefAttr));
         gr.fillRect(0, 0, ivGrW, ivGrH);
       }
@@ -267,10 +278,10 @@ public class XICrtBuffer implements Serializable {
       }
 
     if (ivGr != null) {
-    	Graphics gr = ivGr.create();  //!!1.05d
-    	try {
+      Graphics gr = ivGr.create();  //!!1.05d
+      try {
         gr.copyArea(0, r1 * ivCharH, ivNCols * ivCharW, (r2 - r1) * ivCharH,
-                    0, ivCharH * nRows);
+            0, ivCharH * nRows);
         gr.setColor(getBackground(ivDefAttr));
         gr.fillRect(0, r1 * ivCharH, ivNCols * ivCharW, ivCharH * nRows);
       }
@@ -304,10 +315,10 @@ public class XICrtBuffer implements Serializable {
       }
 
     if (ivGr != null) {
-    	Graphics gr = ivGr.create();  //!!1.05d
-    	try {
+      Graphics gr = ivGr.create();  //!!1.05d
+      try {
         gr.copyArea(0, (r1 + 1) * ivCharH, ivNCols * ivCharW, (r2 - r1) * ivCharH,
-                    0, -ivCharH * nRows);
+            0, -ivCharH * nRows);
         gr.setColor(getBackground(ivDefAttr));
         gr.fillRect(0, (r2 - nRows + 1) * ivCharH, ivNCols * ivCharW, ivCharH * nRows);
       }
@@ -361,7 +372,7 @@ public class XICrtBuffer implements Serializable {
    * Uses the given attribute.
    */
   public synchronized void drawString(String aStr, int col, int row,
-                                      int aAttr) {
+      int aAttr) {
     col = Math.max(0, Math.min(ivNCols - 1, col));
     row = Math.max(0, Math.min(ivNRows - 1, row));
     int len = Math.min(aStr.length(), ivNCols - col);
@@ -382,23 +393,23 @@ public class XICrtBuffer implements Serializable {
    */
   private void addDirtyArea(Rectangle newRt) {
     Rectangle rt;
-  	Rectangle rtG;
+    Rectangle rtG;
     Rectangle res = new Rectangle(newRt);   //!!V 03/03/98
     int       count = 0;
-  	for (Enumeration e = ivDirtyAreas.elements(); e.hasMoreElements(); ) {
-    	rt = (Rectangle)e.nextElement();
-    	// used to see if rectangles are adiacent (x coord)
-    	rtG = new Rectangle(rt);
-    	rtG.grow(1, 0);
-    	if (rtG.intersects(newRt)) {
-      	ivDirtyAreas.removeElement(rt);
-      	res = res.union(rt);
+    for (Iterator<Rectangle> e = ivDirtyAreas.iterator(); e.hasNext(); ) {
+      rt = (Rectangle)e.next();
+      // used to see if rectangles are adiacent (x coord)
+      rtG = new Rectangle(rt);
+      rtG.grow(1, 0);
+      if (rtG.intersects(newRt)) {
+        e.remove();
+        res = res.union(rt);
         // no more than two rects can be joined (x coord)
         if (++count >= 2)
           break;
       }
     }
-   	ivDirtyAreas.addElement(res);
+    ivDirtyAreas.add(res);
   }
 
 
@@ -406,62 +417,62 @@ public class XICrtBuffer implements Serializable {
    * To be called just before painting the offscreen image.
    */
   public synchronized void sync() {
-  	if (ivGr == null || ivDirtyAreas.isEmpty())
-  		return;
+    if (ivGr == null || ivDirtyAreas.isEmpty())
+      return;
 
-  	Graphics gr = ivGr.create();  //!!1.05d
-  	try {
-    	Rectangle rt;
-    	for (Enumeration e = ivDirtyAreas.elements(); e.hasMoreElements(); ) {
-      	rt = (Rectangle)e.nextElement();
+    Graphics gr = ivGr.create();  //!!1.05d
+    try {
+      Rectangle rt;
+      for (Iterator<Rectangle> e = ivDirtyAreas.iterator(); e.hasNext(); ) {
+        rt = (Rectangle)e.next();
 
-		    int          lastAttr;
-		    int          lastCol;
-		    int          lastRow;
-		    StringBuffer str;
+        int          lastAttr;
+        int          lastCol;
+        int          lastRow;
+        StringBuilder str;
 
-		    for (int r = 0; r < rt.height; r++) {
-		      for (int c = 0; c < rt.width; ) {
-		        lastCol = rt.x + c;
-		        lastRow = rt.y + r;
-		        lastAttr = getAttr(rt.x + c, rt.y + r);
-		        str = new StringBuffer();
+        for (int r = 0; r < rt.height; r++) {
+          for (int c = 0; c < rt.width; ) {
+            lastCol = rt.x + c;
+            lastRow = rt.y + r;
+            lastAttr = getAttr(rt.x + c, rt.y + r);
+            str = new StringBuilder();
 
-		        // group char with the same attribute to speed up drawing
-		        for ( ; c < rt.width && lastAttr == getAttr(rt.x + c, rt.y + r); c++)
-		          str.append(getChar(rt.x + c, rt.y + r));
+            // group char with the same attribute to speed up drawing
+            for ( ; c < rt.width && lastAttr == getAttr(rt.x + c, rt.y + r); c++)
+              str.append(getChar(rt.x + c, rt.y + r));
 
-		        _drawString(gr, new String(str), lastCol, lastRow, lastAttr);
-		      }
-		    }
+            _drawString(gr, new String(str), lastCol, lastRow, lastAttr);
+          }
+        }
 
-		    if (XICrt.DEBUG >= 2) {
-		      gr.setColor(Color.yellow);
-		      gr.drawRect(rt.x * ivCharW + 1, rt.y * ivCharH + 1,
-		                  rt.width * ivCharW - 3, rt.height * ivCharH - 3);
-		    }
+        if (XICrt.DEBUG >= 2) {
+          gr.setColor(Color.yellow);
+          gr.drawRect(rt.x * ivCharW + 1, rt.y * ivCharH + 1,
+              rt.width * ivCharW - 3, rt.height * ivCharH - 3);
+        }
       }
 
-      ivDirtyAreas.removeAllElements();
+      ivDirtyAreas.clear();
     }
     finally {
-  		gr.dispose();
+      gr.dispose();
     }
   }
-  
-  
+
+
   /**
    * Draws the given string on the graphics context (called by sync()).
    */
   protected void _drawString(Graphics gr, String aStr, int col, int row,
-                             int aAttr) { //!!1.06
+      int aAttr) { //!!1.06
     int len = aStr.length();
 
     gr.setColor(getBackground(aAttr));
     gr.fillRect(col * ivCharW, row * ivCharH, ivCharW * len, ivCharH);
 
     // do not draw char less than space
-    StringBuffer strBuf = new StringBuffer(aStr);
+    StringBuilder strBuf = new StringBuilder(aStr);
     for (int i = 0; i < strBuf.length(); i++) {
       if (strBuf.charAt(i) < ' ')
         strBuf.setCharAt(i, ' ');
@@ -470,14 +481,14 @@ public class XICrtBuffer implements Serializable {
 
     gr.setColor(getForeground(aAttr));
     gr.drawString(str.substring(0, len), col * ivCharW,
-                    (row + 1) * ivCharH - ivCharD);
+        (row + 1) * ivCharH - ivCharD);
   }
 
 
   /**
    */
   public String getString(int col, int row, int nChars) {
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     for (int i = 0; i < nChars; i++) {
       str.append(getChar(col + i, row));
     }
@@ -567,7 +578,7 @@ public class XICrtBuffer implements Serializable {
    */
   public Rectangle toPoints(int aCol, int aRow, int aNCols, int aNRows) {
     return new Rectangle(aCol * ivCharW, aRow * ivCharH,
-                         aNCols * ivCharW, aNRows * ivCharH);
+        aNCols * ivCharW, aNRows * ivCharH);
   }
 
 

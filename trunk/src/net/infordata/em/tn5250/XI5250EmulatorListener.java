@@ -23,7 +23,7 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.util.*;
+import java.util.EventListener;
 
 
 /**

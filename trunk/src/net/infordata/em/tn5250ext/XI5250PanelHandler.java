@@ -45,6 +45,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JPopupMenu;
@@ -726,7 +727,7 @@ public abstract class XI5250PanelHandler {
   /**
    * Returns an Enumeration of all the fields present on the panel.
    */
-  public final Enumeration getFields() {
+  public final List<XI5250Field> getFields() {
     return getEmulator().getFields();
   }
 

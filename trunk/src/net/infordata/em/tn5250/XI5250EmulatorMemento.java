@@ -23,7 +23,8 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import net.infordata.em.crt5250.*;
+import net.infordata.em.crt5250.XI5250CrtBuffer;
+import net.infordata.em.crt5250.XI5250FieldsList;
 
 
 

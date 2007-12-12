@@ -24,14 +24,28 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.util.ResourceBundle;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
-import net.infordata.em.crt5250.*;
-import net.infordata.em.util.*;
+import net.infordata.em.crt5250.XI5250Crt;
+import net.infordata.em.crt5250.XI5250CrtCtrl;
+import net.infordata.em.crt5250.XI5250CrtFrame;
+import net.infordata.em.util.XIUtil;
 
 
 

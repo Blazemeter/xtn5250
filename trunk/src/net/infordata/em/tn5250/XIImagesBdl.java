@@ -25,12 +25,15 @@ limitations under the License.
 
 package net.infordata.em.tn5250;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Image;
+import java.util.HashMap;
+import java.util.ListResourceBundle;
+import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
-import net.infordata.em.util.*;
+import net.infordata.em.util.XIUtil;
 
 
 /**
@@ -85,7 +88,6 @@ public class XIImagesBdl extends ListResourceBundle {
       System.arraycopy(contents, 0, cvContents, superContents.length, contents.length);
     }
     catch (RuntimeException ex) {
-      ex.printStackTrace(Diagnostic.getOut());
       throw ex;
     }
   }
@@ -116,10 +118,11 @@ public class XIImagesBdl extends ListResourceBundle {
   }
 
 
-  private Hashtable ivIcons = new Hashtable();
+  private Map<String, Icon> ivIcons = new HashMap<String, Icon>();
+
   /**
    */
-  public final Icon getIcon(String anImageName) {
+  public synchronized final Icon getIcon(String anImageName) {
     Icon icon = (Icon)ivIcons.get(anImageName);
     if (icon == null) {
       icon = new ImageIcon((Image)getObject(anImageName));

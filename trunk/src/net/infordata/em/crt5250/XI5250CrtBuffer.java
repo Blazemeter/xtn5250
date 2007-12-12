@@ -33,9 +33,6 @@ package net.infordata.em.crt5250;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import net.infordata.em.crt.XICrtBuffer;
@@ -576,15 +573,15 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
   }
 
 
-  /**
-   */
-  void writeObject(ObjectOutputStream oos) throws IOException {
-    oos.defaultWriteObject();
-  }
-
-  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-    ois.defaultReadObject();
-  }
+//  /**
+//   */
+//  void writeObject(ObjectOutputStream oos) throws IOException {
+//    oos.defaultWriteObject();
+//  }
+//
+//  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+//    ois.defaultReadObject();
+//  }
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -593,6 +590,8 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
    * Simply routes all method calls to the contained color methods
    */
   private static class ColorWrapper extends Color implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Color ivColor;
 

@@ -23,11 +23,14 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import net.infordata.em.tnprot.*;
-import net.infordata.em.util.*;
+import net.infordata.em.tnprot.XITelnet;
 
 
 
@@ -40,9 +43,12 @@ import net.infordata.em.util.*;
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250CmdList extends XI5250Cmd {
-  private static Class[] cv5250CmdClasses = new Class[256];;
 
-  protected Vector ivCmdVect;
+  private static final Logger LOGGER = Logger.getLogger(XI5250CmdList.class.getName());
+  
+  private static Class<?>[] cv5250CmdClasses = new Class[256];;
+
+  protected List<XI5250Cmd> ivCmdVect;
 
   // flags used across command execution
   protected boolean ivICOrderExecuted;
@@ -94,10 +100,10 @@ public class XI5250CmdList extends XI5250Cmd {
       throws IOException, XI5250Exception {
     int       bb;
     XI5250Cmd cmd;
-    ivCmdVect = new Vector(100, 20);
+    ivCmdVect = new ArrayList<XI5250Cmd>(100);
 
-    if (XI5250Emulator.DEBUG >= 2)
-      Diagnostic.getOut().println("START OF COMMANDS LIST");
+    if (LOGGER.isLoggable(Level.FINER))
+      LOGGER.finer("START OF COMMANDS LIST");
 
     // jump until ESC is found
     while ((bb = inStream.read()) != -1 && (byte)bb != XI5250Emulator.ESC)
@@ -122,10 +128,10 @@ public class XI5250CmdList extends XI5250Cmd {
             cmd.init(ivEmulator);
             cmd.readFrom5250Stream(inStream);
 
-            if (XI5250Emulator.DEBUG >= 2)
-              Diagnostic.getOut().println(cmd);
+            if (LOGGER.isLoggable(Level.FINER))
+              LOGGER.finer("" + cmd);
 
-            ivCmdVect.addElement(cmd);
+            ivCmdVect.add(cmd);
           }
           else {
             throw new XI5250Exception("Command not supported : 0x" +
@@ -141,7 +147,7 @@ public class XI5250CmdList extends XI5250Cmd {
    */
   protected void execute() {
     for (int i = 0; i < ivCmdVect.size(); i++)
-      ((XI5250Cmd)ivCmdVect.elementAt(i)).execute();
+      ivCmdVect.get(i).execute();
   }
 
 
@@ -152,7 +158,7 @@ public class XI5250CmdList extends XI5250Cmd {
    */
   protected XI5250Cmd createCmdInstance(int aCmd)
       throws IllegalAccessException, InstantiationException {
-    Class     cls;
+    Class<?>     cls;
 
     cls = cv5250CmdClasses[aCmd];
     if (cls != null)
