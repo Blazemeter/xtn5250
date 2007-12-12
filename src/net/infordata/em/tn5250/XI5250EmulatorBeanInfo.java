@@ -18,10 +18,14 @@ limitations under the License.
 
 package net.infordata.em.tn5250;
 
-import java.beans.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.SimpleBeanInfo;
 
 public class XI5250EmulatorBeanInfo extends SimpleBeanInfo {
-  Class beanClass = XI5250Emulator.class;
+  Class<XI5250Emulator> beanClass = XI5250Emulator.class;
   String iconColor16x16Filename = "resources/XI5250Emulator_16.gif";
   String iconColor32x32Filename = "resources/XI5250Emulator_32.gif";
   String iconMono16x16Filename;
@@ -46,12 +50,17 @@ public class XI5250EmulatorBeanInfo extends SimpleBeanInfo {
       PropertyDescriptor _terminalType =
           new PropertyDescriptor("terminalType", beanClass,
                                  "getTerminalType", "setTerminalType");
+      
+      PropertyDescriptor _altFKeyRemap =
+        new PropertyDescriptor("altFKeyRemap", beanClass,
+                               "getAltFKeyRemap", "setAltFKeyRemap");
 
       PropertyDescriptor[] pds = new PropertyDescriptor[] {
         _active,
         _host,
         _keyboardQueue,
         _terminalType,
+        _altFKeyRemap,
       };
       return pds;
     }
@@ -76,7 +85,7 @@ public class XI5250EmulatorBeanInfo extends SimpleBeanInfo {
   }
 
   public BeanInfo[] getAdditionalBeanInfo() {
-    Class superclass = beanClass.getSuperclass();
+    Class<?> superclass = beanClass.getSuperclass();
     try  {
       BeanInfo superBeanInfo = Introspector.getBeanInfo(superclass);
       return new BeanInfo[] { superBeanInfo };

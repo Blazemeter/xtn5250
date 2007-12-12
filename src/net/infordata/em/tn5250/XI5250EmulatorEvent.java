@@ -23,7 +23,7 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.util.*;
+import java.util.EventObject;
 
 
 /**
@@ -33,6 +33,8 @@ import java.util.*;
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250EmulatorEvent extends EventObject {
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * Fired just berore trying to connect.

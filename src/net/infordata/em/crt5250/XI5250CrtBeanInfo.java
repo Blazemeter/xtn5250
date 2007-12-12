@@ -17,10 +17,14 @@ limitations under the License.
 
 package net.infordata.em.crt5250;
 
-import java.beans.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.SimpleBeanInfo;
 
 public class XI5250CrtBeanInfo extends SimpleBeanInfo {
-  Class beanClass = XI5250Crt.class;
+  Class<XI5250Crt> beanClass = XI5250Crt.class;
   String iconColor16x16Filename;
   String iconColor32x32Filename;
   String iconMono16x16Filename;
@@ -41,6 +45,8 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
       PropertyDescriptor _insertState = new PropertyDescriptor("insertState", beanClass, "isInsertState", "setInsertState");
       
       PropertyDescriptor _referenceCursor = new PropertyDescriptor("referenceCursor", beanClass, "isReferenceCursor", "setReferenceCursor");
+
+      PropertyDescriptor _codePage = new PropertyDescriptor("codePage", beanClass, "getCodePage", "setCodePage");
       
       PropertyDescriptor[] pds = new PropertyDescriptor[] {
         _defBackground,
@@ -48,6 +54,7 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
         _font,
         _insertState,
         _referenceCursor,
+        _codePage,
       };
       return pds;
     }
@@ -72,7 +79,7 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
   }
 
   public BeanInfo[] getAdditionalBeanInfo() {
-    Class superclass = beanClass.getSuperclass();
+    Class<?> superclass = beanClass.getSuperclass();
     try  {
       BeanInfo superBeanInfo = Introspector.getBeanInfo(superclass);
       return new BeanInfo[] { superBeanInfo };

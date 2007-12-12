@@ -24,8 +24,9 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Font;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 ///////////////////////////////////////////////////////////////////////////////

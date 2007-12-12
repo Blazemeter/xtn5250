@@ -22,12 +22,19 @@ limitations under the License.
 
 package net.infordata.em.tn5250; 
 
-import java.awt.*;						 
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
 
-import net.infordata.em.util.*;
+import net.infordata.em.util.XIRatioLayout;
 
 
  
@@ -270,6 +277,8 @@ public class XI5250StatusBar extends JPanel {
   /**
    */
   protected static class TextAndImage extends JComponent {
+
+    private static final long serialVersionUID = 1L;
 
     public static final int LEFT   = 0;
     public static final int CENTER = 1;

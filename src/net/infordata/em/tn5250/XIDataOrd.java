@@ -24,10 +24,11 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
-import net.infordata.em.crt5250.*;
-import net.infordata.em.tnprot.*;
+import net.infordata.em.crt5250.XIEbcdicTranslator;
+import net.infordata.em.tnprot.XITelnet;
 
 
 
@@ -46,7 +47,7 @@ public class XIDataOrd extends XI5250Ord {
 
 
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
-    XIEbcdicTranslator translator = XIEbcdicTranslator.getTranslator();
+    XIEbcdicTranslator translator = ivEmulator.getTranslator();
     int bb;
 
     ivColor = 0;

@@ -23,7 +23,7 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
+import java.io.InputStream;
 
 
 ///////////////////////////////////////////////////////////////////////////////

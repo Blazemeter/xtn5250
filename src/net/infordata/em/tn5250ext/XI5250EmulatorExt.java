@@ -31,6 +31,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -53,7 +54,7 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
   private static final long serialVersionUID = 1L;
 
   // Debug level 0 = none, 1 = , 2 = detailed
-  static final int DEBUG = 0;
+  static final int DEBUG = 2;
 
   private   boolean ivShowHints = true;
   private   boolean ivHintOnActiveField = false;
@@ -169,7 +170,7 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
       System.err.println("!!! Use JDK 1.1.1 or newer !!!");
     }
     */
-    checkJDK();
+//    checkJDK();
 
     /*
     if (argv.length < 1) {
@@ -223,8 +224,8 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
     }
 
     protected void start() {
-      for (Enumeration e = getFields(); e.hasMoreElements(); ) {
-        XI5250Field field = (XI5250Field)e.nextElement();
+      for (Iterator<XI5250Field> e = getFields().iterator(); e.hasNext(); ) {
+        XI5250Field field = e.next();
         setFieldHint(field, new XIHint(field.toString()));
 
         JPopupMenu pm = new JPopupMenu();

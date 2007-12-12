@@ -28,10 +28,11 @@ package net.infordata.em.tn5250ext;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.infordata.em.tn5250.XI5250EmulatorAdapter;
 import net.infordata.em.tn5250.XI5250EmulatorEvent;
-import net.infordata.em.util.Diagnostic;
 
 
 /**
@@ -43,6 +44,8 @@ import net.infordata.em.util.Diagnostic;
  */
 public class XI5250PanelsDispatcher {
 
+  private static final Logger LOGGER = Logger.getLogger(XI5250PanelsDispatcher.class.getName());
+  
   transient private static String DELIMITERS;
 
   transient private XI5250EmulatorExt  ivEm;
@@ -142,8 +145,8 @@ public class XI5250PanelsDispatcher {
 
     String key = calcKey(aPanel.getTitle(), 0);
 
-    if (XI5250EmulatorExt.DEBUG >= 2)
-      Diagnostic.getOut().println("addPanelHandler: [" + key + "] " + aPanel);
+    if (LOGGER.isLoggable(Level.FINER))
+      LOGGER.finer("addPanelHandler: [" + key + "] " + aPanel);
 
     Vector vt = (Vector)ivPanels.get(key);
 
@@ -166,8 +169,8 @@ public class XI5250PanelsDispatcher {
 
     String key = calcKey(aPanel.getTitle(), 0);
 
-    if (XI5250EmulatorExt.DEBUG >= 2)
-      Diagnostic.getOut().println("removePanelHandler: [" +
+    if (LOGGER.isLoggable(Level.FINER))
+      LOGGER.finer("removePanelHandler: [" +
                                   key + "] " + aPanel);
 
     Vector vt = (Vector)ivPanels.get(key);
@@ -203,8 +206,8 @@ public class XI5250PanelsDispatcher {
       key = calcKey(title, j++);
       vt = (Vector)ivPanels.get(key);
 
-      if (XI5250EmulatorExt.DEBUG >= 2)
-        Diagnostic.getOut().println("try [" + key + "] " +
+      if (LOGGER.isLoggable(Level.FINER))
+        LOGGER.finer("try [" + key + "] " +
                                     ((vt != null) ? "found" : "next"));
     }
     while (vt == null && key != null && key.length() > 0);

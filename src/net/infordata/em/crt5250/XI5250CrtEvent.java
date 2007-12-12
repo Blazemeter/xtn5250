@@ -24,8 +24,8 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.util.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.util.EventObject;
 
 
 /**

@@ -24,11 +24,14 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import net.infordata.em.tnprot.*;
-import net.infordata.em.util.*;
+import net.infordata.em.tnprot.XITelnet;
 
 
 
@@ -42,9 +45,11 @@ import net.infordata.em.util.*;
  */
 public class XI5250OrdList extends XI5250Ord {
 
-  private static Class[] cv5250OrdClasses = new Class[0x1F + 1];
+  private static final Logger LOGGER = Logger.getLogger(XI5250OrdList.class.getName());
+  
+  private static Class<?>[] cv5250OrdClasses = new Class<?>[0x1F + 1];
 
-  protected Vector       ivOrdVect;
+  protected List<XI5250Ord> ivOrdVect;
 
   protected boolean[]    ivOrdPresent = new boolean[0x1F + 1];
 
@@ -80,10 +85,10 @@ public class XI5250OrdList extends XI5250Ord {
 
     int       bb;
     XI5250Ord ord;
-    ivOrdVect = new Vector(100, 20);
+    ivOrdVect = new ArrayList<XI5250Ord>(100);
 
-    if (XI5250Emulator.DEBUG >= 2)
-      Diagnostic.getOut().println("  START OF ORDERS LIST");
+    if (LOGGER.isLoggable(Level.FINER))
+      LOGGER.finer("  START OF ORDERS LIST");
 
     for (int i = 0; ; i++) {
       inStream.mark(1);
@@ -111,10 +116,10 @@ public class XI5250OrdList extends XI5250Ord {
         ord.init(ivEmulator);
         ord.readFrom5250Stream(inStream);
 
-        if (XI5250Emulator.DEBUG >= 2)
-          Diagnostic.getOut().println("  " + ord);
+        if (LOGGER.isLoggable(Level.FINER))
+          LOGGER.finer("  " + ord);
 
-        ivOrdVect.addElement(ord);
+        ivOrdVect.add(ord);
       }
       else {
         throw new XI5250Exception("Order not supported : 0x" + XITelnet.toHex((byte)bb));
@@ -127,7 +132,7 @@ public class XI5250OrdList extends XI5250Ord {
    */
   protected void execute() {
     for (int i = 0; i < ivOrdVect.size(); i++)
-      ((XI5250Ord)ivOrdVect.elementAt(i)).execute();
+      ivOrdVect.get(i).execute();
   }
 
 
@@ -139,7 +144,7 @@ public class XI5250OrdList extends XI5250Ord {
   public XI5250Ord createOrdInstance(int aOrd)
       throws IllegalAccessException, InstantiationException {
 
-    Class     cls;
+    Class<?>     cls;
 
     if (aOrd == 0x00 || aOrd == 0x1C || aOrd >= 0x1F)
       cls = XIDataOrd.class;

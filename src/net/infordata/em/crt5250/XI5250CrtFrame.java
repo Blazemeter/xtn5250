@@ -23,14 +23,30 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ResourceBundle;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
-import net.infordata.em.util.*;
+import net.infordata.em.util.XICommand;
+import net.infordata.em.util.XICommandMgr;
+import net.infordata.em.util.XIUtil;
 
 
 
@@ -193,6 +209,19 @@ public class XI5250CrtFrame extends JFrame {
   public void centerOnScreen() {
     Dimension ss  = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension dim = getSize();
+
+    setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2 ,
+              dim.width, dim.height);
+  }
+
+
+  /**
+   */
+  public void centerOnScreen(int perc) {
+    Dimension ss  = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension dim = getSize();
+    dim.width = (ss.width * perc) / 100;
+    dim.height = (ss.height * perc) / 100;
 
     setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2 ,
               dim.width, dim.height);

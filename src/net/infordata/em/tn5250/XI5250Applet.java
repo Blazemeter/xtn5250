@@ -101,7 +101,7 @@ public class XI5250Applet extends JApplet {
       System.err.println("!!! Use JDK 1.1.1 or newer !!!");
     }
     */
-    XI5250Emulator.checkJDK();
+//    XI5250Emulator.checkJDK();
 
     String  host = null;
     host = getParameter("host");
@@ -119,10 +119,15 @@ public class XI5250Applet extends JApplet {
       if (ss != null && "false".equals(ss.toLowerCase()))
         inplace = false;
     }
+    
+    boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
+    String codePage = getParameter("codePage");
 
     ivEmulatorCtrl = new XI5250EmulatorCtrl(new XI5250Emulator());
     getEmulator().setTerminalType("IBM-3477-FC");
     getEmulator().setHost(host);
+    getEmulator().setAltFKeyRemap(altFKeyRemap);
+    getEmulator().setCodePage(codePage);
 
     //!! 1.11a execution moved to the EventQueueThread
     if (inplace)
@@ -260,7 +265,7 @@ public class XI5250Applet extends JApplet {
                                 getEmulator());
     ivFrame.setBounds(0, 0, 648, 506);
     ivFrame.centerOnScreen();
-    ivFrame.show();
+    ivFrame.setVisible(true);
   }
 
 
@@ -476,6 +481,8 @@ public class XI5250Applet extends JApplet {
   /**
    */
   private class EmulatorFrame extends XI5250Frame {
+
+    private static final long serialVersionUID = 1L;
 
     public EmulatorFrame(String aTitle, XI5250Emulator aCrt) {
       super(aTitle, aCrt);

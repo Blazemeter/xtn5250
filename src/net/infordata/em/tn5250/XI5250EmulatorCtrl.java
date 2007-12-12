@@ -23,12 +23,14 @@ limitations under the License.
 package net.infordata.em.tn5250;
 
 
-import javax.swing.*;
+import java.util.ResourceBundle;
 
-import net.infordata.em.crt5250.*;
-import net.infordata.em.util.*;
+import javax.swing.JOptionPane;
 
-import java.util.*;
+import net.infordata.em.crt5250.XI5250Crt;
+import net.infordata.em.crt5250.XI5250CrtCtrl;
+import net.infordata.em.crt5250.XI5250CrtFrame;
+import net.infordata.em.util.XICommand;
 
 
 /**
@@ -137,7 +139,7 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
    */
   protected void processAboutCmd() {
     JOptionPane.showMessageDialog(getEmulator(),
-                                  "Version " + getEmulator().VERSION + "\n" +
+                                  "Version " + XI5250Emulator.VERSION + "\n" +
                                   "\n" +
                                   "Infordata S.p.A.\n" +
                                   "v.proietti@infordata.net",
@@ -156,7 +158,7 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     XI5250CrtFrame frm = new XI5250CrtFrame(title, clone);
     frm.setBounds(0, 0, 728, 512);
     frm.centerOnScreen();
-    frm.show();
+    frm.setVisible(true);
   }
 
 

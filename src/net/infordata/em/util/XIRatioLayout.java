@@ -23,8 +23,18 @@ limitations under the License.
 package net.infordata.em.util;
 
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.LayoutManager2;
+import java.awt.Panel;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -33,7 +43,7 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final int LEFT 	 = 0;   
+  public static final int LEFT   = 0;   
 
   public static final int CENTER = 1;
 
@@ -41,20 +51,20 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
 
   private int ivHGap;
 
-  private Hashtable ivConstraints = new Hashtable();
+  private Map<Component, Constraints> ivConstraints = new HashMap<Component, Constraints>();
 
 
   /**
-	 */
-	public XIRatioLayout() {
-	  this(0);
+     */
+    public XIRatioLayout() {
+      this(0);
   }
 
 
   /**
-	 */
+     */
   public XIRatioLayout(int hgap) {
-	  ivHGap = hgap;
+      ivHGap = hgap;
   }
 
 
@@ -78,7 +88,7 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
   public void addLayoutComponent(Component comp, Object constraints) {
     if (constraints != null && !(constraints instanceof Constraints))
       throw new IllegalArgumentException("XIRatioLayout.Constraints expected");
-    ivConstraints.put(comp, constraints);
+    ivConstraints.put(comp, (Constraints)constraints);
   }
 
 
@@ -172,22 +182,23 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
 
   /**
    */
+  @SuppressWarnings("unchecked")
   public void layoutContainer(Container parent) {
     Insets insets;
-    Vector[] comps = new Vector[3];  // LEFT, CENTER and RIGHT
-    Vector[] constrs = new Vector[3];  // LEFT, CENTER and RIGHT
+    ArrayList<Component>[] comps;
+    ArrayList<Constraints>[] constrs;
     Dimension parentDim;
     
     synchronized (parent.getTreeLock()) {
       insets  = parent.getInsets();
-      comps   = new Vector[3];  // LEFT, CENTER and RIGHT
-      constrs = new Vector[3];  // LEFT, CENTER and RIGHT
+      comps   = new ArrayList[3];  // LEFT, CENTER and RIGHT
+      constrs = new ArrayList[3];  // LEFT, CENTER and RIGHT
 
       {
         int nComps = parent.getComponentCount();
         for (int i = LEFT; i <= RIGHT; i++) {
-          comps[i] = new Vector(nComps);
-          constrs[i] = new Vector(nComps);
+          comps[i] = new ArrayList(nComps);
+          constrs[i] = new ArrayList(nComps);
         }
         Component comp;
         Constraints constr;
@@ -196,8 +207,8 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
           if (comp.isVisible()) {
             constr = (Constraints)ivConstraints.get(comp);
             if (constr != null) {
-              comps[constr.getAlignment()].addElement(comp);
-              constrs[constr.getAlignment()].addElement(constr);
+              comps[constr.getAlignment()].add(comp);
+              constrs[constr.getAlignment()].add(constr);
             }
           }
         }
@@ -208,10 +219,10 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
 
     if (comps[LEFT].size() == 0 && comps[CENTER].size() == 0 &&
         comps[RIGHT].size() == 0)
-	    return;
+        return;
 
-	  int maxW = parentDim.width - (insets.left + insets.right);
-	  int maxH = parentDim.height - (insets.top + insets.bottom);
+      int maxW = parentDim.width - (insets.left + insets.right);
+      int maxH = parentDim.height - (insets.top + insets.bottom);
     for (int i = LEFT; i <= RIGHT; i++)
       if (comps[i].size() > 0)
         maxW -= (comps[i].size() - 1) * ivHGap;
@@ -222,8 +233,8 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
 
     for (int i = LEFT; i <= RIGHT; i++) {
       for (int j = 0; j < comps[i].size(); j++) {
-        comp = (Component)comps[i].elementAt(j);
-        constr = (Constraints)constrs[i].elementAt(j);
+        comp = (Component)comps[i].get(j);
+        constr = (Constraints)constrs[i].get(j);
         comp.setSize(Math.round(maxW * constr.getHRatio()), maxH); 
         totW[i] += comp.getSize().width;
       }
@@ -233,7 +244,7 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
       int x = insets.left;
       Dimension dim;
       for (int j = 0; j < comps[LEFT].size(); j++) {
-        comp = (Component)comps[LEFT].elementAt(j);
+        comp = (Component)comps[LEFT].get(j);
         dim = comp.getSize();
         comp.setLocation(x, insets.top);
         x += (dim.width + ivHGap);
@@ -244,7 +255,7 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
       int x = parentDim.width - insets.right;
       Dimension dim;
       for (int j = 0; j < comps[RIGHT].size(); j++) {
-        comp = (Component)comps[RIGHT].elementAt(j);
+        comp = (Component)comps[RIGHT].get(j);
         dim = comp.getSize();
         comp.setLocation(x - dim.width, insets.top);
         x -= (dim.width + ivHGap);
@@ -256,7 +267,7 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
                (comps[CENTER].size() - 1) * ivHGap) / 2;
       Dimension dim;
       for (int j = 0; j < comps[CENTER].size(); j++) {
-        comp = (Component)comps[CENTER].elementAt(j);
+        comp = (Component)comps[CENTER].get(j);
         dim = comp.getSize();
         comp.setLocation(x, insets.top);
         x += (dim.width + ivHGap);
@@ -298,13 +309,15 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
     panel.add(new Button("C2"), new Constraints(0.2F, CENTER));
     frame.add(panel);
     frame.setBounds(0, 0, 200, 200);
-    frame.show();
+    frame.setVisible(true);
   }
 
 
   //////////////////////////////////////////////////////////////////////////////
 
   public static class Constraints implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private float ivHRatio;
     private int   ivAlign;

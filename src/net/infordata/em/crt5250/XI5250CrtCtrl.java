@@ -23,13 +23,15 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
+import java.awt.SystemColor;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-import javax.swing.*;
+import javax.swing.UIManager;
 
-import net.infordata.em.util.*;
+import net.infordata.em.util.XICommand;
+import net.infordata.em.util.XICommandMgr;
 
 
 /**
@@ -121,7 +123,7 @@ public class XI5250CrtCtrl {
   protected void processCopyCmd() {
     getCrt().processRawKeyEvent(
         new KeyEvent(getCrt(), KeyEvent.KEY_PRESSED,
-                     0, KeyEvent.CTRL_MASK, KeyEvent.VK_INSERT));
+                     0, KeyEvent.CTRL_MASK, KeyEvent.VK_INSERT, (char)KeyEvent.VK_INSERT));
   }
 
 
@@ -130,7 +132,7 @@ public class XI5250CrtCtrl {
   protected void processPasteCmd() {
     getCrt().processRawKeyEvent(
         new KeyEvent(getCrt(), KeyEvent.KEY_PRESSED,
-                     0, KeyEvent.SHIFT_MASK, KeyEvent.VK_INSERT));
+                     0, KeyEvent.SHIFT_MASK, KeyEvent.VK_INSERT, (char)KeyEvent.VK_INSERT));
   }
 
 
