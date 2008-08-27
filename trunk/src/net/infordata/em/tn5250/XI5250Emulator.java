@@ -129,7 +129,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.16";
+  public static final String VERSION = "1.16a";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -751,8 +751,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected void receivedData(byte[] buf, int len) {
-    if (getState() == ST_POWER_ON)
+    if (getState() == ST_POWER_ON) {
+      if (LOGGER.isLoggable(Level.WARNING))
+        LOGGER.log(Level.WARNING, "Discarding received data len: " + len);
       return;
+    }
 
     // eventuali eccezioni di overflow vengono generate dal linguaggio in automatico
     System.arraycopy(buf, 0, ivRXBuf, ivRXBufLen, len);
