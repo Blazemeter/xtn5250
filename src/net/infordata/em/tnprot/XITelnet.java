@@ -477,10 +477,10 @@ public class XITelnet {
             if (ivLocalFlags[ivIACOpt]) {
               switch (ivIACOpt) {
                 case TELOPT_TTYPE:
-                  sendIACStr(SB, TELOPT_TTYPE, "" + (char)IS + ivTermType);
+                  sendIACStr(SB, TELOPT_TTYPE, true, ivTermType);
                   break;
                 case TELOPT_NEW_ENVIRON:
-                  sendIACStr(SB, TELOPT_NEW_ENVIRON, "" + (char)IS + ivEnvironment);
+                  sendIACStr(SB, TELOPT_NEW_ENVIRON, true, ivEnvironment);
                   break;
                 default:
                   unhandledRequest(ivIACOpt, ivIACStr);
@@ -612,18 +612,21 @@ public class XITelnet {
   /**
    * Sends a telnet IAC sequence with a string argument.
    */
-  public void sendIACStr(byte aCmd, byte aOpt, String aString) {
+  public void sendIACStr(byte aCmd, byte aOpt, boolean sendIS, String aString) {
     if (LOGGER.isLoggable(Level.FINE))
       LOGGER.fine("t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
           TELOPT[aOpt] + " " + aString);
 
     byte[] endBuf = {IAC, SE};
-    byte[] startBuf = {IAC, aCmd, aOpt};
-    String str = new String(startBuf) + aString + new String(endBuf);
-    byte[] buf = str.getBytes();
+    byte[] startBuf = 
+      sendIS ? new byte[] {IAC, aCmd, aOpt, IS} : new byte[] {IAC, aCmd, aOpt};
+//    String str = new String(startBuf) + aString + new String(endBuf);
+//    byte[] buf = str.getBytes();
 
     try {
-      ivOut.write(buf);
+      ivOut.write(startBuf);
+      ivOut.write(aString.getBytes());
+      ivOut.write(endBuf);
       ivOut.flush();
     }
     catch (IOException ex) {
