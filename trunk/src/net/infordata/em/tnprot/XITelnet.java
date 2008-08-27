@@ -750,12 +750,12 @@ public class XITelnet {
    * NOTE: receivedData is always callend in the receiving thread.
    */
   protected void receivedData(byte[] buf, int len) {
-    if (LOGGER.isLoggable(Level.FINE)) {
+    if (LOGGER.isLoggable(Level.FINER)) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < len; i++) {
         sb.append((char)buf[i]);
       }
-      LOGGER.fine(sb.toString());
+      LOGGER.finer(sb.toString());
     }
 
     if (ivEmulator != null)
