@@ -74,7 +74,7 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
     // requires some special handling
     // see IBM 5250 function reference manual page 2-70
     if (aField.isSignedNumeric() && aStr.length() > 0) {
-      StringBuffer strBuf = new StringBuffer(aStr);
+      StringBuilder strBuf = new StringBuilder(aStr);
       int i;
 
       // find last digit char
