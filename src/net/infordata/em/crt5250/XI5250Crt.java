@@ -1375,7 +1375,7 @@ public class XI5250Crt extends XICrt implements Serializable {
           if ((col >= 0) && (col < getCrtSize().width) &&
               (row >= 0) && (row < getCrtSize().height) &&
               (field = getFieldFromPos(col, row)) != null) {
-            if (field.insertChar(ch, col, row, false) != 0)
+            if (field.insertChar(ch, col, row, false, true) != 0)
               error = true;
           }
           else
