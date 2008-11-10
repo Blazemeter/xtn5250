@@ -48,7 +48,7 @@ public class XIHint extends JComponent {
   private static final long serialVersionUID = 1L;
 
   // !!CM 06/08/97
-  private final static int DEFAULT_MAX_WIDTH = 300;
+//  private final static int DEFAULT_MAX_WIDTH = 300;
 
   private String      ivText = null;
 
@@ -56,7 +56,7 @@ public class XIHint extends JComponent {
   private int         ivMaxWidth = 0;
 
   private Font        ivFont            = null;
-  private FontMetrics ivFontMetrics     = null;
+//  private FontMetrics ivFontMetrics     = null;
 
   private int ivSpaceLine  = 1;
   private int ivSpaceUp    = 1;
@@ -65,7 +65,7 @@ public class XIHint extends JComponent {
   private int ivSpaceLeft  = 4;
   private int ivHeightShortText;
 
-  private Vector ivVectorLines;
+  private ArrayList<String> ivVectorLines;
 
   // !!0.83/CM - 30/04/97
   private Font ivFBold;
@@ -92,7 +92,7 @@ public class XIHint extends JComponent {
     ivFBoldItalic = new Font(ivFont.getName(), (Font.BOLD|Font.ITALIC),
                              ivFont.getSize());
 
-    ivFontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(ivFont);
+//    ivFontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(ivFont);
 
     ivMaxWidth = aWidth;
 
@@ -126,8 +126,8 @@ public class XIHint extends JComponent {
   /**
    */
   protected void paintComponent(Graphics aGraphics) {
-    Dimension vDim  = getSize();
-    String    vText;
+//    Dimension vDim  = getSize();
+//    String    vText;
     int       vXPos = 0;
 
     aGraphics.setFont(ivFont);
@@ -139,25 +139,28 @@ public class XIHint extends JComponent {
 
 
   //!!CM 06/08/97 BEGIN
+  @SuppressWarnings("deprecation")
   private int strWidth(String str, Font f) {
 
     return Toolkit.getDefaultToolkit().getFontMetrics(f).stringWidth(str);
   }
 
 
+  @SuppressWarnings("deprecation")
   private int strHeight(Font f) {
 
     return Toolkit.getDefaultToolkit().getFontMetrics(f).getHeight();
   }
 
 
+  @SuppressWarnings("deprecation")
   private FontMetrics fontMetrics(Font f) {
   
     return Toolkit.getDefaultToolkit().getFontMetrics(f);
   }
 
 
-  private Dimension textDim(Vector v, Font f) {
+  private Dimension textDim(ArrayList<String> v, Font f) {
     
     int maxW = 0;
     int lineW = 0;
@@ -165,12 +168,12 @@ public class XIHint extends JComponent {
 
     boolean bold = false;
     boolean italic = false;
-    boolean boldItalic = false;
+//    boolean boldItalic = false;
 
     
     for (int i = 0; i < v.size(); i++) {
       
-      String str = (String)v.elementAt(i);
+      String str = v.get(i);
       
       if (isEscapeChar(str, "#") || 
           isEscapeChar(str, "@")) {
@@ -249,7 +252,7 @@ public class XIHint extends JComponent {
   }
 
 
-  private void drawMultiLineString(Graphics g, Vector v,
+  private void drawMultiLineString(Graphics g, ArrayList<String> v,
                                    Font f,
                                    int x, int y) {
   
@@ -257,12 +260,11 @@ public class XIHint extends JComponent {
 
     boolean bold = false;
     boolean italic = false;
-    boolean boldItalic = false;
-
+//    boolean boldItalic = false;
 
     for (int i = 0; i < v.size(); i++) {
       y += ivHeightShortText  - fontMetrics(f).getDescent();
-      StringTokenizer st = new StringTokenizer((String)v.elementAt(i), "#@", true);
+      StringTokenizer st = new StringTokenizer(v.get(i), "#@", true);
       
       while (st.hasMoreElements()) {
         String token = st.nextToken();
@@ -308,10 +310,10 @@ public class XIHint extends JComponent {
   }
 
 
-  private Vector calculateLines(String text, Font f) {
+  private ArrayList<String> calculateLines(String text, Font f) {
 
     StringTokenizer st = new StringTokenizer(text, "\n");
-    Vector v = new Vector(1);
+    ArrayList<String> v = new ArrayList<String>(10);
 
     ivHeightShortText = strHeight(f);  
     
@@ -330,15 +332,15 @@ public class XIHint extends JComponent {
             subToken += str1 + " ";
           }
           else {
-            v.addElement(trimRight(subToken));
+            v.add(trimRight(subToken));
             subToken = str1 + " ";
           }
         }
 
-        v.addElement(trimRight(subToken));
+        v.add(trimRight(subToken));
       }
       else {
-        v.addElement(trimRight(token));
+        v.add(trimRight(token));
       }
     }
     
