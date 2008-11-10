@@ -581,13 +581,14 @@ public abstract class XI5250PanelHandler {
   /**
    */
   private void showHint(XIHint aHint, XI5250Field aField) {
-    hideHint();
+    synchronized (ivDispatcher.getTreeLock()) {
+      hideHint();
 
-    if (!getEmulator().getShowHints())
-      return;
+      if (!getEmulator().getShowHints())
+        return;
 
-    ivHintWindow = new XIHintWindow(aHint, getEmulator());
-
+      ivHintWindow = new XIHintWindow(aHint, getEmulator());
+    }
     int delay = ivHintDelay;
     if (getEmulator().isHintOnActiveField())
       delay /= 2;
@@ -601,16 +602,18 @@ public abstract class XI5250PanelHandler {
   /**
    */
   private void hideHint() {
-    ivLastHint = null;  //!!1.04d
+    synchronized (ivDispatcher.getTreeLock()) {
+      ivLastHint = null;  //!!1.04d
 
-    if (ivHintTimer != null) {
-      ivHintTimer.stop();
-      ivHintTimer = null;
-    }
+      if (ivHintTimer != null) {
+        ivHintTimer.stop();
+        ivHintTimer = null;
+      }
 
-    if (ivHintWindow != null) {
-      ivHintWindow.setVisible(false);
-      ivHintWindow = null;
+      if (ivHintWindow != null) {
+        ivHintWindow.setVisible(false);
+        ivHintWindow = null;
+      }
     }
   }
 
@@ -813,31 +816,34 @@ public abstract class XI5250PanelHandler {
     }
 
     public void actionPerformed(ActionEvent anEvent) {
-      if (ivHintWindow != null && getEmulator().hasFocus()) {
-        {
-          Point       pt = getEmulator().getLocationOnScreen();
-          Rectangle[] rcts = ivField.getRowsRects();
-          Rectangle   rct  = rcts[rcts.length - 1];
+      synchronized (ivDispatcher.getTreeLock()) {
+        if (ivHintWindow != null && getEmulator().hasFocus()) {
+          {
+            Point       pt = getEmulator().getLocationOnScreen();
+            Rectangle[] rcts = ivField.getRowsRects();
+            Rectangle   rct  = rcts[rcts.length - 1];
 
-          pt.translate(rct.x, rct.y + rct.height);
+            pt.translate(rct.x, rct.y + rct.height);
 
-          pt.translate(-4, 4);
+            pt.translate(-4, 4);
 
-          Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 
-          //!!1.05b
-          pt.x = Math.max(0, Math.min(ss.width - ivHintWindow.getSize().width, pt.x));
-          pt.y = Math.max(0, Math.min(ss.height - ivHintWindow.getSize().height, pt.y));
+            System.out.println("!!P " + ivHintWindow.getSize());
+            //!!1.05b
+            pt.x = Math.max(0, Math.min(ss.width - ivHintWindow.getSize().width, pt.x));
+            pt.y = Math.max(0, Math.min(ss.height - ivHintWindow.getSize().height, pt.y));
 
-          ivHintWindow.setLocation(pt.x, pt.y);
+            ivHintWindow.setLocation(pt.x, pt.y);
+          }
+
+          ivHintWindow.setVisible(true);
+          // potrebbe non essere visibile (vedi XIHintWindow)
+          if (!ivHintWindow.isVisible())
+            hideHint();
+          else
+            ivHintWindow.addComponentListener(ivHintListener);
         }
-
-        ivHintWindow.setVisible(true);
-        // potrebbe non essere visibile (vedi XIHintWindow)
-        if (!ivHintWindow.isVisible())
-          hideHint();
-        else
-          ivHintWindow.addComponentListener(ivHintListener);
       }
     }
   }

@@ -135,6 +135,9 @@ public class XI5250PanelsDispatcher {
     return ivEm;
   }
 
+  public final Object getTreeLock() {
+    return ivEm.getTreeLock();
+  }
 
   /**
    * Adds the given XI5250PanelHandler instance to the list of panel handlers

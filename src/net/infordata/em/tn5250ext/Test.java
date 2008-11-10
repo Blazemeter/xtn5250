@@ -1,6 +1,8 @@
 package net.infordata.em.tn5250ext;
 
 import java.awt.SystemColor;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Iterator;
 
 import javax.swing.JButton;
@@ -42,6 +44,11 @@ public class Test {
       em.setDefBackground(SystemColor.control);
     }
 
+    frm.addWindowListener(new WindowAdapter() {
+      public void windowClosed(WindowEvent e) {
+        System.exit(0);
+      }
+    });
     frm.setBounds(0, 0, 570, 510);
     frm.centerOnScreen();
     frm.setVisible(true);
