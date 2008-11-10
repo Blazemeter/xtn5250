@@ -69,8 +69,12 @@ public class Test {
     }
 
     protected void start() {
+      System.out.println("");
       for (Iterator<XI5250Field> e = getFields().iterator(); e.hasNext(); ) {
         XI5250Field field = e.next();
+
+        System.out.println(field.toString());
+
         setFieldHint(field, new XIHint(field.toString()));
 
         JPopupMenu pm = new JPopupMenu();
@@ -82,7 +86,7 @@ public class Test {
 
         new XI5250PanelConnection(this,
                                   new JButton("+-"),
-                                  15, 15, 10, 10);
+                                  15, 15, 10, 6);
       }
     }
 

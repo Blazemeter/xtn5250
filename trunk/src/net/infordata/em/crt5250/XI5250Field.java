@@ -307,7 +307,7 @@ public class XI5250Field implements XI5250BaseField {
       ch = aStr.charAt(i);
       col = ivCrt.toColPos(s + i);
       row = ivCrt.toRowPos(s + i);
-      insertChar(ch, col, row, false);
+      insertChar(ch, col, row, false, false);
     }
   }
 
@@ -472,6 +472,15 @@ public class XI5250Field implements XI5250BaseField {
 
 
   /**
+   * Used to query Field Format Word flags.<br>
+   * Magnetic stripe reader, selector light pen, ...
+   */
+  public boolean isIOOnly() {
+    return ((ivFFW[0] & 0x07) == 0x06);
+  }
+
+
+  /**
    * Used to query Field Format Word flags.
    */
   public boolean isSignedNumeric() {
@@ -588,7 +597,12 @@ public class XI5250Field implements XI5250BaseField {
 
   /**
    */
-  protected int insertChar(char aCh, int col, int row, boolean insert) {//!!1.04
+  protected int insertChar(char aCh, int col, int row, 
+                           boolean insert, boolean fromKeyboard) {//!!1.04
+    if (isIOOnly() && fromKeyboard) {
+      return 4;  // Do not accept keyboard input 
+    }
+    
     if ((isDigitsOnly() && !(aCh >= '0' && aCh <= '9'))) {
       // 10 = only chars between 0 and 9
       return 10;
@@ -649,7 +663,7 @@ public class XI5250Field implements XI5250BaseField {
     }
 
     int error = insertChar(aCh, ivCrt.getCursorCol(), ivCrt.getCursorRow(),
-                           ivCrt.isInsertState());
+                           ivCrt.isInsertState(), true);
     if (error > 0) {
       ivCrt.userError(error);
       return true;
