@@ -42,9 +42,6 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  // Debug level 0 = none, 1 = , 2 = detailed
-  static final int DEBUG = 2;
-
   private   boolean ivShowHints = true;
   private   boolean ivHintOnActiveField = false;
 
