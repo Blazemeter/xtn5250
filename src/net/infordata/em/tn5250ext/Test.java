@@ -24,11 +24,9 @@ public class Test {
     em.setTerminalType("IBM-3477-FC");
     em.setKeyboardQueue(true);
 
-    if (XI5250EmulatorExt.DEBUG >= 2) {
-      em.setHintOnActiveField(true);
-      XI5250PanelsDispatcher disp = new XI5250PanelsDispatcher(em);
-      new TestHandler(disp);
-    }
+    em.setHintOnActiveField(true);
+    XI5250PanelsDispatcher disp = new XI5250PanelsDispatcher(em);
+    new TestHandler(disp);
 
     if (argv.length >= 1) {
       em.setHost(argv[0]);
