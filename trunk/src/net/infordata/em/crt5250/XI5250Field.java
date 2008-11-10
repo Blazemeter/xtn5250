@@ -628,7 +628,7 @@ public class XI5250Field implements XI5250BaseField {
     if (ivPos < 0 || ivPos >= ivLength)
       throw new IllegalStateException("");
 
-    StringBuffer strBuf = new StringBuffer(ivStr);
+    StringBuilder strBuf = new StringBuilder(ivStr);
 
     if (!insert) {
       strBuf.setCharAt(ivPos, aCh);
@@ -712,7 +712,7 @@ public class XI5250Field implements XI5250BaseField {
       aCh = Character.toUpperCase(aCh);
 
     updateStr();
-    StringBuffer strBuf = new StringBuffer(ivStr);
+    StringBuilder strBuf = new StringBuilder(ivStr);
 
     if (!ivCrt.isInsertState()) {
       strBuf.setCharAt(ivPos, aCh);
@@ -794,7 +794,7 @@ public class XI5250Field implements XI5250BaseField {
     switch (aModifier) {
       case 0:
         updateStr();
-        StringBuffer strBuf = new StringBuffer(ivStr);
+        StringBuilder strBuf = new StringBuilder(ivStr);
         for (int i = ivPos + 1; i < ivStr.length(); i++)
           strBuf.setCharAt(i - 1, strBuf.charAt(i));
         strBuf.setCharAt(ivStr.length() - 1, '\u0000');
@@ -827,7 +827,7 @@ public class XI5250Field implements XI5250BaseField {
     XIEbcdicTranslator translator = getCrt().getTranslator();
 
     updateStr();
-    StringBuffer strBuf = new StringBuffer(ivStr);
+    StringBuilder strBuf = new StringBuilder(ivStr);
 
     for (int i = ivPos; i < ivStr.length(); i++)
       strBuf.setCharAt(i, '\u0000');

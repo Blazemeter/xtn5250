@@ -439,7 +439,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
    * @see    String#indexOf
    */
   public String getString(int col, int row, int nChars) {
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     for (int i = 0; i < nChars; i++) {
       int j = toLinearPos(col + i, row);
       str.append(getChar(toColPos(j), toRowPos(j)));

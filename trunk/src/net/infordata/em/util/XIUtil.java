@@ -173,7 +173,7 @@ public class XIUtil {
   /**
    */
   public static String removeMnemonics(String str) {
-    StringBuffer sb = new StringBuffer(str.length());
+    StringBuilder sb = new StringBuilder(str.length());
     char ch;
     int state = 0;
     for (int i = 0; i < str.length(); i++) {
