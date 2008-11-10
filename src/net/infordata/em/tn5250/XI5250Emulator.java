@@ -1516,12 +1516,15 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected boolean processKeyEnter(int aModifier) {
-    if (aModifier != 0 && aModifier != -1)
+    // Cannot detect -1 modifier directly
+    final KeyEvent kev = new KeyEvent(this, KeyEvent.KEY_PRESSED, 0, -1, 
+        KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER);
+    if (aModifier != 0 && aModifier != kev.getModifiers())
       return false;
 
     if (ivPendingCmd != null)
       ivPendingCmd.executePending(
-          (aModifier != -1) ? AID_ENTER : AID_AUTO_ENTER, false);
+          (aModifier != kev.getModifiers()) ? AID_ENTER : AID_AUTO_ENTER, false);
 
     return true;
   }

@@ -673,10 +673,10 @@ public class XI5250Field implements XI5250BaseField {
     if (ivPos < (ivInputLen - 1))
       ivCrt.moveCursor(1, 0);
     else {
-      // send auto enter (-1 as modifier)
+      // send auto enter (-1 as modifier) see XI5250Emulator.processKeyEnter()
       if (isAutoEnter())
         ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0,
-                                             -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_TAB));
+                                             -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER));
       // send auto tab
       else if (!isExitRequired())
         ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0, 0,
