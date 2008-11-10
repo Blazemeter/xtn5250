@@ -829,7 +829,6 @@ public abstract class XI5250PanelHandler {
 
             Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 
-            System.out.println("!!P " + ivHintWindow.getSize());
             //!!1.05b
             pt.x = Math.max(0, Math.min(ss.width - ivHintWindow.getSize().width, pt.x));
             pt.y = Math.max(0, Math.min(ss.height - ivHintWindow.getSize().height, pt.y));
