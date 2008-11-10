@@ -25,9 +25,10 @@ limitations under the License.
 package net.infordata.em.tn5250ext;
 
 
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,9 +62,9 @@ public class XI5250PanelsDispatcher {
    * the related 5250 screen first line.
    * It really contains Vectors of XI5250PanelHandler (one to many relation)
    */
-  transient private Hashtable          ivPanels;
+  transient private HashMap<String, ArrayList<XI5250PanelHandler>> ivPanels;
 
-  transient private Hashtable          ivSharedData;
+  transient private HashMap<Object, Object> ivSharedData;
 
 
   /**
@@ -141,22 +142,22 @@ public class XI5250PanelsDispatcher {
    */
   public synchronized void addPanelHandler(XI5250PanelHandler aPanel) {
     if (ivPanels == null)
-      ivPanels = new Hashtable();
+      ivPanels = new HashMap<String, ArrayList<XI5250PanelHandler>>();
 
     String key = calcKey(aPanel.getTitle(), 0);
 
     if (LOGGER.isLoggable(Level.FINER))
       LOGGER.finer("addPanelHandler: [" + key + "] " + aPanel);
 
-    Vector vt = (Vector)ivPanels.get(key);
+    ArrayList<XI5250PanelHandler> vt = ivPanels.get(key);
 
     if (vt == null) {
-      vt = new Vector(10, 10);
+      vt = new ArrayList<XI5250PanelHandler>(10);
       ivPanels.put(key, vt);
     }
 
     if (!vt.contains(aPanel))
-      vt.addElement(aPanel);
+      vt.add(aPanel);
   }
 
 
@@ -173,12 +174,12 @@ public class XI5250PanelsDispatcher {
       LOGGER.finer("removePanelHandler: [" +
                                   key + "] " + aPanel);
 
-    Vector vt = (Vector)ivPanels.get(key);
+    ArrayList<XI5250PanelHandler> vt = ivPanels.get(key);
 
     if (vt == null)
       return;
 
-    vt.removeElement(aPanel);
+    vt.remove(aPanel);
 
     if (vt.size() <= 0)
       ivPanels.remove(key);
@@ -197,14 +198,14 @@ public class XI5250PanelsDispatcher {
 
     int    j = 0;
     String key;
-    Vector vt;
+    ArrayList<XI5250PanelHandler> vt;
 
     // first step
     // find the XI5250PanelHandler vector using as key the tokenized title
     // minus j ending tokens
     do {
       key = calcKey(title, j++);
-      vt = (Vector)ivPanels.get(key);
+      vt = ivPanels.get(key);
 
       if (LOGGER.isLoggable(Level.FINER))
         LOGGER.finer("try [" + key + "] " +
@@ -219,11 +220,11 @@ public class XI5250PanelsDispatcher {
 
     // second step
     for (int i = vt.size() - 1; i >= 0; i--) {
-      panelHndl = (XI5250PanelHandler)vt.elementAt(i);
+      panelHndl = vt.get(i);
       if (panelHndl.detailedTest()) {
         // increase priority
-        vt.removeElement(panelHndl);
-        vt.addElement(panelHndl);
+        vt.remove(panelHndl);
+        vt.add(panelHndl);
 
         return panelHndl;
       }
@@ -234,12 +235,12 @@ public class XI5250PanelsDispatcher {
 
 
   /**
-   * Returns an Hashtable that can be used to store data shared by different
+   * Returns a Map that can be used to store data shared by different
    * XI5250Panel instances.
    */
-  public final Hashtable getSharedData() {
+  public final Map<Object, Object> getSharedData() {
     if (ivSharedData == null)
-      ivSharedData = new Hashtable();
+      ivSharedData = new HashMap<Object, Object>();
 
     return ivSharedData;
   }

@@ -142,7 +142,7 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
                                   "Version " + XI5250Emulator.VERSION + "\n" +
                                   "\n" +
                                   "Infordata S.p.A.\n" +
-                                  "v.proietti@infordata.net",
+                                  "http://xtn5250.sourceforge.net",
                                   "About",
                                   JOptionPane.INFORMATION_MESSAGE,
                                   cvImagesBdl.getIcon("Logo"));

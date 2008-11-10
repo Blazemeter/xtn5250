@@ -43,10 +43,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import java.util.Map;
 
 import javax.swing.JPopupMenu;
 
@@ -170,18 +171,18 @@ public abstract class XI5250PanelHandler {
 
   // Hash table used to mantain relations between XI5250Fields and
   // XI5250FieldConnections
-  transient private Hashtable              ivConnections;
+  transient private HashMap<XI5250Field, XI5250FieldConnection> ivConnections;
 
   // Hash table used to mantain relations between Components and
   // XI5250PanelConnections
-  transient private Hashtable              ivPanelConnections;
+  transient private HashMap<Component, XI5250PanelConnection>   ivPanelConnections;
 
   transient private int                    ivInvalidateCount;
 
   transient private CrtAdapter             ivCrtAdapter;
 
   //!!1.00
-  transient private Hashtable          ivHints;
+  transient private HashMap<XI5250Field, XIHint> ivHints;
   transient private XIHintWindow       ivHintWindow;
   transient private javax.swing.Timer  ivHintTimer;
   transient private int                ivHintDelay = 1000;
@@ -191,8 +192,8 @@ public abstract class XI5250PanelHandler {
   transient private HintThread         ivHintThread;
 
   //!!V-23/09/97
-  transient private Hashtable          ivPopupMenus;
-  transient private Vector             ivPopupList;
+  transient private HashMap<XI5250Field, JPopupMenu> ivPopupMenus;
+  transient private ArrayList<JPopupMenu>            ivPopupList;
   transient private MouseListener      ivMouseListener;
 
 
@@ -253,11 +254,11 @@ public abstract class XI5250PanelHandler {
 
 
   /**
-   * Returns an Hashtable that can be used to store data shared by different
+   * Returns a Map that can be used to store data shared by different
    * XI5250Panel instances.
    * @see    XI5250PanelsDispatcher#getSharedData
    */
-  public Hashtable getSharedData() {
+  public Map<Object, Object> getSharedData() {
     return ivDispatcher.getSharedData();
   }
 
@@ -358,9 +359,9 @@ public abstract class XI5250PanelHandler {
       // remove all XI5250PanelConnections
       if (ivPanelConnections != null) {
         XI5250PanelConnection c;
-        for (Enumeration e = ivPanelConnections.elements();
-             e.hasMoreElements(); ) {
-          c = (XI5250PanelConnection)e.nextElement();
+        for (Iterator<XI5250PanelConnection> e = ivPanelConnections.values().iterator();
+             e.hasNext(); ) {
+          c = e.next();
           em.remove(c.getComponent());
         }
         ivPanelConnections = null;
@@ -369,8 +370,9 @@ public abstract class XI5250PanelHandler {
       // remove all XI5250FieldConnections
       if (ivConnections != null) {
         XI5250FieldConnection c;
-        for (Enumeration e = ivConnections.elements(); e.hasMoreElements(); ) {
-          c = (XI5250FieldConnection)e.nextElement();
+        for (Iterator<XI5250FieldConnection> e = ivConnections.values().iterator(); 
+             e.hasNext(); ) {
+          c = e.next();
           em.remove(c.getComponent());
         }
         ivConnections = null;
@@ -379,8 +381,8 @@ public abstract class XI5250PanelHandler {
       // remove all PopupMenu
       if (ivPopupList != null) {
         JPopupMenu c;
-        for (Enumeration e = ivPopupList.elements(); e.hasMoreElements(); ) {
-          c = (JPopupMenu)e.nextElement();
+        for (Iterator<JPopupMenu> e = ivPopupList.iterator(); e.hasNext(); ) {
+          c = e.next();
           em.remove(c);
         }
         ivPopupMenus = null;
@@ -398,10 +400,10 @@ public abstract class XI5250PanelHandler {
     XI5250EmulatorExt em = getEmulator();
 
     if (ivConnections == null)
-      ivConnections = new Hashtable();
+      ivConnections = new HashMap<XI5250Field, XI5250FieldConnection>();
 
     XI5250FieldConnection c =
-        (XI5250FieldConnection)ivConnections.put(aField, aConnection);
+        ivConnections.put(aField, aConnection);
 
     if (c != null)
       em.remove(c.getComponent());
@@ -420,7 +422,7 @@ public abstract class XI5250PanelHandler {
     XI5250EmulatorExt em = getEmulator();
 
     if (ivPanelConnections == null)
-      ivPanelConnections = new Hashtable();
+      ivPanelConnections = new HashMap<Component, XI5250PanelConnection>();
 
     XI5250PanelConnection c = (XI5250PanelConnection)
                               ivPanelConnections.put(aConnection.getComponent(),
@@ -467,9 +469,9 @@ public abstract class XI5250PanelHandler {
       // validate all panel-connections
       if (ivPanelConnections != null) {
         XI5250PanelConnection conn;
-        for (Enumeration en = ivPanelConnections.elements();
-             en.hasMoreElements(); ) {
-          conn = (XI5250PanelConnection)en.nextElement();
+        for (Iterator<XI5250PanelConnection> en = ivPanelConnections.values().iterator();
+             en.hasNext(); ) {
+          conn = en.next();
           conn.recalcBounds(em);
         }
       }
@@ -478,9 +480,9 @@ public abstract class XI5250PanelHandler {
       if (ivConnections != null) {
         XI5250Field           fld;
         XI5250FieldConnection conn;
-        for (Enumeration en = ivConnections.keys(); en.hasMoreElements(); ) {
-          fld = (XI5250Field)en.nextElement();
-          conn = (XI5250FieldConnection)ivConnections.get(fld);
+        for (Iterator<XI5250Field> en = ivConnections.keySet().iterator(); en.hasNext(); ) {
+          fld = en.next();
+          conn = ivConnections.get(fld);
           conn.recalcBounds(em, fld);
         }
       }
@@ -648,7 +650,7 @@ public abstract class XI5250PanelHandler {
       return;
 
     if (ivHints == null) {
-      ivHints = new Hashtable();
+      ivHints = new HashMap<XI5250Field, XIHint>();
     }
 
     if (aHint == null)
@@ -681,10 +683,10 @@ public abstract class XI5250PanelHandler {
       return;
 
     if (ivPopupMenus == null)
-      ivPopupMenus = new Hashtable();
+      ivPopupMenus = new HashMap<XI5250Field, JPopupMenu>();
 
     if (ivPopupList == null)
-      ivPopupList = new Vector(10, 5);
+      ivPopupList = new ArrayList<JPopupMenu>(10);
 
     if (aPopupMenu == null)
       ivPopupMenus.remove(aField);
@@ -692,7 +694,7 @@ public abstract class XI5250PanelHandler {
       ivPopupMenus.put(aField, aPopupMenu);
 
     if (!ivPopupList.contains(aPopupMenu)) {
-      ivPopupList.addElement(aPopupMenu);
+      ivPopupList.add(aPopupMenu);
       getEmulator().add(aPopupMenu);
     }
   }

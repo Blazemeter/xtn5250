@@ -38,7 +38,7 @@ public class XIHintWindow extends JWindow {
 
   private static final long serialVersionUID = 1L;
 
-  private XIHint     ivHint;
+//  private XIHint     ivHint;
   private Component  ivComponent;
 
   private WinAdapter   ivWinAdapter  = new WinAdapter();
