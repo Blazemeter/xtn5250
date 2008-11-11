@@ -196,21 +196,26 @@ public abstract class XI5250PanelsDispatcher {
    */
   class EmulatorAdapter extends XI5250EmulatorAdapter {
 
+    @Override
     public void stateChanged(XI5250EmulatorEvent e) {
     }
 
+    @Override
     public void disconnected(XI5250EmulatorEvent e) {
       XI5250PanelsDispatcher.this.fieldsRemoved();
     }
 
+    @Override
     public void newPanelReceived(XI5250EmulatorEvent e) {
       XI5250PanelsDispatcher.this.newPanelReceived();
     }
 
+    @Override
     public void fieldsRemoved(XI5250EmulatorEvent e) {
       XI5250PanelsDispatcher.this.fieldsRemoved();
     }
 
+    @Override
     public void dataSended(XI5250EmulatorEvent e) {
       XI5250PanelsDispatcher.this.dataSended(e.getAidCode());
     }

@@ -202,6 +202,7 @@ public abstract class XI5250PanelHandler {
   /**
    */
   transient private ComponentListener  ivHintListener = new ComponentAdapter() {
+    @Override
     public void componentHidden(ComponentEvent aEvent) {
       // ivHintWindow potrebbe essere null
       ((XIHintWindow)aEvent.getSource()).
@@ -216,10 +217,12 @@ public abstract class XI5250PanelHandler {
   /**
    */
   class EmulatorMouseListener extends MouseAdapter {
+    @Override
     public void mousePressed(MouseEvent e) {
       XI5250PanelHandler.this.mousePressed(e);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       XI5250PanelHandler.this.mouseReleased(e);
     }
@@ -438,6 +441,7 @@ public abstract class XI5250PanelHandler {
   /**
    * @exception    Throwable .
    */
+  @Override
   public void finalize() throws Throwable {
     stopInternal();
     super.finalize();
@@ -777,26 +781,32 @@ public abstract class XI5250PanelHandler {
    */
   class CrtAdapter extends XI5250CrtAdapter {
 
+    @Override
     public void fieldActivated(XI5250CrtEvent e) {
       XI5250PanelHandler.this.fieldActivated(e.getField());
     }
 
+    @Override
     public void fieldDeactivated(XI5250CrtEvent e) {
       XI5250PanelHandler.this.fieldDeactivated(e.getField());
     }
 
+    @Override
     public void sizeChanged(XI5250CrtEvent e) {
       XI5250PanelHandler.this.sizeChanged();
     }
 
+    @Override
     public void keyEvent(XI5250CrtEvent e) {
       XI5250PanelHandler.this.keyEvent(e.getKeyEvent());
     }
 
+    @Override
     public void mouseEntersField(XI5250CrtEvent e) {
       XI5250PanelHandler.this.mouseEntersField(e.getField());
     }
 
+    @Override
     public void mouseExitsField(XI5250CrtEvent e) {
       XI5250PanelHandler.this.mouseExitsField(e.getField());
     }
@@ -853,6 +863,7 @@ public abstract class XI5250PanelHandler {
   /**
    */
   class HintThread extends Thread {
+    @Override
     public void run() {
       while (true) {
         try {

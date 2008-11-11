@@ -75,6 +75,7 @@ public class XIHintWindow extends JWindow {
   /**
    * Visibile solo se la frame associata è attiva
    */
+  @Override
   public void setVisible(boolean b) {
     //!!V TODO dovrebbe essere visibile solo se la frame alla quale è associato
     // è attiva
@@ -88,18 +89,21 @@ public class XIHintWindow extends JWindow {
    */
   class CompAdapter extends ComponentAdapter {
 
+    @Override
     public void componentResized(ComponentEvent aEvent) {
       if (aEvent.getSource() == getParent()) {
         setVisible(false);
       }
     }
 
+    @Override
     public void componentMoved(ComponentEvent aEvent) {
       if (aEvent.getSource() == getParent()) {
         setVisible(false);
       }
     }
 
+    @Override
     public void componentShown(ComponentEvent aEvent) {
       if (aEvent.getSource() == XIHintWindow.this) {
         Frame frm = (Frame)getParent();
@@ -108,6 +112,7 @@ public class XIHintWindow extends JWindow {
       }
     }
 
+    @Override
     public void componentHidden(ComponentEvent aEvent) {
       if (aEvent.getSource() == XIHintWindow.this) {
         Frame frm = (Frame)getParent();
@@ -123,6 +128,7 @@ public class XIHintWindow extends JWindow {
 	/**
 	 */
   class WinAdapter extends WindowAdapter {
+    @Override
     public void windowDeactivated(WindowEvent aEvent) {
       setVisible(false);
     }
