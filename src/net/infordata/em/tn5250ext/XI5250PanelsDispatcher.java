@@ -25,11 +25,8 @@ limitations under the License.
 package net.infordata.em.tn5250ext;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.infordata.em.tn5250.XI5250EmulatorAdapter;
@@ -43,12 +40,10 @@ import net.infordata.em.tn5250.XI5250EmulatorEvent;
  * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
-public class XI5250PanelsDispatcher {
+public abstract class XI5250PanelsDispatcher {
 
-  private static final Logger LOGGER = Logger.getLogger(XI5250PanelsDispatcher.class.getName());
+  protected static final Logger LOGGER = Logger.getLogger(XI5250PanelsDispatcher.class.getName());
   
-  transient private static String DELIMITERS;
-
   transient private XI5250EmulatorExt  ivEm;
   transient private EmulatorAdapter    ivEmulatorAdapter;
 
@@ -57,23 +52,7 @@ public class XI5250PanelsDispatcher {
    */
   transient private XI5250PanelHandler ivPanelHndl;
 
-  /**
-   * Contains relations between XI5250PanelHandler and a tokenized version of
-   * the related 5250 screen first line.
-   * It really contains Vectors of XI5250PanelHandler (one to many relation)
-   */
-  transient private HashMap<String, ArrayList<XI5250PanelHandler>> ivPanels;
-
   transient private HashMap<Object, Object> ivSharedData;
-
-
-  /**
-   */
-  static {
-    DELIMITERS = "";
-    for (int i = 0; i <= 32; i++)
-      DELIMITERS += (char)i;
-  }
 
 
   /**
@@ -114,21 +93,6 @@ public class XI5250PanelsDispatcher {
     }
   }
 
-
-  /**
-   */
-  private static String calcKey(String str, int excludeTokens) {
-    String          res = "";
-    StringTokenizer st  = new StringTokenizer(str, DELIMITERS);
-    int             n   = Math.max(0, st.countTokens() - excludeTokens);
-
-    for (int i = n - 1; i>= 0; i--)
-      res += " " + st.nextToken();
-
-    return res;
-  }
-
-
   /**
    */
   public final XI5250EmulatorExt getEmulator() {
@@ -143,99 +107,18 @@ public class XI5250PanelsDispatcher {
    * Adds the given XI5250PanelHandler instance to the list of panel handlers
    * waiting to be activated.
    */
-  public synchronized void addPanelHandler(XI5250PanelHandler aPanel) {
-    if (ivPanels == null)
-      ivPanels = new HashMap<String, ArrayList<XI5250PanelHandler>>();
-
-    String key = calcKey(aPanel.getTitle(), 0);
-
-    if (LOGGER.isLoggable(Level.FINER))
-      LOGGER.finer("addPanelHandler: [" + key + "] " + aPanel);
-
-    ArrayList<XI5250PanelHandler> vt = ivPanels.get(key);
-
-    if (vt == null) {
-      vt = new ArrayList<XI5250PanelHandler>(10);
-      ivPanels.put(key, vt);
-    }
-
-    if (!vt.contains(aPanel))
-      vt.add(aPanel);
-  }
-
+  public abstract void addPanelHandler(XI5250PanelHandler aPanel);
 
   /**
    * Removes the panel handler.
    */
-  public synchronized void removePanelHandler(XI5250PanelHandler aPanel) {
-    if (ivPanels == null)
-      return;
-
-    String key = calcKey(aPanel.getTitle(), 0);
-
-    if (LOGGER.isLoggable(Level.FINER))
-      LOGGER.finer("removePanelHandler: [" +
-                                  key + "] " + aPanel);
-
-    ArrayList<XI5250PanelHandler> vt = ivPanels.get(key);
-
-    if (vt == null)
-      return;
-
-    vt.remove(aPanel);
-
-    if (vt.size() <= 0)
-      ivPanels.remove(key);
-  }
-
+  public abstract void removePanelHandler(XI5250PanelHandler aPanel);
 
   /**
-   * Searches the XI5250PanelHandler instace related to the current 5250 panel.
-   * Uses a two step search.
-   * First step is based on the contents of the first line present on screen
-   * then the detailedTest() method provided by XI5250PanelHandler is used.
+   * Searches the XI5250PanelHandler instace related to the current 5250 panel.<br>
    * @see    XI5250PanelHandler#detailedTest
    */
-  protected synchronized XI5250PanelHandler getCurrentPanelHandler() {
-    String title = ivEm.getString().substring(0, ivEm.getCrtSize().width);
-
-    int    j = 0;
-    String key;
-    ArrayList<XI5250PanelHandler> vt;
-
-    // first step
-    // find the XI5250PanelHandler vector using as key the tokenized title
-    // minus j ending tokens
-    do {
-      key = calcKey(title, j++);
-      vt = ivPanels.get(key);
-
-      if (LOGGER.isLoggable(Level.FINER))
-        LOGGER.finer("try [" + key + "] " +
-                                    ((vt != null) ? "found" : "next"));
-    }
-    while (vt == null && key != null && key.length() > 0);
-
-    if (vt == null)
-      return null;
-
-    XI5250PanelHandler panelHndl;
-
-    // second step
-    for (int i = vt.size() - 1; i >= 0; i--) {
-      panelHndl = vt.get(i);
-      if (panelHndl.detailedTest()) {
-        // increase priority
-        vt.remove(panelHndl);
-        vt.add(panelHndl);
-
-        return panelHndl;
-      }
-    }
-
-    return null;
-  }
-
+  protected abstract XI5250PanelHandler getCurrentPanelHandler();
 
   /**
    * Returns a Map that can be used to store data shared by different

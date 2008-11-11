@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.16a";
+  public static final String VERSION = "1.17";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -1514,19 +1514,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
 
-  private static final int AUTO_ENTER_MODIFIER = (new KeyEvent(new JLabel(""), 
+  private static final int AUTO_ENTER_MODIFIERS = (new KeyEvent(new JLabel(""), 
       KeyEvent.KEY_PRESSED, 0, -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER)).getModifiers();
   
   /**
    */
   protected boolean processKeyEnter(int aModifier) {
     // Cannot detect -1 modifier directly
-    if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIER)
+    if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIERS)
       return false;
 
     if (ivPendingCmd != null)
       ivPendingCmd.executePending(
-          (aModifier != AUTO_ENTER_MODIFIER) ? AID_ENTER : AID_AUTO_ENTER, false);
+          (aModifier != AUTO_ENTER_MODIFIERS) ? AID_ENTER : AID_AUTO_ENTER, false);
 
     return true;
   }
