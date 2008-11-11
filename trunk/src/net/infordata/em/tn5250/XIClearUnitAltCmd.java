@@ -40,11 +40,13 @@ import java.io.InputStream;
 public class XIClearUnitAltCmd extends XI5250Cmd {
   protected int ivPar;
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     ivPar = Math.max(0, inStream.read());   //!!1.02
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.setState(XI5250Emulator.ST_NORMAL_LOCKED);
     ivEmulator.ivPendingCmd = null;

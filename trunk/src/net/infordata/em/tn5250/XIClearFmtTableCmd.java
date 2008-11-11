@@ -36,10 +36,12 @@ import java.io.InputStream;
  */
 public class XIClearFmtTableCmd extends XI5250Cmd {
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.setState(XI5250Emulator.ST_NORMAL_LOCKED);
     ivEmulator.ivPendingCmd = null;

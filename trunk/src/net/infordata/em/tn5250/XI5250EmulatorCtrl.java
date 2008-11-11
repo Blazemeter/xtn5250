@@ -176,18 +176,22 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
           DISCONNECT_CMD, getEmulator().isActive());
     }
 
+    @Override
     public void connecting(XI5250EmulatorEvent e) {
       enableCmd();
     }
 
+    @Override
     public void connected(XI5250EmulatorEvent e) {
       enableCmd();
     }
 
+    @Override
     public void disconnected(XI5250EmulatorEvent e) {
       enableCmd();
     }
 
+    @Override
     public void stateChanged(XI5250EmulatorEvent e) {
     }
   }

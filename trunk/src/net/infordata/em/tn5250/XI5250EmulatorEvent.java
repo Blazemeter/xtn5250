@@ -37,7 +37,7 @@ public class XI5250EmulatorEvent extends EventObject {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Fired just berore trying to connect.
+   * Fired just before trying to connect.
    */
   public static final int CONNECTING         = 0;
   /**
@@ -117,6 +117,7 @@ public class XI5250EmulatorEvent extends EventObject {
 
   /**
    */
+  @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "]";
   }

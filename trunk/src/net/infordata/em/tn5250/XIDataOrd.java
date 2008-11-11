@@ -46,6 +46,7 @@ public class XIDataOrd extends XI5250Ord {
   protected byte   ivColor;
 
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     XIEbcdicTranslator translator = ivEmulator.getTranslator();
     int bb;
@@ -83,6 +84,7 @@ public class XIDataOrd extends XI5250Ord {
   }
 
 
+  @Override
   protected void execute() {
     if (ivColor != 0) {
       ivEmulator.setDefAttr(XITelnet.toInt(ivColor));
@@ -95,6 +97,7 @@ public class XIDataOrd extends XI5250Ord {
   }
 
 
+  @Override
   public String toString() {
     return super.toString() + " [" + XITelnet.toHex(ivColor) + "," + ",\"" + ivData + "\"" + "]";
   }

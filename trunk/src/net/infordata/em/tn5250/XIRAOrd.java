@@ -41,6 +41,7 @@ public class XIRAOrd extends XI5250Ord {
   protected char ivChar;
 
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     ivEndRow = Math.max(0, inStream.read());
     ivEndCol = Math.max(0, inStream.read());
@@ -50,6 +51,7 @@ public class XIRAOrd extends XI5250Ord {
   }
 
 
+  @Override
   protected void execute() {
     int start = ivEmulator.toLinearPos(ivEmulator.getSBACol(), ivEmulator.getSBARow());
     int end   = ivEmulator.toLinearPos(ivEndCol - 1, ivEndRow - 1);
@@ -62,6 +64,7 @@ public class XIRAOrd extends XI5250Ord {
   }
 
 
+  @Override
   public String toString() {
     return super.toString() +
            " [" + ivEndRow + "," + ivEndCol + ",'" + ivChar + "'" + "]";

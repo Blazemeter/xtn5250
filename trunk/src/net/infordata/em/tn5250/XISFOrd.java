@@ -46,6 +46,7 @@ public class XISFOrd extends XI5250Ord {
   protected int    ivFieldLen;
 
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     byte bb;
 
@@ -75,6 +76,7 @@ public class XISFOrd extends XI5250Ord {
   }
 
 
+  @Override
   protected void execute() {
     if (ivScreenAttr != 0) {
       //NO ivEmulator.setDefAttr(XITelnet.toInt(ivScreenAttr));
@@ -93,6 +95,7 @@ public class XISFOrd extends XI5250Ord {
   }
 
 
+  @Override
   public String toString() {
     return super.toString() + " [FFW=[" + XITelnet.toHex(FFW[0]) + "," +
         XITelnet.toHex(FFW[1]) + "]," +

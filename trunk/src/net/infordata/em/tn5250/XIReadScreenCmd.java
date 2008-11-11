@@ -37,10 +37,12 @@ import java.io.InputStream;
  */
 public class XIReadScreenCmd extends XI5250Cmd {
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.send5250Screen();
   }

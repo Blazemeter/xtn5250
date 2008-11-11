@@ -80,6 +80,7 @@ public class XI5250OrdList extends XI5250Ord {
   /**
    * @exception    XI5250Exception    raised if order parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
 
@@ -130,6 +131,7 @@ public class XI5250OrdList extends XI5250Ord {
 
   /**
    */
+  @Override
   protected void execute() {
     for (int i = 0; i < ivOrdVect.size(); i++)
       ivOrdVect.get(i).execute();
@@ -160,6 +162,7 @@ public class XI5250OrdList extends XI5250Ord {
 
   /**
    */
+  @Override
   public String toString() {
     String ss = super.toString() + ivOrdVect.toString();
     return ss;

@@ -50,10 +50,12 @@ public abstract class XICCCmd extends XI5250Cmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected abstract void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception;
 
 
+  @Override
   protected abstract void execute();
 
 
@@ -143,6 +145,7 @@ public abstract class XICCCmd extends XI5250Cmd {
   }
 
 
+  @Override
   public String toString() {
     return super.toString() + " [CC=[" + XITelnet.toHex(ivCC[0]) + "," + XITelnet.toHex(ivCC[1]) + "]]";
   }

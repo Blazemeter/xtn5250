@@ -96,6 +96,7 @@ public class Test {
           XI5250Frame frm = new XI5250Frame("tn5250" + " " +
                                             XI5250Emulator.VERSION, em);
           frm.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosed(WindowEvent e) {
               System.exit(0);
             }

@@ -91,6 +91,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
+  @Override
   public void init() {
     if (DEBUG >= 1)
       System.out.println("init()");
@@ -156,6 +157,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
+  @Override
   public void start() {
     if (DEBUG >= 1)
       System.out.println("start()");
@@ -167,6 +169,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
+  @Override
   public void stop() {
     if (DEBUG >= 1)
       System.out.println("stop()");
@@ -175,6 +178,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
+  @Override
   public void destroy() {
     if (DEBUG >= 1)
       System.out.println("destroy()");
@@ -463,6 +467,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
+  @Override
   public void paint(Graphics g) {
     super.paint(g);
     if (ivFrame != null) {
@@ -488,6 +493,7 @@ public class XI5250Applet extends JApplet {
       super(aTitle, aCrt);
     }
 
+    @Override
     protected void processExitCmd() {
       if (UNDEAD_FRAME && ivDestroyed)
         super.processExitCmd();
@@ -495,6 +501,7 @@ public class XI5250Applet extends JApplet {
         dispose();
     }
 
+    @Override
     protected void processWindowEvent(WindowEvent e) {
       switch(e.getID()) {
         case WindowEvent.WINDOW_CLOSED:

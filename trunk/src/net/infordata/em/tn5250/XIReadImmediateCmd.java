@@ -37,10 +37,12 @@ import java.io.InputStream;
  */
 public class XIReadImmediateCmd extends XI5250Cmd {
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.send5250Data(0x00, ivEmulator.isMasterMDTSet(), false);
   }
