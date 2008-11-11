@@ -298,6 +298,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
    * Returns a cloned XICrtBuffer (the new one needs initGraphics() to be
    * displayed).
    */
+  @Override
   public Object clone() {
     XI5250CrtBuffer aClone = new XI5250CrtBuffer(this, 0, 0,
                                                  getCrtSize().width, getCrtSize().height);
@@ -313,6 +314,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
   /**
    * Handles lines wrap.
    */
+  @Override
   public synchronized void drawString(String aStr, int col, int row,
                                       int aAttr) {
     int lPos = toLinearPos(col, row);
@@ -401,6 +403,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
   /**
    * Splits string to detect attribute place-holder presence.
    */
+  @Override
   protected void _drawString(Graphics gr, String aStr, int col, int row,
                              int aAttr) {
     if (aStr.length() <= 0)
@@ -438,6 +441,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
    * Redefined to implement lines wrap.
    * @see    String#indexOf
    */
+  @Override
   public String getString(int col, int row, int nChars) {
     StringBuilder str = new StringBuilder();
     for (int i = 0; i < nChars; i++) {
@@ -451,6 +455,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
   /**
    * Attribute to color mapping.
    */
+  @Override
   protected Color getBackground(int aAttribute) {
     // see SA21-9247-6 pg 2-143
     int mapIdx = Math.min(ivBackgroundColorsMap.length - 1,
@@ -463,6 +468,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
   /**
    * Attribute to color mapping.
    */
+  @Override
   protected Color getForeground(int aAttribute) {
     // see SA21-9247-6 pg 2-143
     int mapIdx = Math.min(ivForegroundColorsMap.length - 1,
@@ -496,6 +502,7 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
 
   /**
    */
+  @Override
   public int getAttr(int col, int row) {
     int attr = super.getAttr(col, row);
     XI5250Crt crt = (XI5250Crt)getCrt();
@@ -620,38 +627,47 @@ public class XI5250CrtBuffer extends XICrtBuffer implements Serializable {
 
     /**
      */
+    @Override
     public int getRed() {
       return ivColor.getRed();
     }
 
+    @Override
     public int getGreen() {
       return ivColor.getGreen();
     }
 
+    @Override
     public int getBlue() {
       return ivColor.getBlue();
     }
 
+    @Override
     public int getRGB() {
       return ivColor.getRGB();
     }
 
+    @Override
     public Color brighter() {
       return ivColor.brighter();
     }
 
+    @Override
     public Color darker() {
       return ivColor.darker();
     }
 
+    @Override
     public int hashCode() {
       return ivColor.hashCode();
     }
 
+    @Override
     public boolean equals(Object obj) {
       return ivColor.equals(obj);
     }
 
+    @Override
     public String toString() {
       return ivColor.toString();
     }

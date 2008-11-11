@@ -111,6 +111,7 @@ public class XI5250FieldEvent extends EventObject {
 
   /**
    */
+  @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "," + getSource() + "]";
   }

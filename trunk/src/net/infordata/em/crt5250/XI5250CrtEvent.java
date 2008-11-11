@@ -121,6 +121,7 @@ public class XI5250CrtEvent extends EventObject {
 
   /**
    */
+  @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[getID()] + "," + ivField + "]";
   }

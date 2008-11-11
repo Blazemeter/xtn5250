@@ -1252,6 +1252,7 @@ public class XI5250Field implements XI5250BaseField {
 
   /**
    */
+  @Override
   public String toString() {
     return super.toString() + " [FFW=[" + XITelnet.toHex(ivFFW[0]) + "," +
                                           XITelnet.toHex(ivFFW[1]) + "]," +
@@ -1281,6 +1282,7 @@ public class XI5250Field implements XI5250BaseField {
 
 
     //!!1.03a
+    @Override
     protected EventListener remove(EventListener oldl) {
       if (oldl == a)  return b;
       if (oldl == b)  return a;

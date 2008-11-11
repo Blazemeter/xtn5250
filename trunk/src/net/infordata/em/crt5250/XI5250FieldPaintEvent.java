@@ -88,6 +88,7 @@ public class XI5250FieldPaintEvent extends EventObject {
 
   /**
    */
+  @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "," + getSource() + "]";
   }
