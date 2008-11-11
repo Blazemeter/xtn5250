@@ -90,6 +90,7 @@ import java.util.EventListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import net.infordata.em.crt5250.XI5250Crt;
@@ -1513,18 +1514,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
 
+  private static final int AUTO_ENTER_MODIFIER = (new KeyEvent(new JLabel(""), 
+      KeyEvent.KEY_PRESSED, 0, -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER)).getModifiers();
+  
   /**
    */
   protected boolean processKeyEnter(int aModifier) {
     // Cannot detect -1 modifier directly
-    final KeyEvent kev = new KeyEvent(this, KeyEvent.KEY_PRESSED, 0, -1, 
-        KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER);
-    if (aModifier != 0 && aModifier != kev.getModifiers())
+    if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIER)
       return false;
 
     if (ivPendingCmd != null)
       ivPendingCmd.executePending(
-          (aModifier != kev.getModifiers()) ? AID_ENTER : AID_AUTO_ENTER, false);
+          (aModifier != AUTO_ENTER_MODIFIER) ? AID_ENTER : AID_AUTO_ENTER, false);
 
     return true;
   }

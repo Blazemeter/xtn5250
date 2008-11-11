@@ -100,7 +100,7 @@ public class Test {
               btn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   em.setCursorPos(field.getCol(), field.getRow());
-                  em.requestFocus();
+                  em.requestFocusInWindow();
                   em.processRawKeyEvent(new KeyEvent(em, KeyEvent.KEY_PRESSED, 0,
                       0, KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER));
                 }
