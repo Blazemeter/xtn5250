@@ -114,6 +114,7 @@ public class XICrtBuffer implements Serializable {
    * Returns a cloned XICrtBuffer (the new one needs initGraphics() to be
    * displayed).
    */
+  @Override
   public Object clone() {
     XICrtBuffer aClone = new XICrtBuffer(this, 0, 0, ivNCols, ivNRows);
     /* !!1.04
