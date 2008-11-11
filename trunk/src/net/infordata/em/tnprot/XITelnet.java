@@ -781,6 +781,7 @@ public class XITelnet {
 
   /**
    */
+  @Override
   protected void finalize() throws Throwable {
     disconnect();
     super.finalize();
@@ -860,6 +861,7 @@ public class XITelnet {
     /**
      * The receiving thread.
      */
+    @Override
     public void run() {
       byte[] buf  = new byte[1024];
       byte[] rBuf = new byte[1024];
