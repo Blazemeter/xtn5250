@@ -40,6 +40,7 @@ public class XISBAOrd extends XI5250Ord {
   protected int ivRow, ivCol;
 
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     ivRow = Math.max(0, inStream.read());
     ivCol = Math.max(0, inStream.read());
@@ -47,11 +48,13 @@ public class XISBAOrd extends XI5250Ord {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.setSBA(ivCol - 1, ivRow - 1);
   }
 
 
+  @Override
   public String toString() {
     return super.toString() + " [" + ivRow + "," + ivCol + "]";
   }

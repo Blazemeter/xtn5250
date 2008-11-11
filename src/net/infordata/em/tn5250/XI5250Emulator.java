@@ -411,6 +411,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Redefined to move the status bar.
    */
+  @Override
   public void doLayout() {
     super.doLayout();
     moveStatusBar();
@@ -540,6 +541,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Moves the cursor to the given position.
    * It updates also the status bar area with the new cursor coordinates.
    */
+  @Override
   public void setCursorPos(int aCol, int aRow) {
     super.setCursorPos(aCol, aRow);
 
@@ -554,6 +556,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Redefined to take care of the status-bar presence
    */
+  @Override
   public Dimension getPreferredSize() {
     Dimension size = super.getPreferredSize();
     size.height += getCharSize().height + 4;
@@ -564,6 +567,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Redefined to take care of the status-bar presence
    */
+  @Override
   public Dimension getMinimumSize() {
     Dimension size = super.getMinimumSize();
     size.height += getMinCharSize().height + 4;
@@ -575,6 +579,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Redefined to take care of the status-bar presence
    * @see    crt.XICrt#getTestSize
    */
+  @Override
   protected Dimension getTestSize(Font aFont) {
     FontMetrics fm = getFontMetrics(aFont);
     Dimension res = new Dimension(fm.charWidth('W') * getCrtSize().width,
@@ -1294,6 +1299,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * DO NOT USE, reserved for commands and orders
    * Removes all fields.
    */
+  @Override
   public void removeFields() {
     super.removeFields();
     processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.FIELDS_REMOVED, this));
@@ -1303,6 +1309,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Redefined to request 5250 error decoding.
    */
+  @Override
   protected void userError(int aError) {
     Toolkit.getDefaultToolkit().beep();
     setState(ST_PRE_HELP);
@@ -1312,6 +1319,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    */
+  @Override
   protected void processMouseEvent(MouseEvent e) {
     updateStatusBar(e);
     super.processMouseEvent(e);
@@ -1320,6 +1328,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    */
+  @Override
   protected void processKeyEvent(KeyEvent e) {
     updateStatusBar(e);
     super.processKeyEvent(e);
@@ -1330,6 +1339,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Avoid concurrent access with the synchronized part of receivedEOR() method.
    * When we get there the translation process has already been done.
    */
+  @Override
   public synchronized void processRawKeyEvent(KeyEvent e) {
     // keyboard handling that doesn' t depends on 5250 state
     switch (e.getID()) {
@@ -1371,6 +1381,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Here is where the real keyboard handling is done.
    * If the keyboard queue is enabled we get there when it is safe to handle the key event.
    */
+  @Override
   protected synchronized void doProcessKeyEvent(KeyEvent e) {
     // pre
     switch (e.getID()) {
@@ -1584,6 +1595,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    */
+  @Override
   protected void finalize() throws Throwable {
     setActive(false);
     super.finalize();
@@ -1631,6 +1643,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
     //!!1.03a
+    @Override
     protected EventListener remove(EventListener oldl) {
       if (oldl == a)  return b;
       if (oldl == b)  return a;
@@ -1878,6 +1891,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     /**
      */
+    @Override
     public void run() {
       while (!ivStop && ivEmulator.isKeyboardQueue()) {
         try {

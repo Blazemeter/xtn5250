@@ -46,6 +46,7 @@ public class XISOHOrd extends XI5250Ord {
   /**
    * @exception    XI5250Exception    raised if order parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     int  i = 0;
@@ -63,6 +64,7 @@ public class XISOHOrd extends XI5250Ord {
   }
 
 
+  @Override
   protected void execute() {
     // I didn' t found them on docs, but i need them
     ivEmulator.ivCmdList.ivICOrderExecuted = false;
@@ -90,6 +92,7 @@ public class XISOHOrd extends XI5250Ord {
   }
 
 
+  @Override
   public String toString() {
     String str = "";
     for (int i = 0; i < ivLen; i++)

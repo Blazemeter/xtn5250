@@ -44,6 +44,7 @@ public class XIWriteErrorCodeCmd extends XI5250Cmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     ivOrdList = ivEmulator.createOrdList(ivEmulator);
@@ -51,6 +52,7 @@ public class XIWriteErrorCodeCmd extends XI5250Cmd {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.setState(XI5250Emulator.ST_PRE_HELP);
 

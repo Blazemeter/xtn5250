@@ -80,6 +80,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   /**
    */
+  @Override
   protected XI5250CrtCtrl createController(XI5250Crt crt) {
     return new XI5250EmulatorCtrl((XI5250Emulator)crt);
   }
@@ -101,6 +102,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   /**
    */
+  @Override
   protected void processExitCmd() {
     if (getEmulator().isActive()) {
       //!!1.13a otherwise a dead-lock may occur !!
@@ -126,6 +128,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   /**
    */
+  @Override
   protected void processWindowEvent(WindowEvent e) {
     super.processWindowEvent(e);
     switch(e.getID()) {
@@ -139,6 +142,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   /**
    */
+  @Override
   protected JMenuBar createMenuBar() {
     String str;
 
@@ -227,6 +231,7 @@ public class XI5250Frame extends XI5250CrtFrame {
   /**
    * Inserisce nella tool-bar i bottoni di default.
    */
+  @Override
   protected JToolBar createToolBar() {
     // bottoni della tool-bar
     AbstractButton[] buttons = new AbstractButton[] {

@@ -96,6 +96,7 @@ public class XI5250CmdList extends XI5250Cmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     int       bb;
@@ -145,6 +146,7 @@ public class XI5250CmdList extends XI5250Cmd {
 
   /**
    */
+  @Override
   protected void execute() {
     for (int i = 0; i < ivCmdVect.size(); i++)
       ivCmdVect.get(i).execute();
@@ -170,6 +172,7 @@ public class XI5250CmdList extends XI5250Cmd {
 
   /**
    */
+  @Override
   public String toString() {
     String ss = super.toString() + ivCmdVect.toString();
     return ss;

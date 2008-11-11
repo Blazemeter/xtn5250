@@ -39,6 +39,7 @@ public class XIQueryCmd extends XI5250Cmd {
   protected int[] ivPar = new int[5];
 
 
+  @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
     for (int i = 0; i < 5; i++)
       ivPar[i] = inStream.read();
@@ -50,6 +51,7 @@ public class XIQueryCmd extends XI5250Cmd {
   }
 
 
+  @Override
   protected void execute() {
     // see rfc 1205
     byte[] buf = {

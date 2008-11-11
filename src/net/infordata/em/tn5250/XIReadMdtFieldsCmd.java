@@ -39,12 +39,14 @@ public class XIReadMdtFieldsCmd extends XICCCmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     readCC(inStream);
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.ivPendingCmd = this;
     executeCC1();
@@ -52,6 +54,7 @@ public class XIReadMdtFieldsCmd extends XICCCmd {
   }
 
 
+  @Override
   protected void executePending(int anAidCode, boolean isMasked) {
     ivEmulator.setState(XI5250Emulator.ST_TEMPORARY_LOCK);
     ivEmulator.send5250Data(anAidCode,

@@ -106,6 +106,7 @@ public class XIImagesBdl extends ListResourceBundle {
   }
 
 
+  @Override
   public Object[][] getContents() {
     return cvContents;
   }

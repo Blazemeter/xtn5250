@@ -46,6 +46,7 @@ public class XIRollCmd extends XI5250Cmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     int[] bb = new int[3];
@@ -69,6 +70,7 @@ public class XIRollCmd extends XI5250Cmd {
   }
 
 
+  @Override
   protected void execute() {
     ivEmulator.scroll(ivDown, ivTopRow - 1, ivBottomRow, ivNRows);
   }

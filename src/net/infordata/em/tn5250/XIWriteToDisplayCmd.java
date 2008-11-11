@@ -46,6 +46,7 @@ public class XIWriteToDisplayCmd extends XICCCmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     readCC(inStream);
@@ -57,6 +58,7 @@ public class XIWriteToDisplayCmd extends XICCCmd {
 
   /**
    */
+  @Override
   protected void execute() {
     //ivEmulator.setSBA(0, 0);
 

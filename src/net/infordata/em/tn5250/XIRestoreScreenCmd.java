@@ -43,6 +43,7 @@ public class XIRestoreScreenCmd extends XI5250Cmd {
   /**
    * @exception    XI5250Exception    raised if command parameters are wrong.
    */
+  @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     ivPos = inStream.read();
@@ -51,6 +52,7 @@ public class XIRestoreScreenCmd extends XI5250Cmd {
   }
 
 
+  @Override
   protected void execute() {
     try {
     	/*!!1.06a

@@ -101,6 +101,7 @@ public class XI5250StatusBar extends JPanel {
 
   /**
    */
+  @Override
   public boolean isValidateRoot() {
     return true;
   }
@@ -313,6 +314,7 @@ public class XI5250StatusBar extends JPanel {
     }
 
 
+    @Override
     public void paintComponent(Graphics gr) {
 
       Insets    insets = getInsets();
