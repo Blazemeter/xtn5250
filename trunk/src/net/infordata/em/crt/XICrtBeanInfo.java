@@ -33,6 +33,7 @@ public class XICrtBeanInfo extends SimpleBeanInfo {
   public XICrtBeanInfo() {
   }
 
+  @Override
   public PropertyDescriptor[] getPropertyDescriptors() {
     try  {
       PropertyDescriptor _cursorVisible = new PropertyDescriptor("cursorVisible", beanClass, "isCursorVisible", "setCursorVisible");
@@ -51,6 +52,7 @@ public class XICrtBeanInfo extends SimpleBeanInfo {
     }
   }
 
+  @Override
   public java.awt.Image getIcon(int iconKind) {
     switch (iconKind) {
     case BeanInfo.ICON_COLOR_16x16:
@@ -65,6 +67,7 @@ public class XICrtBeanInfo extends SimpleBeanInfo {
     return null;
   }
 
+  @Override
   public BeanInfo[] getAdditionalBeanInfo() {
     Class<?> superclass = beanClass.getSuperclass();
     try  {

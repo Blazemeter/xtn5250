@@ -163,6 +163,7 @@ public class XICrt extends JComponent implements Serializable {
    * Changes the panel font.
    * Only monospaced fonts are accepted.
    */
+  @Override
   public void setFont(Font aFont) {
     FontMetrics fontMetrics = getFontMetrics(aFont);
     if (fontMetrics.charWidth('W') != fontMetrics.charWidth('i'))
@@ -191,6 +192,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    */
+  @Override
   public Font getFont() {
     return ivFont;
   }
@@ -231,6 +233,7 @@ public class XICrt extends JComponent implements Serializable {
    * If initialized calls recalcFontSize().
    * @see    #recalcFontSize
    */
+  @Override
   public void invalidate() {
     if (ivInitialized)
       recalcFontSize();
@@ -243,6 +246,7 @@ public class XICrt extends JComponent implements Serializable {
    * Redefines Panel.addNotify() to do some initializations when called for
    * the first time.
    */
+  @Override
   public void addNotify() {
     super.addNotify();
 
@@ -261,6 +265,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    */
+  @Override
   public void removeNotify() {
     ivInitialized = false;
     setFreeze(true);
@@ -273,6 +278,7 @@ public class XICrt extends JComponent implements Serializable {
   /**
    * Returns the preferred size based on the current font dimension.
    */
+  @Override
   public Dimension getPreferredSize() {
     return ivCrtBuffer.getSize();
   }
@@ -281,6 +287,7 @@ public class XICrt extends JComponent implements Serializable {
   /**
    * Returns the minimum size based on minimum size of the current font.
    */
+  @Override
   public Dimension getMinimumSize() {
     return new Dimension(ivMinCharW * ivCrtBuffer.getCrtSize().width,
                          ivMinCharH * ivCrtBuffer.getCrtSize().height);
@@ -291,6 +298,7 @@ public class XICrt extends JComponent implements Serializable {
    * Redefined to handle the freeze attribute.
    * @see    #setFreeze
    */
+  @Override
   public void repaint(long tm, int x, int y, int width, int height) {
     if (!ivFreeze)
       super.repaint(tm, x, y, width, height);
@@ -346,6 +354,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    */
+  @Override
   public final void paint(Graphics g) {
     // remove cursor from screen
     //!!V cannot check if the cursor intersects the clipping area, because the
@@ -364,6 +373,7 @@ public class XICrt extends JComponent implements Serializable {
   /**
    * do nothing.
    */
+  @Override
   protected void paintBorder(Graphics g) {
   }
 
@@ -372,6 +382,7 @@ public class XICrt extends JComponent implements Serializable {
    * Subclasses must redefine foregroundPaint to add painting.
    * @see    #foregroundPaint
    */
+  @Override
   public synchronized void paintComponent(Graphics g) {
     if (ivImage != null) {
       synchronized (ivCrtBuffer) {
@@ -775,6 +786,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    */
+  @Override
   protected void finalize() throws Throwable {
     setBlinkingCursor(false);
     super.finalize();
@@ -880,6 +892,7 @@ public class XICrt extends JComponent implements Serializable {
     }
 
 
+    @Override
     public void run() {
       while (!ivTerminate) {
         if (isCursorVisible())
