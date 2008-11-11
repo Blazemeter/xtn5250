@@ -43,6 +43,7 @@ public class XI5250EmulatorExtBeanInfo extends SimpleBeanInfo {
   public XI5250EmulatorExtBeanInfo() {
   }
 
+  @Override
   public PropertyDescriptor[] getPropertyDescriptors() {
     try  {
       PropertyDescriptor _hintOnActiveField = 
@@ -65,6 +66,7 @@ public class XI5250EmulatorExtBeanInfo extends SimpleBeanInfo {
     }
   }
 
+  @Override
   public java.awt.Image getIcon(int iconKind) {
     switch (iconKind) {
     case BeanInfo.ICON_COLOR_16x16:
@@ -79,6 +81,7 @@ public class XI5250EmulatorExtBeanInfo extends SimpleBeanInfo {
     return null;
   }
 
+  @Override
   public BeanInfo[] getAdditionalBeanInfo() {
     Class<?> superclass = beanClass.getSuperclass();
     try  {

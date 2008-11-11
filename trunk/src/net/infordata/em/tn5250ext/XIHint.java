@@ -102,6 +102,7 @@ public class XIHint extends JComponent {
 
   /**
    */
+  @Override
   public Dimension getPreferredSize() {
     int x = ivSpaceLeft;
     int y = ivSpaceUp;
@@ -125,6 +126,7 @@ public class XIHint extends JComponent {
 
   /**
    */
+  @Override
   protected void paintComponent(Graphics aGraphics) {
 //    Dimension vDim  = getSize();
 //    String    vText;

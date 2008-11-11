@@ -12,10 +12,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 
 /*
-    ***
+ ***
     10/07/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
 
@@ -42,35 +42,37 @@ public class XIImage extends JComponent {
 
   /**
    */
-	public XIImage(Image anImage) {
+  public XIImage(Image anImage) {
     setImage(anImage);
- 	}
+  }
 
 
   /**
    */
   public void setImage(Image anImage)	{
-	  if (anImage == ivImage)
-	    return;
+    if (anImage == ivImage)
+      return;
 
-	  ivImage = anImage;
-		repaint();
-	}
+    ivImage = anImage;
+    repaint();
+  }
 
 
   /**
-	 */
+   */
+  @Override
   public void update(Graphics gr) {
     paint(gr);
   }
 
 
   /**
-	 */
+   */
+  @Override
   public void paintComponent(Graphics gr) {
     Dimension dim = getSize();
 
     if (ivImage != null)
       gr.drawImage(ivImage, 0, 0, dim.width, dim.height, this);
- 	}
+  }
 }

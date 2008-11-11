@@ -53,6 +53,7 @@ public class Test {
     }
 
     frm.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosed(WindowEvent e) {
         System.exit(0);
       }
@@ -85,10 +86,12 @@ public class Test {
       }
     }
 
+    @Override
     protected boolean detailedTest() {
       return true;
     }
     
+    @Override
     protected void start() {
       ivButtons.clear();
       final XI5250EmulatorExt em = getEmulator(); 
@@ -149,6 +152,7 @@ public class Test {
       }
     }
 
+    @Override
     protected void stop() {
       ivButtons.clear();
     }
