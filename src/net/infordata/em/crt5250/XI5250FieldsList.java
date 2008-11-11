@@ -61,6 +61,7 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   /**
    * Returns a cloned XI5250FieldList
    */
+  @Override
   @SuppressWarnings("unchecked")
   public Object clone() {
     try {

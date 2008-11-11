@@ -229,6 +229,7 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    * Redefined to use XI5250CrtBuffer.
    */
+  @Override
   protected XICrtBuffer createCrtBuffer(int nCols, int nRows) {
     return new XI5250CrtBuffer(nCols, nRows);
   }
@@ -236,6 +237,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   public synchronized void setCrtSize(int nCols, int nRows) {
     XI5250CrtBuffer oldCrt = (XI5250CrtBuffer)getCrtBuffer();
 
@@ -250,6 +252,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected CursorShape getCursorShape() {
     return (ivInsertState) ? cvInsertCursorShape : cvNormalCursorShape;
   }
@@ -257,6 +260,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected CursorShape getFixedCursorShape() {
     return (ivRefCursor) ? ivFixedCursorShape : null;
   }
@@ -536,6 +540,7 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    * Changes the cursor position.
    */
+  @Override
   public void setCursorPos(int aCol, int aRow) {
     super.setCursorPos(aCol, aRow);
 
@@ -744,6 +749,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected void processMouseEvent(MouseEvent e) {
     switch (e.getID()) {
       //
@@ -782,6 +788,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected void processMouseMotionEvent(MouseEvent e) {
     switch (e.getID()) {
       //
@@ -933,6 +940,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected synchronized void processKeyEvent(KeyEvent e) {
     processRawKeyEvent(translateKeyEvent(e));
     if (!e.isConsumed())
@@ -1128,6 +1136,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
   /**
    */
+  @Override
   protected void processFocusEvent(FocusEvent e) {
     switch (e.getID()) {
       //
@@ -1154,6 +1163,7 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    * Redefined because 5250 works with line wrap.
    */
+  @Override
   public void drawString(String str, int col, int row, int aAttr) {
     int lines = ((col + str.length()) / getCrtSize().width + 1);
 
@@ -1198,6 +1208,7 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    * If the font is really changed then a SIZE_CHANGED event is fired.
    */
+  @Override
   public void setFont(Font aFont) {
     Font oldFont = getFont();
     super.setFont(aFont);
@@ -1214,6 +1225,7 @@ public class XI5250Crt extends XICrt implements Serializable {
   /**
    * Usefull to add paint over the normal 5250 screen.
    */
+  @Override
   protected void foregroundPaint(Graphics g) {
     ivFields.paint(g);
 
@@ -1412,6 +1424,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
     XI5250CrtFrame frm = new XI5250CrtFrame("TEST", crt);
     frm.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosed(WindowEvent e) {
         System.out.println("END.");
         System.exit(0);
@@ -1540,6 +1553,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
 
     //!!1.03a
+    @Override
     protected EventListener remove(EventListener oldl) {
       if (oldl == a)  return b;
       if (oldl == b)  return a;
@@ -1714,6 +1728,7 @@ public class XI5250Crt extends XICrt implements Serializable {
       add(crt);
     }
 
+    @Override
      protected void addImpl(Component comp, Object constraints, int index) {
        if (getComponentCount() > 0)
          throw new IllegalStateException("This panel doesn't support components");
@@ -1721,6 +1736,7 @@ public class XI5250Crt extends XICrt implements Serializable {
      }
 
      int count = 0;  //!!P
+     @Override
      public void doLayout() {
        //!!PSystem.out.println("!!P doLayout() " + count++);
        //!!P(new Exception()).printStackTrace();
@@ -1739,6 +1755,7 @@ public class XI5250Crt extends XICrt implements Serializable {
        }
      }
 
+     @Override
      public Dimension getPreferredSize() {
        Insets insets = getInsets();
        Dimension pSize = ivCrt.getPreferredSize();

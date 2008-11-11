@@ -34,6 +34,7 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
   public XI5250CrtBeanInfo() {
   }
 
+  @Override
   public PropertyDescriptor[] getPropertyDescriptors() {
     try  {
       PropertyDescriptor _defBackground = new PropertyDescriptor("defBackground", beanClass, "getDefBackground", "setDefBackground");
@@ -64,6 +65,7 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
     }
   }
 
+  @Override
   public java.awt.Image getIcon(int iconKind) {
     switch (iconKind) {
     case BeanInfo.ICON_COLOR_16x16:
@@ -78,6 +80,7 @@ public class XI5250CrtBeanInfo extends SimpleBeanInfo {
     return null;
   }
 
+  @Override
   public BeanInfo[] getAdditionalBeanInfo() {
     Class<?> superclass = beanClass.getSuperclass();
     try  {

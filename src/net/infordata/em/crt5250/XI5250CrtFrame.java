@@ -176,6 +176,7 @@ public class XI5250CrtFrame extends JFrame {
 
   /**
    */
+  @Override
   public void invalidate() {
     super.invalidate();
     sizeChanged();
@@ -230,6 +231,7 @@ public class XI5250CrtFrame extends JFrame {
 
   /**
    */
+  @Override
   protected void processWindowEvent(WindowEvent e) {
     switch(e.getID()) {
       case WindowEvent.WINDOW_OPENED:
