@@ -60,6 +60,11 @@ public class XI5250OrdList extends XI5250Ord {
     cv5250OrdClasses[XI5250Emulator.ORD_SBA] = XISBAOrd.class;
     cv5250OrdClasses[XI5250Emulator.ORD_SF] = XISFOrd.class;
     cv5250OrdClasses[XI5250Emulator.ORD_SOH] = XISOHOrd.class;
+    cv5250OrdClasses[XI5250Emulator.ORD_MC] = XIMCOrd.class;
+    cv5250OrdClasses[XI5250Emulator.ORD_EA] = XIEAOrd.class;
+    cv5250OrdClasses[XI5250Emulator.ORD_TD] = XITDOrd.class;
+    cv5250OrdClasses[XI5250Emulator.ORD_WEA] = XIWEAOrd.class;
+    cv5250OrdClasses[XI5250Emulator.ORD_WDSF] = XIWDSFOrd.class;
   }
 
 

@@ -26,6 +26,8 @@ package net.infordata.em.tn5250;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.infordata.em.crt5250.XIEbcdicTranslator;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -53,6 +55,7 @@ public class XIQueryCmd extends XI5250Cmd {
 
   @Override
   protected void execute() {
+    XIEbcdicTranslator trans = ivEmulator.getTranslator();  
     // see rfc 1205
     byte[] buf = {
       (byte)0x00, (byte)0x00,
@@ -62,24 +65,23 @@ public class XIQueryCmd extends XI5250Cmd {
       (byte)0x70,
       (byte)0x80,
       (byte)0x06, (byte)0x00,  // any other 5250 emulator
-      (byte)0x01, (byte)0x00, (byte)0x00,  // version
+      (byte)0x01, (byte)0x01, (byte)0x00,  // version
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x01,
-      (byte)0x31, (byte)0x79,  // 3179
-      (byte)0x00, (byte)0x02,  // modello 2
-      (byte)0x02,
-      (byte)0x00,
-      (byte)0x00,
-      (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
-      (byte)0x01, (byte)0x00,
+      (byte)trans.toEBCDIC('5'), (byte)trans.toEBCDIC('2'), (byte)trans.toEBCDIC('5'), (byte)trans.toEBCDIC('1'), // 5251
+      (byte)trans.toEBCDIC('0'), (byte)trans.toEBCDIC('1'), (byte)trans.toEBCDIC('1'),
+      (byte)0x02, (byte)0x00,  // keyboard 
+      (byte)0x00, 
+      (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,  // S/N
+      (byte)0x01, (byte)0x00,  // max input fields
       (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x01,   // Row 1 e col 1 support
-      (byte)(0x01 | 0x40),  // 24x80 color supported
+      (byte)(0x03 | 0x40),  // 24x80 and 27x132 color supported
+      (byte)0x00,  // reserved
       (byte)0x00,
-      (byte)0x00,
-      (byte)0x00,
+      (byte)0x00, //0x07,  // enhanced mode ?? 
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x00, (byte)0x00, (byte)0x00};
 
