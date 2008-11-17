@@ -182,11 +182,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   protected static final byte CMD_WRITE_TO_DISPLAY= (byte)0x11;
 
   // orders
-  protected static final byte ORD_IC   = (byte)0x13;
-  protected static final byte ORD_RA   = (byte)0x02;
-  protected static final byte ORD_SBA  = (byte)0x11;
-  protected static final byte ORD_SF   = (byte)0x1D;
-  protected static final byte ORD_SOH  = (byte)0x01;
+  // see http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.3?DT=19950629163252
+  protected static final byte ORD_SBA  = (byte)0x11;  // Set buffer address 
+  protected static final byte ORD_IC   = (byte)0x13;  // Insert cursor
+  protected static final byte ORD_MC   = (byte)0x14;  // Move cursor 
+  protected static final byte ORD_RA   = (byte)0x02;  // Repeat to address
+  protected static final byte ORD_EA   = (byte)0x03;  // Erase to address 
+  protected static final byte ORD_SOH  = (byte)0x01;  // Start of header
+  protected static final byte ORD_TD   = (byte)0x10;  // Transparent data 
+  protected static final byte ORD_WEA  = (byte)0x12;  // Write extended attributes 
+  protected static final byte ORD_SF   = (byte)0x1D;  // Start of field
+  protected static final byte ORD_WDSF = (byte)0x15;  // Write to Display Structured Field 
 
   // aid codes
   public static final byte AID_COMMAND   = (byte)0x31;
