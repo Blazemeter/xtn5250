@@ -40,13 +40,17 @@ import java.io.InputStream;
  */
 public class XIMCOrd extends XI5250Ord {
 
+  protected int ivRow, ivCol;
+
+  
   /**
    * @exception    XI5250Exception    raised if order parameters are wrong.
    */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
-    throw new IllegalStateException("Not supported");
+    ivRow = Math.max(0, inStream.read());
+    ivCol = Math.max(0, inStream.read());
   }
 
 
@@ -58,6 +62,6 @@ public class XIMCOrd extends XI5250Ord {
 
   @Override
   public String toString() {
-    return super.toString();
+    return super.toString() + " [" + ivRow + "," + ivCol + "]";
   }
 }
