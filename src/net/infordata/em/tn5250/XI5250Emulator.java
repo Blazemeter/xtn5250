@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.17";
+  public static final String VERSION = "1.17a";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -1558,6 +1558,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       aidCode = AID_COMMAND + ofs;
     else if (aModifier == KeyEvent.SHIFT_MASK)
       aidCode = AID_F13 + ofs;
+    else if (aModifier == KeyEvent.ALT_MASK && aKey == KeyEvent.VK_F1)
+      aidCode  = AID_HELP;
     else
       return false;
 
