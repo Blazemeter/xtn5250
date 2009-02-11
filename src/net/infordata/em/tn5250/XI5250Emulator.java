@@ -1594,7 +1594,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     if (!getAltFKeyRemap())
       return e;
     if (e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode () <= KeyEvent.VK_F12) {
-      if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
+      // ALT+SHIFT+Fx replaces ALT+Fx 
+      if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0 && 
+          (e.getModifiers() & KeyEvent.SHIFT_MASK) != 0) {
+        e.setModifiers(e.getModifiers() & ~KeyEvent.SHIFT_MASK); 
+      }
+      // ALT+Fx replaces Fx
+      else if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
         e.setModifiers(e.getModifiers() & ~KeyEvent.ALT_MASK); 
       }
     }
