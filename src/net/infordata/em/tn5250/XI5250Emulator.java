@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.17a";
+  public static final String VERSION = "1.17b";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
