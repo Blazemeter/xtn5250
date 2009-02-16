@@ -49,6 +49,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.VolatileImage;
@@ -385,9 +386,10 @@ public class XICrt extends JComponent implements Serializable {
   @Override
   public synchronized void paintComponent(Graphics g) {
     if (ivImage != null) {
+      GraphicsConfiguration gconf = getGraphicsConfiguration(); // acquires a tree-lock
       synchronized (ivCrtBuffer) {
         do {
-          int returnCode = ivImage.validate(getGraphicsConfiguration());
+          int returnCode = ivImage.validate(gconf);
           if (returnCode == VolatileImage.IMAGE_RESTORED) {
             // Contents need to be restored
             ivCrtBuffer.invalidateAll();
