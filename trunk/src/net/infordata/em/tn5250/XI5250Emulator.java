@@ -117,7 +117,6 @@ import net.infordata.em.tnprot.XITelnetEmulator;
  *
  * </pre>
  *
- * @version  1.15g
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250Emulator extends XI5250Crt implements Serializable {
@@ -126,7 +125,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.17c";
+  public static final String VERSION = "1.17e";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -1909,11 +1908,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     public void run() {
       while (!ivStop && ivEmulator.isKeyboardQueue()) {
         try {
-          KeyEvent e = (KeyEvent)ivEmulator.ivKeybEventQueue.getNextEvent();
-          ivEmulator.doProcessKeyEvent(e);
-          //!!1.12 move execution in the event queue thread
-          //!!V to properly work jdk1.1.7 or greather is required (?? to be tested).
-          //!!1.15d SwingUtilities.invokeAndWait(KeyEventRunnable.getInstance(ivEmulator, e));
+          final KeyEvent e = (KeyEvent)ivEmulator.ivKeybEventQueue.getNextEvent();
+          /* The future ... when receivedEOR() will be also moved in the awt event queue thread and,
+           * as a conseguence, many synchronized methods will be removed. 
+          SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+              ivEmulator.doProcessKeyEvent(e);
+            }
+          });
+          */
+          synchronized (ivEmulator.getTreeLock()) {  // just to avoid dead-locks
+            ivEmulator.doProcessKeyEvent(e);
+          }
         }
         catch (InterruptedException ex) {
           continue;
