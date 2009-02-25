@@ -62,11 +62,14 @@ public class XI5250Frame extends XI5250CrtFrame {
   private static ResourceBundle cvRes =
       ResourceBundle.getBundle("net.infordata.em.tn5250.resources.Res");
 
+  private final String ivTitle;
 
   /**
    */
   public XI5250Frame(String aTitle, XI5250Emulator aCrt) {
     super(aTitle, aCrt);
+    ivTitle = aTitle;
+    init(aCrt);
   }
 
 
@@ -75,9 +78,26 @@ public class XI5250Frame extends XI5250CrtFrame {
   public XI5250Frame(String aTitle, XI5250Emulator aCrt,
                      boolean sizeControlledFrame) {
     super(aTitle, aCrt, sizeControlledFrame);
+    ivTitle = aTitle;
+    init(aCrt);
   }
 
+  
+  private void init(XI5250Emulator aCrt) {
+    aCrt.addEmulatorListener(new XI5250EmulatorAdapter() {
+      @Override
+      public void connected(XI5250EmulatorEvent e) {
+        setTitle(ivTitle + " - " + e.get5250Emulator().getHost());
+      }
 
+      @Override
+      public void disconnected(XI5250EmulatorEvent e) {
+        setTitle(ivTitle);
+      }
+    });
+  }
+
+  
   /**
    */
   @Override
