@@ -84,6 +84,8 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   
   private void init(XI5250Emulator aCrt) {
+    if (aCrt.isActive())
+      setTitle(ivTitle + " - " + aCrt.getHost());
     aCrt.addEmulatorListener(new XI5250EmulatorAdapter() {
       @Override
       public void connected(XI5250EmulatorEvent e) {
