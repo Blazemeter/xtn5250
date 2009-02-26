@@ -750,15 +750,15 @@ public class XITelnet {
   /**
    * Called when data are received.
    * Data are already cleared from IAC sequence.
-   * NOTE: receivedData is always callend in the receiving thread.
+   * NOTE: receivedData is always called in the receiving thread.
    */
   protected void receivedData(byte[] buf, int len) {
-    if (LOGGER.isLoggable(Level.FINER)) {
-      StringBuilder sb = new StringBuilder();
+    if (LOGGER.isLoggable(Level.FINEST)) {
+      StringBuilder sb = new StringBuilder(1024);
       for (int i = 0; i < len; i++) {
-        sb.append((char)buf[i]);
+        sb.append(toHex(buf[i])).append(' ');
       }
-      LOGGER.finer(sb.toString());
+      LOGGER.finest(sb.toString());
     }
 
     if (ivEmulator != null)
