@@ -91,6 +91,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import net.infordata.em.crt5250.XI5250Crt;
@@ -125,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.17g";
+  public static final String VERSION = "1.17z";
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -749,11 +750,24 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Called by XITelnet when an IOException is catched.
    */
   protected void catchedIOException(IOException ex) {
-    //!!V gestire
     if (LOGGER.isLoggable(Level.WARNING))
       LOGGER.log(Level.WARNING, "catchedIOException()", ex);
   }
-
+  
+  /**
+   * Called when an generic exception is catched.
+   * @param ex
+   */
+  protected void catchedException(final Throwable ex) {
+    LOGGER.log(Level.SEVERE, "catchedException()", ex);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JOptionPane.showMessageDialog(XI5250Emulator.this, 
+            ex.getMessage() + "\nSee the log for details ",
+            "ERROR", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+  }
 
   /**
    */
@@ -805,7 +819,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
                     XITelnet.toInt(ivRXBuf[1]);
     if (packetLen != ivRXBufLen || ivRXBuf[2] != (byte)0x12 ||
         ivRXBuf[3] != (byte)0xA0) {
-      //!!V gestire
+      //TODO ??
       if (LOGGER.isLoggable(Level.FINE))
         LOGGER.fine("malformed packet");
 
@@ -877,12 +891,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           }
         }
         catch (IOException ex) {
-          //!!V gestire
-          ex.printStackTrace();
+          catchedException(ex);
         }
         catch (XI5250Exception ex) {
-          //!!V gestire
-          ex.printStackTrace();
+          catchedException(ex);
+        }
+        catch (Exception ex) {
+          catchedException(ex);
         }
 
         if (LOGGER.isLoggable(Level.FINER))
@@ -1159,7 +1174,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected boolean isMasterMDTSet() {
-    //!!V gestire
+    //TODO ??
     return true;
   }
 
@@ -1809,66 +1824,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       ivQueue = null;
     }
   }
-
-
-  //////////////////////////////////////////////////////////////////////////////
-
-//  /**
-//   * !!1.12
-//   */
-//  private static class KeyEventRunnable implements Runnable {
-//
-//    private static Vector cvReusable = new Vector(20, 10);
-//
-//    private XI5250Emulator ivEmulator;
-//    private KeyEvent       ivKeyEvent;
-//
-//    private KeyEventRunnable() {
-//    }
-//
-//    private void initialize(XI5250Emulator em, KeyEvent ke) {
-//      ivEmulator = em;
-//      ivKeyEvent = ke;
-//    }
-//
-//    public void run() {
-//      try {
-//        ivEmulator.doProcessKeyEvent(ivKeyEvent);
-//      }
-//      finally {
-//        release(this);
-//      }
-//    }
-//
-//    /**
-//     * Retrieve an instance from a pool of objects.
-//     */
-//    public static KeyEventRunnable getInstance(XI5250Emulator em, KeyEvent ke) {
-//      KeyEventRunnable ker = null;
-//      try {
-//        synchronized (cvReusable) {
-//          ker = (KeyEventRunnable)cvReusable.lastElement();
-//          cvReusable.setSize(cvReusable.size() - 1);
-//        }
-//      }
-//      catch (NoSuchElementException ex) {
-//        ker = new KeyEventRunnable();
-//      }
-//      ker.initialize(em, ke);
-//      return ker;
-//    }
-//
-//    /**
-//     * Insert an instance in the pool.
-//     */
-//    private static void release(KeyEventRunnable ker) {
-//      if (DEBUG >= 1)
-//        if (cvReusable.contains(ker))
-//          throw new IllegalStateException("Instance already in the pool: " + ker);
-//
-//      cvReusable.addElement(ker);
-//    }
-//  }
 
 
   //////////////////////////////////////////////////////////////////////////////
