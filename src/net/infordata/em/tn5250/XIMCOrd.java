@@ -31,7 +31,6 @@ import java.io.InputStream;
 
 /**
  * MC - Move cursor
- * TODO
  * 
  * see: http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.6?DT=19950629163252
  *
@@ -56,7 +55,7 @@ public class XIMCOrd extends XI5250Ord {
 
   @Override
   protected void execute() {
-    throw new IllegalStateException("Not supported");
+    ivEmulator.setCursorPos(ivCol - 1, ivRow - 1);
   }
 
 
