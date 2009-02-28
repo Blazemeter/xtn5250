@@ -26,6 +26,8 @@ package net.infordata.em.tn5250;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.infordata.em.tnprot.XITelnet;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -40,24 +42,38 @@ import java.io.InputStream;
  */
 public class XIWEAOrd extends XI5250Ord {
 
+  protected byte ivAttributeType;
+  protected byte ivAttribute;
+
   /**
    * @exception    XI5250Exception    raised if order parameters are wrong.
    */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
-    throw new IllegalStateException("Not supported");
+    {
+      byte[] buf = new byte[2];
+      if (inStream.read(buf) < buf.length)
+        throw new XI5250Exception("EOF reached", XI5250Emulator.ERR_INVALID_EXT_ATTR_TYPE);
+      ivAttributeType = buf[0];
+      ivAttribute = buf[1];
+      if (ivAttributeType != 0x01 && ivAttributeType != 0x03 && ivAttributeType != 0x05)
+        throw new XI5250Exception("Invalid attr type: " + XITelnet.toHex(ivAttributeType), 
+            XI5250Emulator.ERR_INVALID_EXT_ATTR_TYPE);
+    }
   }
 
 
   @Override
   protected void execute() {
+    //TODO
     throw new IllegalStateException("Not supported");
   }
 
 
   @Override
   public String toString() {
-    return super.toString();
+    return super.toString() + " [" + XITelnet.toHex(ivAttributeType) + "," + 
+        XITelnet.toHex(ivAttribute) + "]";
   }
 }

@@ -184,6 +184,18 @@ public class XITelnet {
     return "00".substring(hex.length()) + hex;
   }
 
+  public static final String toHex(byte[] buf, int len) {
+    StringBuilder sb = new StringBuilder(len * 4);
+    for (int i = 0; i < len; i++) {
+      sb.append(toHex(buf[i])).append(' ');
+    }
+    return sb.toString();
+  }
+
+  public static final String toHex(byte[] buf) {
+    return toHex(buf, buf.length);
+  }
+
 
   /**
    * Uses telnet default port for socket connection.
@@ -754,11 +766,7 @@ public class XITelnet {
    */
   protected void receivedData(byte[] buf, int len) {
     if (LOGGER.isLoggable(Level.FINEST)) {
-      StringBuilder sb = new StringBuilder(1024);
-      for (int i = 0; i < len; i++) {
-        sb.append(toHex(buf[i])).append(' ');
-      }
-      LOGGER.finest(sb.toString());
+      LOGGER.finest(toHex(buf, len));
     }
 
     if (ivEmulator != null)

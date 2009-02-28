@@ -48,7 +48,8 @@ public class XIRestoreScreenCmd extends XI5250Cmd {
       throws IOException, XI5250Exception {
     ivPos = inStream.read();
     if (ivPos == -1)
-      throw new XI5250Exception("Restore screen position required");
+      throw new XI5250Exception("Restore screen position required", 
+          XI5250Emulator.ERR_INVALID_COMMAND);
   }
 
 

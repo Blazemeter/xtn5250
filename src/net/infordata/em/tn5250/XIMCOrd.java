@@ -50,6 +50,11 @@ public class XIMCOrd extends XI5250Ord {
       throws IOException, XI5250Exception {
     ivRow = Math.max(0, inStream.read());
     ivCol = Math.max(0, inStream.read());
+    // Cannot deal with real dimensions, since they can be not applied yet 
+    if (ivRow <= 0 || ivRow > XI5250Emulator.MAX_ROWS || 
+        ivCol <= 0 || ivCol > XI5250Emulator.MAX_COLS)
+      throw new XI5250Exception("Invalid screen coord: " + ivRow + "," + ivCol, 
+          XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 

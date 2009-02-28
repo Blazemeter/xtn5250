@@ -45,6 +45,15 @@ public class XIDataOrd extends XI5250Ord {
   protected String ivData;
   protected byte   ivColor;
 
+  /**
+   * see http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.2?SHELF=&DT=19950629163252&CASE=
+   * and IBM SA21-9247-6 pg. 2.13
+   */
+  public static final boolean isDataCharacter(int bb) {
+    // 0x1F instead of 0x20
+    return (bb == 0x00 || bb == 0x1C || bb == 0x1E || bb == 0x0E || bb == 0x0F ||
+        (bb >= 0x1F && bb <= 0xFE));
+  }
 
   @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
@@ -62,7 +71,7 @@ public class XIDataOrd extends XI5250Ord {
         break;
 
       // see IBM SA21-9247-6 pg. 2.13
-      if (bb == 0x00 || bb == 0x1C || bb >= 0x1F) {
+      if (isDataCharacter(bb)) {
         // is it a color ?
         if (bb > 0x1F && bb <= 0x3F) {
           if (i == 0)

@@ -127,6 +127,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public static final String VERSION = "1.17z";
+  
+  public static final int MAX_ROWS = 27;
+  public static final int MAX_COLS = 132;
 
   // opcodes
   protected static final byte OPCODE_NOP              = (byte)0x00;
@@ -156,6 +159,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
                                   "Cancel invite operation",
                                   "Turn ON message light",
                                   "Turn OFF message light"};
+  
+  // 5250 stream parsing errors
+  protected static final int ERR_INVALID_COMMAND        = 10030101;
+  protected static final int ERR_INVALID_CLEAR_UNIT_ALT = 10030105;
+  protected static final int ERR_INVALID_SOH_LENGTH     = 10050131;
+  protected static final int ERR_INVALID_ROW_COL_ADDR   = 10050122;
+  protected static final int ERR_INVALID_EXT_ATTR_TYPE  = 10050132;
+  protected static final int ERR_INVALID_SF_CLASS_TYPE  = 10050111;
 
   // flags
   protected static final byte FLAG_HLP                = (byte)0x01;
@@ -753,6 +764,16 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     if (LOGGER.isLoggable(Level.WARNING))
       LOGGER.log(Level.WARNING, "catchedIOException()", ex);
   }
+
+  /**
+   * Called when 5250 stream parsing exception is catched.
+   * @param ex
+   */
+  protected void catched5250Exception(XI5250Exception ex) {
+    if (LOGGER.isLoggable(Level.FINE))
+      LOGGER.log(Level.FINE, "catched5250Exception()", ex);
+    send5250Error(ex.getErrorCode());
+  }
   
   /**
    * Called when an generic exception is catched.
@@ -894,7 +915,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           catchedException(ex);
         }
         catch (XI5250Exception ex) {
-          catchedException(ex);
+          catched5250Exception(ex);
         }
         catch (Exception ex) {
           catchedException(ex);
@@ -1216,14 +1237,24 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
+   */
+  public void send5250UserError(int aErrorCode) {
+    XIEbcdicTranslator    translator = getTranslator();
+    byte[] buf = translator.toPacked(aErrorCode, 4);
+
+    send5250Packet(FLAG_HLP, OPCODE_NOP, buf);
+  }
+
+
+  /**
    * DO NOT USE, reserved for commands and orders
    * Sends a 5250 error decoding request.
    */
   public void send5250Error(int aErrorCode) {
     XIEbcdicTranslator    translator = getTranslator();
-    byte[] buf = translator.toPacked(aErrorCode, 4);
+    byte[] buf = translator.toPacked(aErrorCode, 8);
 
-    send5250Packet(FLAG_HLP, OPCODE_NOP, buf);
+    send5250Packet(FLAG_ERR, OPCODE_NOP, buf);
   }
 
 
@@ -1333,7 +1364,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   protected void userError(int aError) {
     Toolkit.getDefaultToolkit().beep();
     setState(ST_PRE_HELP);
-    send5250Error(aError);
+    send5250UserError(aError);
   }
 
 

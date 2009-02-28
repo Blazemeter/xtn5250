@@ -59,8 +59,8 @@ public class XISOHOrd extends XI5250Ord {
         ivData[i] = (byte)bb;
     }
     // parameters check
-    if (ivLen < 0 || ivLen > 255 || i < ivLen)
-      throw new XI5250Exception("Bad SOH Order");
+    if (ivLen < 0 || ivLen > 7 || i < ivLen)
+      throw new XI5250Exception("Bad SOH Order", XI5250Emulator.ERR_INVALID_SOH_LENGTH);
   }
 
 

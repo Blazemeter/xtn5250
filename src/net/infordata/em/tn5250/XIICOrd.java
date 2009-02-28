@@ -41,10 +41,14 @@ public class XIICOrd extends XI5250Ord {
 
 
   @Override
-  protected void readFrom5250Stream(InputStream inStream) throws IOException {
+  protected void readFrom5250Stream(InputStream inStream) throws IOException, XI5250Exception {
     ivRow = Math.max(0, inStream.read());
     ivCol = Math.max(0, inStream.read());
-    //!!V effettuare check dei parametri
+    // Cannot deal with real dimensions, since they can be not applied yet 
+    if (ivRow <= 0 || ivRow > XI5250Emulator.MAX_ROWS || 
+        ivCol <= 0 || ivCol > XI5250Emulator.MAX_COLS)
+      throw new XI5250Exception("Invalid screen coord: " + ivRow + "," + ivCol, 
+          XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 
