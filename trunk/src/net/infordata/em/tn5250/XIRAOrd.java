@@ -42,12 +42,15 @@ public class XIRAOrd extends XI5250Ord {
 
 
   @Override
-  protected void readFrom5250Stream(InputStream inStream) throws IOException {
+  protected void readFrom5250Stream(InputStream inStream) throws IOException, XI5250Exception {
     ivEndRow = Math.max(0, inStream.read());
     ivEndCol = Math.max(0, inStream.read());
-    ivChar = ivEmulator.
-                 getTranslator().toChar((byte)Math.max(0, inStream.read()));
-    //!!V effettuare check dei parametri
+    ivChar = ivEmulator.getTranslator().toChar((byte)Math.max(0, inStream.read()));
+    // Cannot deal with real dimensions, since they can be not applied yet 
+    if (ivEndRow <= 0 || ivEndRow > XI5250Emulator.MAX_ROWS || 
+        ivEndCol <= 0 || ivEndCol > XI5250Emulator.MAX_COLS)
+      throw new XI5250Exception("Invalid screen coord: " + ivEndRow + "," + ivEndCol, 
+          XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 

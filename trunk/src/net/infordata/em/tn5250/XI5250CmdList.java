@@ -115,7 +115,7 @@ public class XI5250CmdList extends XI5250Cmd {
       switch (i % 2) {
         case 0:
           if ((byte)bb != XI5250Emulator.ESC)
-            throw new XI5250Exception("Malformed 5250 packet");
+            throw new XI5250Exception("Malformed 5250 packet", XI5250Emulator.ERR_INVALID_COMMAND);
           break;
         case 1:
           try {
@@ -136,7 +136,8 @@ public class XI5250CmdList extends XI5250Cmd {
           }
           else {
             throw new XI5250Exception("Command not supported : 0x" +
-                                      XITelnet.toHex((byte)bb));
+                                      XITelnet.toHex((byte)bb), 
+                                      XI5250Emulator.ERR_INVALID_COMMAND);
           }
           break;
       }

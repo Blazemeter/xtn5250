@@ -38,7 +38,7 @@ import net.infordata.em.tnprot.XITelnet;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * 5250 Orders list (Works like a macro order).
+ * 5250 Orders list.
  *
  * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
@@ -95,7 +95,7 @@ public class XI5250OrdList extends XI5250Ord {
 
     if (LOGGER.isLoggable(Level.FINER))
       LOGGER.finer("  START OF ORDERS LIST");
-
+    
     for (int i = 0; ; i++) {
       inStream.mark(1);
       if ((bb = inStream.read()) == -1)
@@ -106,7 +106,7 @@ public class XI5250OrdList extends XI5250Ord {
         break;
       }
 
-      if (bb == 0x00 || bb == 0x1C || bb >= 0x1F)
+      if (XIDataOrd.isDataCharacter(bb)) 
         inStream.reset();          // need it (it is also the color attribute)
       else
         ivOrdPresent[bb] = true;  // remember orders present
@@ -128,7 +128,17 @@ public class XI5250OrdList extends XI5250Ord {
         ivOrdVect.add(ord);
       }
       else {
-        throw new XI5250Exception("Order not supported : 0x" + XITelnet.toHex((byte)bb));
+        if (LOGGER.isLoggable(Level.FINE)) {
+          LOGGER.fine("Order not supported : 0x" + XITelnet.toHex((byte)bb));
+          for (int ii = 0; ii < ivOrdVect.size(); ii++) {
+            LOGGER.fine("Prev. order[" + ii + "]: " + ivOrdVect.get(ii));
+          }
+          byte[] buf = new byte[10]; 
+          int count = inStream.read(buf);
+          LOGGER.fine("Next " + count + " bytes: " + XITelnet.toHex(buf, count));
+        }
+        throw new XI5250Exception("Order not supported : 0x" + XITelnet.toHex((byte)bb),
+            XI5250Emulator.ERR_INVALID_COMMAND);
       }
     }
   }
@@ -153,7 +163,7 @@ public class XI5250OrdList extends XI5250Ord {
 
     Class<?>     cls;
 
-    if (aOrd == 0x00 || aOrd == 0x1C || aOrd >= 0x1F)
+    if (XIDataOrd.isDataCharacter(aOrd))
       cls = XIDataOrd.class;
     else
       cls = cv5250OrdClasses[aOrd];

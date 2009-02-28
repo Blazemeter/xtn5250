@@ -56,7 +56,8 @@ public class XIRollCmd extends XI5250Cmd {
       ;
 
     if (i < 3)
-      throw new XI5250Exception("Roll parameter missing");
+      throw new XI5250Exception("Roll parameter missing", 
+          XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
 
     ivDown = ((bb[0] & 0x80) != 0);
 
@@ -66,7 +67,8 @@ public class XIRollCmd extends XI5250Cmd {
     ivBottomRow = bb[2];
 
     if (ivTopRow > ivBottomRow)
-      throw new XI5250Exception("TopRow greater then BottomRow");
+      throw new XI5250Exception("TopRow greater then BottomRow", 
+          XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 

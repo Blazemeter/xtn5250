@@ -38,11 +38,15 @@ import java.io.InputStream;
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIClearUnitAltCmd extends XI5250Cmd {
+
   protected int ivPar;
 
   @Override
-  protected void readFrom5250Stream(InputStream inStream) throws IOException {
+  protected void readFrom5250Stream(InputStream inStream) throws IOException, XI5250Exception {
     ivPar = Math.max(0, inStream.read());   //!!1.02
+    if (ivPar != 0x00 && ivPar != 0x80)
+      throw new XI5250Exception("Invalid clear unit param: " + ivPar, 
+          XI5250Emulator.ERR_INVALID_CLEAR_UNIT_ALT);
   }
 
 

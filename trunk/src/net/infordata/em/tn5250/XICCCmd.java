@@ -73,7 +73,7 @@ public abstract class XICCCmd extends XI5250Cmd {
       ivCC[i] = (byte)bb;
 
     if (i < 2)
-      throw new XI5250Exception("CC required");
+      throw new XI5250Exception("CC required", XI5250Emulator.ERR_INVALID_COMMAND);
   }
 
 
