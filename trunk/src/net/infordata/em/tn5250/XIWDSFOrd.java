@@ -46,7 +46,9 @@ public class XIWDSFOrd extends XI5250Ord {
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
-    throw new IllegalStateException("Not supported");
+    // If not in enhanced mode ...
+    if (true)
+      throw new XI5250Exception("Not supported", XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 

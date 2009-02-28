@@ -51,6 +51,9 @@ public class XIWEAOrd extends XI5250Ord {
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
+    // If not in enhanced mode ...
+    if (true)
+      throw new XI5250Exception("Not supported", XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
     {
       byte[] buf = new byte[2];
       if (inStream.read(buf) < buf.length)
