@@ -38,7 +38,7 @@ import java.io.InputStream;
  * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
-public class XIWDSFOrd extends XI5250Ord {
+public class XIWdsfOrd extends XI5250Ord {
 
   /**
    * @exception    XI5250Exception    raised if order parameters are wrong.
