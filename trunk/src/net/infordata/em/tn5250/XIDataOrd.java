@@ -61,7 +61,7 @@ public class XIDataOrd extends XI5250Ord {
     int bb;
 
     ivColor = 0;
-    ivData = "";
+    StringBuilder sb = new StringBuilder(128);
 
     for (int i = 0;  ; i++) {
       inStream.mark(1);
@@ -83,13 +83,14 @@ public class XIDataOrd extends XI5250Ord {
           }
         }
         else
-          ivData += translator.toChar((byte)bb);
+          sb.append(translator.toChar((byte)bb));
       }
       else {
         inStream.reset();
         break;
       }
     }
+    ivData = sb.toString();
   }
 
 
