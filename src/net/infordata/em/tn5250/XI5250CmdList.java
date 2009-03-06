@@ -122,7 +122,7 @@ public class XI5250CmdList extends XI5250Cmd {
             cmd = createCmdInstance(XITelnet.toInt((byte)bb));
           }
           catch (Exception ex) {
-            throw new RuntimeException("Error during instance creation");
+            throw new RuntimeException(ex);
           }
 
           if (cmd != null) {
