@@ -50,9 +50,9 @@ public class XIDataOrd extends XI5250Ord {
    * and IBM SA21-9247-6 pg. 2.13
    */
   public static final boolean isDataCharacter(int bb) {
-    // 0x1F instead of 0x20
+    // 0x1F instead of 0x20 and keep 0xFF chars
     return (bb == 0x00 || bb == 0x1C || bb == 0x1E || bb == 0x0E || bb == 0x0F ||
-        (bb >= 0x1F && bb <= 0xFE));
+        (bb >= 0x1F && bb <= 0xFF));
   }
 
   @Override

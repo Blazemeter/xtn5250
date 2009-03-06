@@ -47,11 +47,11 @@ public class XI5250OrdList extends XI5250Ord {
 
   private static final Logger LOGGER = Logger.getLogger(XI5250OrdList.class.getName());
   
-  private static Class<?>[] cv5250OrdClasses = new Class<?>[0x1F + 1];
+  private static Class<?>[] cv5250OrdClasses = new Class<?>[256];
 
   protected List<XI5250Ord> ivOrdVect;
 
-  protected boolean[]    ivOrdPresent = new boolean[0x1F + 1];
+  protected boolean[]    ivOrdPresent = new boolean[256];
 
 
   static {
@@ -115,7 +115,7 @@ public class XI5250OrdList extends XI5250Ord {
         ord = createOrdInstance(bb);
       }
       catch (Exception ex) {
-        throw new RuntimeException("Error during instance creation");
+        throw new RuntimeException(ex);
       }
 
       if (ord != null) {
