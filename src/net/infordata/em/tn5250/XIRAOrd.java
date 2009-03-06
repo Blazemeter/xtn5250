@@ -58,11 +58,11 @@ public class XIRAOrd extends XI5250Ord {
   protected void execute() {
     int start = ivEmulator.toLinearPos(ivEmulator.getSBACol(), ivEmulator.getSBARow());
     int end   = ivEmulator.toLinearPos(ivEndCol - 1, ivEndRow - 1);
-    String str = "";
+    StringBuilder str = new StringBuilder(end - start + 1);
     for (int i = 0; i < (end - start + 1); i++)
-      str += ivChar;
+      str.append(ivChar);
 
-    ivEmulator.drawString(str, ivEmulator.getSBACol(), ivEmulator.getSBARow());
+    ivEmulator.drawString(str.toString(), ivEmulator.getSBACol(), ivEmulator.getSBARow());
     ivEmulator.setSBA(ivEmulator.getSBA() + (end - start + 1));
   }
 
