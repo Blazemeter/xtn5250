@@ -48,8 +48,10 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import net.infordata.em.crt5250.XI5250Crt;
+import net.infordata.em.crt5250.XI5250Field;
 import net.infordata.em.util.XICommand;
 import net.infordata.em.util.XICommandMgr;
 import net.infordata.em.util.XIUtil;
@@ -88,6 +90,9 @@ public class XI5250Applet extends JApplet {
 
   public static final String INFRAME_CMD = "INFRAME_CMD";
 
+  protected XI5250Emulator createEmulator() {
+    return new XI5250Emulator(); 
+  }
 
   /**
    */
@@ -121,12 +126,18 @@ public class XI5250Applet extends JApplet {
         inplace = false;
     }
     
-    boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
-    String codePage = getParameter("codePage");
+    final boolean p3dFX = "true".equalsIgnoreCase(getParameter("3dFX"));
+    final boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
+    final String codePage = getParameter("codePage");
 
-    ivEmulatorCtrl = new XI5250EmulatorCtrl(new XI5250Emulator());
+    ivEmulatorCtrl = new XI5250EmulatorCtrl(createEmulator());
     getEmulator().setTerminalType("IBM-3477-FC");
     getEmulator().setHost(host);
+    //3D FX
+    if (p3dFX) {
+      getEmulator().setDefFieldsBorderStyle(XI5250Field.LOWERED_BORDER);
+      getEmulator().setDefBackground(UIManager.getColor("control"));
+    }
     getEmulator().setAltFKeyRemap(altFKeyRemap);
     getEmulator().setCodePage(codePage);
 
@@ -214,7 +225,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
-  public void emulatorInPlace() {
+  protected void emulatorInPlace() {
     if (!ivFirstTime && ivFrame == null)
       return;
 
@@ -249,7 +260,7 @@ public class XI5250Applet extends JApplet {
 
   /**
    */
-  public void emulatorInFrame() {
+  protected void emulatorInFrame() {
     if (ivFrame != null)
       return;
 
