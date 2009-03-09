@@ -233,7 +233,14 @@ public abstract class XI5250PanelHandler {
 
   /**
    * Registers itself in the provided XI5250PanelsDispatcher.
-   * @param aPanelTitle    is the string that is used by XI5250PanelsDispatcher
+   */
+  public XI5250PanelHandler(XI5250PanelsDispatcher aPanelDisp) {
+    this(aPanelDisp, null);
+  }
+
+  /**
+   * Registers itself in the provided XI5250PanelsDispatcher.
+   * @param aPanelTitle    is the string that is used by {@link XI5250SimplePanelsDispatcher}
    *                       in the first step of the panel handler search.
    *
    * @see    XI5250PanelsDispatcher#addPanelHandler
@@ -283,6 +290,14 @@ public abstract class XI5250PanelHandler {
     return (Window)comp;
   }
 
+  
+  /**
+   * Just to make {@link #detailedTest()} public without breaking compatibility with the past. 
+   */
+  public final boolean panelMatched() {
+    return detailedTest();
+  }
+  
 
   /**
    * Check if this is really the panel we are waiting for.
