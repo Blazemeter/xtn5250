@@ -51,8 +51,24 @@ public class XIDataOrd extends XI5250Ord {
    */
   public static final boolean isDataCharacter(int bb) {
     // 0x1F instead of 0x20 and keep 0xFF chars
-    return (bb == 0x00 || bb == 0x1C || bb == 0x1E || bb == 0x0E || bb == 0x0F ||
-        (bb >= 0x1F && bb <= 0xFF));
+//    return (bb == 0x00 || bb == 0x1C || bb == 0x1E || bb == 0x0E || bb == 0x0F ||
+//        (bb >= 0x1F && bb <= 0xFF));
+    switch (bb) {
+      case XI5250Emulator.ORD_IC:
+      case XI5250Emulator.ORD_RA:
+      case XI5250Emulator.ORD_SBA:
+      case XI5250Emulator.ORD_SF:
+      case XI5250Emulator.ORD_SOH:
+      case XI5250Emulator.ORD_MC:
+      case XI5250Emulator.ORD_EA:
+      case XI5250Emulator.ORD_TD:
+      case XI5250Emulator.ORD_WEA:
+      case XI5250Emulator.ORD_WDSF:
+      case XI5250Emulator.ESC:
+        return false;
+      default:
+        return true;
+    }
   }
 
   @Override
