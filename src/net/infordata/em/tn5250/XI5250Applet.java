@@ -129,6 +129,7 @@ public class XI5250Applet extends JApplet {
     final boolean p3dFX = "true".equalsIgnoreCase(getParameter("3dFX"));
     final boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
     final String codePage = getParameter("codePage");
+    final boolean requestFocus = !"false".equalsIgnoreCase(getParameter("requestFocus"));
 
     ivEmulatorCtrl = new XI5250EmulatorCtrl(createEmulator());
     getEmulator().setTerminalType("IBM-3477-FC");
@@ -146,12 +147,16 @@ public class XI5250Applet extends JApplet {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           emulatorInPlace();
+          if (requestFocus)
+            getEmulator().requestFocusInWindow();
         }
       });
     else
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           emulatorInFrame();
+          if (requestFocus)
+            getEmulator().requestFocusInWindow();
         }
       });
 
