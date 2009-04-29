@@ -124,7 +124,12 @@ public class XITelnet {
   static final byte SB   = (byte)0xFA;
   static final byte SE   = (byte)0xF0;
   static final byte EOR  = (byte)0xEF;
-  static final String[] TELCMD = {"IAC", "DONT", "DO", "WONT", "WILL", "SB", "SE", "EOR"}; 
+  static final String[] TELCMD = {
+    "IAC", "DONT", "DO", "WONT", 
+    "WILL", "SB", "GA", "EL",
+    "EC", "AYT", "AO", "IP",
+    "BRK", "DATA MARK", "NOP", "SE",
+    "EOR"}; 
       
   static final byte SEND = (byte)0x01;
   static final byte IS   = (byte)0x00;
