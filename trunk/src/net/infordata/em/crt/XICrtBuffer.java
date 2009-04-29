@@ -167,14 +167,18 @@ public class XICrtBuffer implements Serializable {
 
   /**
    * Dumps the buffer on System.out stream.
-   * Usefull for debugging.
+   * Useful for debugging.
    */
   public void dumpBuffer(PrintStream out) {
     out.println("BUFFER DUMP");
-    for (int r = 0; r < ivNRows; r++)
-    {
+    for (int r = 0; r < ivNRows; r++) {
       for (int c = 0; c < ivNCols; c++)
         out.print(ivCharBuffer[r][c]);
+      out.println();
+    }
+    for (int r = 0; r < ivNRows; r++) {
+      for (int c = 0; c < ivNCols; c++)
+        out.print(Integer.toHexString(ivAttrBuffer[r][c]) + " ");
       out.println();
     }
     out.println("END BUFFER DUMP");
