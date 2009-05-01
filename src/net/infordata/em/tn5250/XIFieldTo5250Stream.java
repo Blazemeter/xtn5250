@@ -73,36 +73,38 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
 
     // requires some special handling
     // see IBM 5250 function reference manual page 2-70
-    if (aField.isSignedNumeric() && aStr.length() > 0) {
-      StringBuilder strBuf = new StringBuilder(aStr);
-      int i;
+    if (aStr.length() > 0) {
+      if (aField.isSignedNumeric()) {
+        StringBuilder strBuf = new StringBuilder(aStr);
+        int i;
 
-      // find last digit char
-      for (i = strBuf.length() - 1;
-           (i >= 0) && !Character.isDigit(strBuf.charAt(i)); i--)
-        ;
+        // find last digit char
+        for (i = strBuf.length() - 1;
+             (i >= 0) && !Character.isDigit(strBuf.charAt(i)); i--)
+          ;
 
-      // replace non digit chars between digit char with zeroes
-      for (int j = i - 1; j >= 0; j--)
-        if (!Character.isDigit(strBuf.charAt(j)))
-          strBuf.setCharAt(j, '0');
+        // replace non digit chars between digit char with zeroes
+        for (int j = i - 1; j >= 0; j--)
+          if (!Character.isDigit(strBuf.charAt(j)))
+            strBuf.setCharAt(j, '0');
 
-      if (strBuf.charAt(strBuf.length() - 1) == '-') {
-        if (i >= 0) {
-          byte xx = translator.toEBCDIC(strBuf.charAt(i));
-          xx &= 0x0F;
-          xx |= 0xD0;
-          strBuf.setCharAt(i, translator.toChar(xx));
-          aStr = new String(strBuf).substring(0, strBuf.length() - 1);
+        if (strBuf.charAt(strBuf.length() - 1) == '-') {
+          if (i >= 0) {
+            byte xx = translator.toEBCDIC(strBuf.charAt(i));
+            xx &= 0x0F;
+            xx |= 0xD0;
+            strBuf.setCharAt(i, translator.toChar(xx));
+            aStr = new String(strBuf).substring(0, strBuf.length() - 1);
+          }
+          else
+            aStr = "";
         }
         else
-          aStr = "";
+          aStr = new String(strBuf);
       }
-      else
-        aStr = new String(strBuf);
     }
 
-    int    i = aStr.length() - 1;
+    int i = aStr.length() - 1;
 
     if (ivOnlyMDT) {  //!!1.04a
       byte[] cBuf = {XI5250Emulator.ORD_SBA,
@@ -116,10 +118,31 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
         ;
     }
 
-    // convert all nulls to spaces
-    aStr = aStr.replace('\u0000', ' ');    //!!1.03c
+    byte[] strBuf = new byte[i + 1];
+    {
+      int linearPos = ivEmulator.toLinearPos(aField.getCol(), aField.getRow());
+      int    j;
+      int    len = Math.min(i + 1, aStr.length());
+      byte   space = translator.toEBCDIC(' ');
 
-    byte[] strBuf = translator.toText(aStr, i + 1);
+      for (j = 0; j < len; j++) {
+        char ch = aStr.charAt(j);
+        if (ch == XI5250Emulator.ATTRIBUTE_PLACE_HOLDER) {
+          ch = (char)ivEmulator.getAttr(ivEmulator.toColPos(linearPos + j), 
+              ivEmulator.toRowPos(linearPos + j));
+          strBuf[j] = (byte)ch;   // leave attributes as is
+        }
+        else if (ch == '\u0000') {
+          strBuf[j] = space;
+        }
+        else {
+          strBuf[j] = translator.toEBCDIC(ch);
+        }
+      }
+      // fill with space
+      for (j = len; j < i + 1; j++)
+        strBuf[j] = space;
+    }
 
     if (i >= 0) {
       for (int j = 0; j < (i + 1); j++) {
