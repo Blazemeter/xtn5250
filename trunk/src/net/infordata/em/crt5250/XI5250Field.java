@@ -262,7 +262,22 @@ public class XI5250Field implements XI5250BaseField {
     int newAttr = ivCrt.getAttr(ivCrt.toColPos(ivFldPos - 1), ivCrt.toRowPos(ivFldPos - 1));
     if (newAttr != ivAttr) {
       ivAttr = newAttr;
-      ivCrt.drawString(getString(), ivCol, ivRow, ivAttr);
+      String str = getString();
+      int from = 0;
+      while (true) {
+        int idx = str.indexOf(XI5250Crt.ATTRIBUTE_PLACE_HOLDER, from);
+        if (idx < 0) {
+          ivCrt.drawString(str.substring(from), 
+              ivCrt.toColPos(ivFldPos + from), ivCrt.toRowPos(ivFldPos + from), newAttr);
+          break;
+        }
+        ivCrt.drawString(str.substring(from, idx), 
+            ivCrt.toColPos(ivFldPos + from), ivCrt.toRowPos(ivFldPos + from), newAttr);
+        newAttr = ivCrt.getAttr(ivCrt.toColPos(ivFldPos + idx), ivCrt.toRowPos(ivFldPos + idx));
+        ivCrt.drawString(String.valueOf(XI5250Crt.ATTRIBUTE_PLACE_HOLDER), 
+            ivCrt.toColPos(ivFldPos + idx), ivCrt.toRowPos(ivFldPos + idx), newAttr);
+        from = idx + 1;
+      }
     }
   }
 
