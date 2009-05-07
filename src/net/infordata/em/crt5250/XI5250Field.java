@@ -774,6 +774,8 @@ public class XI5250Field implements XI5250BaseField {
    */
   protected boolean processOtherKey(KeyEvent e) {
     switch (e.getKeyCode()) {
+      case KeyEvent.VK_BACK_SPACE:
+        return processBackSpace(e.getModifiers());
       //
       case KeyEvent.VK_DELETE:
         return processDelete(e.getModifiers());
@@ -798,6 +800,43 @@ public class XI5250Field implements XI5250BaseField {
       //
       case KeyEvent.VK_END:
         return processEnd(e.getModifiers());
+    }
+    return false;
+  }
+
+
+  /**
+   */
+  protected boolean processBackSpace(int aModifier) {
+    switch (aModifier) {
+      case 0:
+        updateStr();
+        if (ivPos == 0) {
+          ivCrt.doProcessKeyEvent(new KeyEvent(ivCrt, KeyEvent.KEY_PRESSED, 0, KeyEvent.SHIFT_MASK,
+              KeyEvent.VK_TAB, (char)KeyEvent.VK_TAB));
+        }
+        else {
+          ivCrt.moveCursor(-1, 0);
+        }
+        return true;
+      case KeyEvent.SHIFT_MASK:
+        updateStr();
+        if (ivPos == 0) {
+        }
+        else {
+          ivCrt.moveCursor(-1, 0);
+          updateStr();
+          StringBuilder strBuf = new StringBuilder(ivStr);
+          for (int i = ivPos + 1; i < ivStr.length(); i++)
+            strBuf.setCharAt(i - 1, strBuf.charAt(i));
+          strBuf.setCharAt(ivStr.length() - 1, '\u0000');
+          
+          ivCrt.drawString(new String(strBuf).substring(ivPos),
+              ivCrt.getCursorCol(), ivCrt.getCursorRow(), ivAttr);
+
+          setMDTOn();   // field modified
+        }
+        return true;
     }
     return false;
   }
@@ -911,6 +950,17 @@ public class XI5250Field implements XI5250BaseField {
           ;
         int xx = ivCrt.toLinearPos(ivCol, ivRow) + Math.min(i + 1, ivInputLen - 1);
         ivCrt.setCursorPos(ivCrt.toColPos(xx), ivCrt.toRowPos(xx));
+        return true;
+      case KeyEvent.SHIFT_MASK:
+        updateStr();
+        StringBuilder strBuf = new StringBuilder(ivStr);
+        for (int j = ivPos; j < ivStr.length(); j++)
+          strBuf.setCharAt(j, '\u0000');
+          
+        ivCrt.drawString(new String(strBuf).substring(ivPos),
+            ivCrt.getCursorCol(), ivCrt.getCursorRow(), ivAttr);
+
+        setMDTOn();   // field modified
         return true;
     }
     return false;

@@ -998,7 +998,7 @@ public class XI5250Crt extends XICrt implements Serializable {
             res = processKeyDown(e.getModifiers());
             break;
           //
-          case KeyEvent.VK_BACK_SPACE:
+//          case KeyEvent.VK_BACK_SPACE:
           case KeyEvent.VK_LEFT:
             res = processKeyLeft(e.getModifiers());
             break;
