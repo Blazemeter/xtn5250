@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.18f";
+  public static final String VERSION = "1.18h";
   
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
@@ -760,9 +760,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Called by XITelnet when an IOException is catched.
    */
-  protected void catchedIOException(IOException ex) {
+  protected void catchedIOException(final IOException ex) {
     if (LOGGER.isLoggable(Level.WARNING))
       LOGGER.log(Level.WARNING, "catchedIOException()", ex);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        JOptionPane.showMessageDialog(XI5250Emulator.this, 
+            ex.getClass().getName() + "\n" + 
+            ex.getMessage() + 
+            "\nSee the log for details ",
+            "WARNING", JOptionPane.WARNING_MESSAGE);
+      }
+    });
   }
 
   /**
@@ -888,28 +897,32 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         try {
           cmdList.readFrom5250Stream(dataStream);
           ivCmdList = cmdList;
-          //!!0.95 this statement avoids deadlocks during component resizing
-          synchronized (getTreeLock()) {
-            synchronized (this) {
-              if (getState() == ST_SYSTEM_REQUEST)  //!!1.01b
-                setPrevState();
+          SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+              //!!0.95 this statement avoids deadlocks during component resizing
+              synchronized (getTreeLock()) {
+                synchronized (this) {
+                  if (getState() == ST_SYSTEM_REQUEST)  //!!1.01b
+                    setPrevState();
 
-              setFreeze(true);
-              try {
-                ivCmdList.execute();
-                // input fields inizialization
-                initAllFields();
+                  setFreeze(true);
+                  try {
+                    ivCmdList.execute();
+                    // input fields initialization
+                    initAllFields();
 
-                processEmulatorEvent(
-                    new XI5250EmulatorEvent(
-                            XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
-                            this));
-              }
-              finally {
-                setFreeze(false);
+                    processEmulatorEvent(
+                        new XI5250EmulatorEvent(
+                                XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
+                                XI5250Emulator.this));
+                  }
+                  finally {
+                    setFreeze(false);
+                  }
+                }
               }
             }
-          }
+          });
         }
         catch (IOException ex) {
           catchedException(ex);

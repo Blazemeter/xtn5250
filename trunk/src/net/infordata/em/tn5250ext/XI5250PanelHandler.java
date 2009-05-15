@@ -454,16 +454,6 @@ public abstract class XI5250PanelHandler {
 
 
   /**
-   * @exception    Throwable .
-   */
-  @Override
-  public void finalize() throws Throwable {
-    stopInternal();
-    super.finalize();
-  }
-
-
-  /**
    * @see    #validate
    */
   public void invalidate() {
