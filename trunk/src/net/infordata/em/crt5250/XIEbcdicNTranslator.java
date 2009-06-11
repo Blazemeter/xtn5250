@@ -465,11 +465,11 @@ public class XIEbcdicNTranslator extends XIEbcdicTranslator {
   public static final XIEbcdicNTranslator TRANSLATOR_CP500 = 
     new XIEbcdicNTranslator(CP500);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1140 = 
-    new XIEbcdicNTranslator.Euro(CP37, (byte)151);
+    new XIEbcdicNTranslator.Euro(CP37, (byte)159);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1141 = 
     new XIEbcdicNTranslator.Euro(CP273, (byte)159);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1144 = 
     new XIEbcdicNTranslator.Euro(CP280, (byte)159);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1147 = 
-    new XIEbcdicNTranslator.Euro(CP297, (byte)151);
+    new XIEbcdicNTranslator.Euro(CP297, (byte)159);
 }
