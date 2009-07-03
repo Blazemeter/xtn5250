@@ -27,6 +27,7 @@ package net.infordata.em.tn5250;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,8 +107,28 @@ public class XI5250OrdList extends XI5250Ord {
         break;
       }
 
-      if (XIDataOrd.isDataCharacter(bb)) 
+      if (XIDataOrd.isDataCharacter(bb)) {
         inStream.reset();          // need it (it is also the color attribute)
+        if (ivEmulator.isStrPcCmdEnabled()) {  
+          inStream.mark(XI5250Emulator.STRPCCMD.length);
+          byte[] lhbb = new byte[XI5250Emulator.STRPCCMD.length];
+          int sz = inStream.read(lhbb);
+          if (sz == XI5250Emulator.STRPCCMD.length) {
+            if (Arrays.equals(lhbb, XI5250Emulator.STRPCCMD)) {
+              ivEmulator.receivedStrPcCmd();
+            }
+            else if (Arrays.equals(lhbb, XI5250Emulator.ENDSTRPCCMD)) {
+              ivEmulator.receivedEndStrPcCmd();
+            }
+            else {
+              inStream.reset();
+            }
+          }
+          else {
+            inStream.reset();
+          }
+        }
+      }
       else
         ivOrdPresent[bb] = true;  // remember orders present
 
@@ -173,8 +194,8 @@ public class XI5250OrdList extends XI5250Ord {
     else
       return null;
   }
-
-
+  
+  
   /**
    */
   @Override
