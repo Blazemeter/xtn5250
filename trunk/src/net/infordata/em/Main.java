@@ -27,7 +27,7 @@ public class Main {
 
   private static void usageError(String msg) {
     System.err.println(msg);
-    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-altFKeyRemap] [-cp codepage] host-name");
+    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-cp codepage] host-name");
     System.err.println("Supported code pages:");
     for (String cp : XIEbcdicTranslator.getRegisteredTranslators().keySet()) {
       System.err.println("  " + cp + 
@@ -43,6 +43,7 @@ public class Main {
     boolean pUse3dFX = false;
     boolean pAltFKeyRemap = false;
     boolean pPSHBTNCHC = false;
+    boolean pSTRPCCMD = false;
 
     String arg;
     String pHost = null;
@@ -55,6 +56,8 @@ public class Main {
           pUse3dFX = true;
         else if ("-PSHBTNCHC".equalsIgnoreCase(arg))
           pPSHBTNCHC = true;
+        else if ("-STRPCCMD".equalsIgnoreCase(arg))
+          pSTRPCCMD = true;
         else if ("-altFKeyRemap".equalsIgnoreCase(arg))
           pAltFKeyRemap = true;
         else if ("-cp".equalsIgnoreCase(arg))
@@ -81,6 +84,7 @@ public class Main {
     final boolean altFKeyRemap = pAltFKeyRemap;
     final boolean use3dFX = pUse3dFX;
     final boolean enablePSHBTNCHC = pPSHBTNCHC;
+    final boolean enableSTRPCCMD = pSTRPCCMD;
     final String host = pHost;
     final String codePage = cp;
     try {
@@ -100,6 +104,7 @@ public class Main {
           em.setTerminalType("IBM-3477-FC");
           em.setKeyboardQueue(true);
 
+          em.setStrPcCmdEnabled(enableSTRPCCMD);
           em.setAltFKeyRemap(altFKeyRemap);
           em.setCodePage(codePage);
           

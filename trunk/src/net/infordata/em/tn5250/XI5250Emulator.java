@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.18i";
+  public static final String VERSION = "1.18l";
   
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
@@ -203,7 +203,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   protected static final byte ORD_TD   = (byte)0x10;  // Transparent data 
   protected static final byte ORD_WEA  = (byte)0x12;  // Write extended attributes 
   protected static final byte ORD_SF   = (byte)0x1D;  // Start of field
-  protected static final byte ORD_WDSF = (byte)0x15;  // Write to Display Structured Field 
+  protected static final byte ORD_WDSF = (byte)0x15;  // Write to Display Structured Field
+  
+  protected static final byte[] STRPCCMD = new byte[] {
+    (byte)0x27, (byte)0x80, (byte)0xfc, (byte)0xd7, (byte)0xc3, (byte)0xd6, (byte)0x40, (byte)0x83, (byte)0x80, (byte)0xa1, (byte)0x80
+  };  // Start PC Command
+  protected static final byte[] ENDSTRPCCMD = new byte[] {
+    (byte)0x27, (byte)0x00, (byte)0xfc, (byte)0xd7, (byte)0xc3, (byte)0xd6, (byte)0x40, (byte)0x83, (byte)0x80, (byte)0x82, (byte)0x00
+  };  // Start PC Command
 
   // aid codes
   public static final byte AID_COMMAND   = (byte)0x31;
@@ -329,12 +336,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   public static final String       TERMINAL_TYPE     = "terminalType";
   public static final String       ALTFKEY_REMAP     = "altFKeyRemap";
 
+  public static final String       STRPCCMD_ENABLED  = "strPcCmd";
+
   //!!1.07
   private String                   ivHost;
   
   private boolean                  ivAltFKeyRemap;
-
-
+  
+  private boolean                  ivStrPcCmdEnabled;
+  private boolean                  ivReceivedStrPcCmd;
+  private boolean                  ivReceivedEndStrPcCmd;
+  
   /**
    * Default contructor.
    */
@@ -555,6 +567,21 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
+   * @param value - if true the STRPCCMD order is enabled. 
+   */
+  public void setStrPcCmdEnabled(boolean value) {
+    if (value == ivStrPcCmdEnabled)
+      return;
+    boolean old = ivStrPcCmdEnabled;
+    ivStrPcCmdEnabled = value;
+    firePropertyChange(STRPCCMD_ENABLED, old, ivStrPcCmdEnabled);
+  }
+  
+  public boolean isStrPcCmdEnabled() {
+    return ivStrPcCmdEnabled;
+  }
+
+  /**
    * Moves the cursor to the given position.
    * It updates also the status bar area with the new cursor coordinates.
    */
@@ -606,7 +633,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * Factory method fo XI5250Field creation.
+   * Factory method for XI5250Field creation.
    */
   protected XI5250Field create5250Field(byte[] aFFW, byte[] aFCW,
                                         int aCol, int aRow,
@@ -892,6 +919,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       case OPCODE_RESTORE_SCREEN:
       case OPCODE_READ_IMM:
       case OPCODE_INVITE_OPERATION:
+        ivReceivedStrPcCmd = false;
+        ivReceivedEndStrPcCmd = false;
         // read command list
         XI5250CmdList cmdList = createCmdList(this);
         try {
@@ -920,6 +949,52 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
                     setFreeze(false);
                   }
                 }
+              }
+              if (ivReceivedStrPcCmd) {
+                char ctrlChar = getChar(0, 0);
+                boolean wait = !(ctrlChar == 'a');
+                String cmd = getString(1, 0, 132 - STRPCCMD.length);
+                {
+                  int k = cmd.length() - 1;
+                  for ( ; k >= 0; k--) {
+                    char ch = cmd.charAt(k);
+                    if (!Character.isISOControl(ch) && !Character.isWhitespace(ch))
+                      break;
+                  }
+                  cmd = cmd.substring(0, k + 1);
+                }
+                try {
+                  if (LOGGER.isLoggable(Level.INFO)) {
+                    if (wait)
+                      LOGGER.info("Executing and waiting for local command: " + cmd);
+                    else
+                      LOGGER.info("Executing local command: " + cmd);
+                  }
+                  try {
+                    strPcCmd(wait, cmd);
+                  }
+                  catch (IOException ex) {
+                    catchedIOException(ex);
+                  }
+                  catch (InterruptedException ex) {
+                    catchedException(ex);
+                  }
+                }
+                finally {
+                  // AUTOENTER
+                  processRawKeyEvent(
+                      new KeyEvent(XI5250Emulator.this, KeyEvent.KEY_PRESSED,
+                      0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));                  
+                }
+              }
+              else if (ivReceivedEndStrPcCmd) {
+                if (LOGGER.isLoggable(Level.INFO)) {
+                  LOGGER.info("Reveived STRPCCMD shutdown" );
+                }
+                // AUTOENTER
+                processRawKeyEvent(
+                    new KeyEvent(XI5250Emulator.this, KeyEvent.KEY_PRESSED,
+                    0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));                  
               }
             }
           });
@@ -1673,6 +1748,29 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     super.finalize();
   }
 
+  
+  void receivedStrPcCmd() {
+    if (!isStrPcCmdEnabled())
+      throw new IllegalStateException();
+    ivReceivedStrPcCmd = true;
+  }
+  void receivedEndStrPcCmd() {
+    if (!isStrPcCmdEnabled())
+      throw new IllegalStateException();
+    ivReceivedEndStrPcCmd = true;
+  }
+
+  /**
+   * @param wait
+   * @param cmd
+   * @return the process return code if wait is true, otherwise 0
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  protected int strPcCmd(boolean wait, String cmd) throws IOException, InterruptedException {
+    Process proc = Runtime.getRuntime().exec(cmd);
+    return wait ? proc.waitFor() : 0;
+  }
 
 //  /**
 //   */

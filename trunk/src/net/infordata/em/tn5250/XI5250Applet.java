@@ -130,6 +130,7 @@ public class XI5250Applet extends JApplet {
     final boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
     final String codePage = getParameter("codePage");
     final boolean requestFocus = !"false".equalsIgnoreCase(getParameter("requestFocus"));
+    final boolean pSTRPCCMD = "true".equalsIgnoreCase(getParameter("STRPCCMD"));
 
     ivEmulatorCtrl = new XI5250EmulatorCtrl(createEmulator());
     getEmulator().setTerminalType("IBM-3477-FC");
@@ -141,6 +142,7 @@ public class XI5250Applet extends JApplet {
     }
     getEmulator().setAltFKeyRemap(altFKeyRemap);
     getEmulator().setCodePage(codePage);
+    getEmulator().setStrPcCmdEnabled(pSTRPCCMD);
 
     //!! 1.11a execution moved to the EventQueueThread
     if (inplace)
