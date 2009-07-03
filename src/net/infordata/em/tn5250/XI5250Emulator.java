@@ -989,7 +989,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
               }
               else if (ivReceivedEndStrPcCmd) {
                 if (LOGGER.isLoggable(Level.INFO)) {
-                  LOGGER.info("Reveived STRPCCMD shutdown" );
+                  LOGGER.info("Received STRPCCMD shutdown" );
                 }
                 // AUTOENTER
                 processRawKeyEvent(
