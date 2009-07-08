@@ -1772,30 +1772,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return wait ? proc.waitFor() : 0;
   }
 
-//  /**
-//   */
-//  void writeObject(ObjectOutputStream oos) throws IOException {
-//    oos.defaultWriteObject();
-//  }
-//
-//  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-//    ois.defaultReadObject();
-//  }
-
-
-//  /**
-//   */
-//  public static void checkJDK() {
-//    String jdkVersion = System.getProperty("java.version").toLowerCase();
-//    if (DEBUG >= 1)
-//      Diagnostic.getOut().println("JDK version: " + jdkVersion);
-//    if (jdkVersion.compareTo("1.1.7") < 0 ||
-//        jdkVersion.compareTo("1.1_final") == 0) {
-//      //System.err.println("!!! Use JDK 1.1.7 or newer !!!");
-//      throw new IllegalStateException("!!! Use JDK 1.1.7 or newer !!!");
-//    }
-//  }
-
 
   //////////////////////////////////////////////////////////////////////////////
 
