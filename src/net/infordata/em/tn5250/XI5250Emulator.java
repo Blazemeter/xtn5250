@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.18l";
+  public static final String VERSION = "1.18m";
   
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
@@ -1656,6 +1656,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           case KeyEvent.VK_PAGE_DOWN:
             res = processKeyPageXX(e.getKeyCode(), e.getModifiers());
             break;
+          //
+          case KeyEvent.VK_PAUSE:
+            res = processKeyPause(e.getModifiers());
+            break;
         }
         break;
     }
@@ -1714,6 +1718,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       ivPendingCmd.executePending((aKey == KeyEvent.VK_PAGE_UP) ? AID_ROLL_DN :
                                                                   AID_ROLL_UP,
                                   false);
+
+    return true;
+  }
+
+  /**
+   */
+  protected boolean processKeyPause(int aModifier) {
+    if (aModifier != 0)
+      return false;
+
+    if (ivPendingCmd != null)
+      ivPendingCmd.executePending(AID_CLEAR, false);
 
     return true;
   }
