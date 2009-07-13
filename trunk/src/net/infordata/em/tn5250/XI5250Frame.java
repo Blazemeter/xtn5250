@@ -210,11 +210,15 @@ public class XI5250Frame extends XI5250CrtFrame {
           new JMenuItem(cvRes.getString("TXT_Paste"));
       JMenuItem snapShotItem =
           new JMenuItem(cvRes.getString("TXT_SnapShot"));
+      JMenuItem printItem =
+        new JMenuItem(cvRes.getString("TXT_Print"));
 
       editMenu.add(copyItem);
       editMenu.add(pasteItem);
       editMenu.addSeparator();
       editMenu.add(snapShotItem);
+      editMenu.addSeparator();
+      editMenu.add(printItem);
 
       getCommandMgr().handleCommand(copyItem,
                                     XI5250EmulatorCtrl.COPY_CMD);
@@ -222,6 +226,8 @@ public class XI5250Frame extends XI5250CrtFrame {
                                     XI5250EmulatorCtrl.PASTE_CMD);
       getCommandMgr().handleCommand(snapShotItem,
                                     XI5250EmulatorCtrl.SNAPSHOT_CMD);
+      getCommandMgr().handleCommand(printItem,
+                                    XI5250EmulatorCtrl.PRINT_CMD);
     }
 
     str = cvRes.getString("TXT_Options");
@@ -264,6 +270,7 @@ public class XI5250Frame extends XI5250CrtFrame {
       new JButton(cvImagesBdl.getIcon("Paste")),
       null,
       new JButton(cvImagesBdl.getIcon("SnapShot")),
+      new JButton(cvImagesBdl.getIcon("Print")),
       null,
       new JToggleButton(cvImagesBdl.getIcon("3dFx")),
       new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
@@ -277,6 +284,7 @@ public class XI5250Frame extends XI5250CrtFrame {
       XI5250EmulatorCtrl.PASTE_CMD,
       null,
       XI5250EmulatorCtrl.SNAPSHOT_CMD,
+      XI5250EmulatorCtrl.PRINT_CMD,
       null,
       XI5250EmulatorCtrl.SWITCH_3DFX_CMD,
       XI5250EmulatorCtrl.REFERENCE_CURSOR_CMD,
@@ -290,6 +298,7 @@ public class XI5250Frame extends XI5250CrtFrame {
       cvRes.getString("TXT_Paste"),
       null,
       cvRes.getString("TXT_SnapShot"),
+      cvRes.getString("TXT_Print"),
       null,
       cvRes.getString("TXT_3dFx"),
       cvRes.getString("TXT_RefCursor"),
