@@ -23,11 +23,22 @@ limitations under the License.
 package net.infordata.em.crt5250;
 
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.SystemColor;
 import java.awt.event.KeyEvent;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.infordata.em.util.XICommand;
@@ -38,6 +49,8 @@ import net.infordata.em.util.XICommandMgr;
  * Handles common commands.
  */
 public class XI5250CrtCtrl {
+
+  private static final Logger LOGGER = Logger.getLogger(XI5250CrtCtrl.class.getName());
 
   private XI5250Crt    ivCrt;
 
@@ -50,6 +63,7 @@ public class XI5250CrtCtrl {
   public static final String COPY_CMD             = "COPY_CMD";
   public static final String PASTE_CMD            = "PASTE_CMD";
 
+  public static final String PRINT_CMD            = "PRINT_CMD";
 
   /**
    */
@@ -91,6 +105,13 @@ public class XI5250CrtCtrl {
     getCommandMgr().setCommand(REFERENCE_CURSOR_CMD,  new XICommand() {
       public void execute() {
         processReferenceCursorCmd();
+      }
+    });
+
+    // Print command
+    getCommandMgr().setCommand(PRINT_CMD, new XICommand() {
+      public void execute() {
+        processPrintCmd();
       }
     });
   }
@@ -180,6 +201,64 @@ public class XI5250CrtCtrl {
   }
 
 
+  /**
+   */
+  protected void processPrintCmd() {
+    PrinterJob job = PrinterJob.getPrinterJob();
+    job.setPrintable(new Printable() {
+      public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
+          throws PrinterException {
+        if (pageIndex > 0) { 
+          return NO_SUCH_PAGE;
+        }
+        final int imgWidth = (int)pageFormat.getImageableWidth();
+        final int imgHeight = (int)pageFormat.getImageableHeight();
+        final XI5250Crt crt = getCrt();
+        Graphics2D g2d = (Graphics2D)graphics;
+        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+        double scale;
+        {
+          int w = crt.getSize().width;
+          int h = crt.getSize().height;
+          scale = Math.min(((double)imgWidth) / w, ((double)imgHeight) / h);
+          g2d.scale(scale, scale);
+        }
+        synchronized (crt.getTreeLock()) {
+          synchronized (crt) {
+            Color oldBG = crt.getDefBackground();
+            //int oldBS = crt.getDefFieldsBorderStyle();
+            try {
+              //crt.setDefFieldsBorderStyle(XI5250Field.NO_BORDER);
+              crt.setDefBackground(SystemColor.white);
+              crt.printAll(g2d);
+            }
+            finally {
+              //crt.setDefFieldsBorderStyle(oldBS);
+              crt.setDefBackground(oldBG);
+            }
+          }
+        }
+        return PAGE_EXISTS;      }
+    });
+    boolean doPrint = job.printDialog();
+    if (doPrint) {
+      try {
+        job.print();
+      } 
+      catch (final PrinterException ex) {
+        LOGGER.log(Level.SEVERE, "catchedException()", ex);
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            JOptionPane.showMessageDialog(getCrt(), 
+                ex.getMessage() + "\nSee the log for details ",
+                "ERROR", JOptionPane.ERROR_MESSAGE);
+          }
+        });
+      }
+    }    
+  }
+
+  
   //////////////////////////////////////////////////////////////////////////////
 
   /**

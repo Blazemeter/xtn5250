@@ -44,6 +44,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import net.infordata.em.tn5250.XI5250EmulatorCtrl;
 import net.infordata.em.util.XICommand;
 import net.infordata.em.util.XICommandMgr;
 import net.infordata.em.util.XIUtil;
@@ -262,14 +263,20 @@ public class XI5250CrtFrame extends JFrame {
           new JMenuItem(cvRes.getString("TXT_Copy"));
       JMenuItem pasteItem =
           new JMenuItem(cvRes.getString("TXT_Paste"));
+      JMenuItem printItem =
+          new JMenuItem(cvRes.getString("TXT_Print"));
 
       editMenu.add(copyItem);
       editMenu.add(pasteItem);
+      editMenu.addSeparator();
+      editMenu.add(printItem);
 
       getCommandMgr().handleCommand(copyItem,
                                     XI5250CrtCtrl.COPY_CMD);
       getCommandMgr().handleCommand(pasteItem,
                                     XI5250CrtCtrl.PASTE_CMD);
+      getCommandMgr().handleCommand(printItem,
+                                    XI5250EmulatorCtrl.PRINT_CMD);
     }
 
     str = cvRes.getString("TXT_Options");
@@ -306,6 +313,8 @@ public class XI5250CrtFrame extends JFrame {
       new JButton(cvImagesBdl.getIcon("Copy")),
       new JButton(cvImagesBdl.getIcon("Paste")),
       null,
+      new JButton(cvImagesBdl.getIcon("Print")),
+      null,
       new JToggleButton(cvImagesBdl.getIcon("3dFx")),
       new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
     };
@@ -314,6 +323,8 @@ public class XI5250CrtFrame extends JFrame {
       XI5250CrtCtrl.COPY_CMD,
       XI5250CrtCtrl.PASTE_CMD,
       null,
+      XI5250EmulatorCtrl.PRINT_CMD,
+      null,
       XI5250CrtCtrl.SWITCH_3DFX_CMD,
       XI5250CrtCtrl.REFERENCE_CURSOR_CMD,
     };
@@ -321,6 +332,8 @@ public class XI5250CrtFrame extends JFrame {
     String[] buttonHints = new String[] {
       cvRes.getString("TXT_Copy"),
       cvRes.getString("TXT_Paste"),
+      null,
+      cvRes.getString("TXT_Print"),
       null,
       cvRes.getString("TXT_3dFx"),
       cvRes.getString("TXT_RefCursor"),

@@ -68,6 +68,9 @@ public class XIImagesBdl extends ListResourceBundle {
         {"RefCursor",
          XIUtil.createImage(
              XIImagesBdl.class, "resources/RefCursor.gif")},
+        {"Print",
+         XIUtil.createImage(
+             XIImagesBdl.class, "resources/Print.gif")},
         //
         {"Logo",
          XIUtil.createImage(
