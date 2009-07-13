@@ -29,7 +29,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -37,7 +36,6 @@ import java.beans.PropertyChangeListener;
 import java.util.ResourceBundle;
 
 import javax.swing.AbstractButton;
-import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -299,8 +297,12 @@ public class XI5250Applet extends JApplet {
 
     if (UNDEAD_FRAME && ivDestroyed)
       getEmulator().setActive(false);
-    else
+    else {
       emulatorInPlace();
+      invalidate();
+      validate();
+      getEmulator().requestFocusInWindow();
+    }
   }
 
 
@@ -355,11 +357,15 @@ public class XI5250Applet extends JApplet {
           new JMenuItem(cvRes.getString("TXT_Paste"));
       JMenuItem snapShotItem =
           new JMenuItem(cvRes.getString("TXT_SnapShot"));
+      JMenuItem printItem =
+        new JMenuItem(cvRes.getString("TXT_Print"));
 
       editMenu.add(copyItem);
       editMenu.add(pasteItem);
       editMenu.addSeparator();
       editMenu.add(snapShotItem);
+      editMenu.addSeparator();
+      editMenu.add(printItem);
 
       getCommandMgr().handleCommand(copyItem,
                                     XI5250EmulatorCtrl.COPY_CMD);
@@ -367,6 +373,8 @@ public class XI5250Applet extends JApplet {
                                     XI5250EmulatorCtrl.PASTE_CMD);
       getCommandMgr().handleCommand(snapShotItem,
                                     XI5250EmulatorCtrl.SNAPSHOT_CMD);
+      getCommandMgr().handleCommand(printItem,
+                                    XI5250EmulatorCtrl.PRINT_CMD);
     }
 
     str = cvRes.getString("TXT_Options");
@@ -407,26 +415,19 @@ public class XI5250Applet extends JApplet {
   private JToolBar createToolBar() {
     // bottoni della tool-bar
     AbstractButton[] buttons = new AbstractButton[] {
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("Connect"))),
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("Disconnect"))),
-      null,
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("Copy"))),
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("Paste"))),
-      null,
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("SnapShot"))),
-      null,
-      new JButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("InFrame"))),
-      null,
-      new JToggleButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("3dFx"))),
-      new JToggleButton(
-          new ImageIcon((Image)cvImagesBdl.getObject("RefCursor"))),
+        new JButton(cvImagesBdl.getIcon("Connect")),
+        new JButton(cvImagesBdl.getIcon("Disconnect")),
+        null,
+        new JButton(cvImagesBdl.getIcon("Copy")),
+        new JButton(cvImagesBdl.getIcon("Paste")),
+        null,
+        new JButton(cvImagesBdl.getIcon("SnapShot")),
+        new JButton(cvImagesBdl.getIcon("Print")),
+        null,
+        new JButton(cvImagesBdl.getIcon("InFrame")),
+        null,
+        new JToggleButton(cvImagesBdl.getIcon("3dFx")),
+        new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
     };
     // action commands associati con i bottoni della tool-bar.
     String[]   buttonsActCmd = new String[] {
@@ -437,6 +438,7 @@ public class XI5250Applet extends JApplet {
       XI5250EmulatorCtrl.PASTE_CMD,
       null,
       XI5250EmulatorCtrl.SNAPSHOT_CMD,
+      XI5250EmulatorCtrl.PRINT_CMD,
       null,
       INFRAME_CMD,
       null,
@@ -452,6 +454,7 @@ public class XI5250Applet extends JApplet {
       cvRes.getString("TXT_Paste"),
       null,
       cvRes.getString("TXT_SnapShot"),
+      cvRes.getString("TXT_Print"),
       null,
       cvRes.getString("TXT_InFrame"),
       null,
