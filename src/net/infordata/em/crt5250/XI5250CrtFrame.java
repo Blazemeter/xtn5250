@@ -124,7 +124,12 @@ public class XI5250CrtFrame extends JFrame {
     });
   }
 
+  
+  public void doNotPackOnStartup() {
+    ivFirstTime = false;
+  }
 
+  
   /**
    */
   protected void processExitCmd() {
