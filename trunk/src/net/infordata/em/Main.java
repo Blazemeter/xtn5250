@@ -1,5 +1,6 @@
 package net.infordata.em;
 
+import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +28,7 @@ public class Main {
 
   private static void usageError(String msg) {
     System.err.println(msg);
-    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-cp codepage] host-name");
+    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-maximized] [-cp codepage] host-name");
     System.err.println("Supported code pages:");
     for (String cp : XIEbcdicTranslator.getRegisteredTranslators().keySet()) {
       System.err.println("  " + cp + 
@@ -44,6 +45,7 @@ public class Main {
     boolean pAltFKeyRemap = false;
     boolean pPSHBTNCHC = false;
     boolean pSTRPCCMD = false;
+    boolean pMaximized = false;
 
     String arg;
     String pHost = null;
@@ -58,6 +60,8 @@ public class Main {
           pPSHBTNCHC = true;
         else if ("-STRPCCMD".equalsIgnoreCase(arg))
           pSTRPCCMD = true;
+        else if ("-maximized".equalsIgnoreCase(arg))
+          pMaximized = true;
         else if ("-altFKeyRemap".equalsIgnoreCase(arg))
           pAltFKeyRemap = true;
         else if ("-cp".equalsIgnoreCase(arg))
@@ -85,6 +89,7 @@ public class Main {
     final boolean use3dFX = pUse3dFX;
     final boolean enablePSHBTNCHC = pPSHBTNCHC;
     final boolean enableSTRPCCMD = pSTRPCCMD;
+    final boolean maximized = pMaximized;
     final String host = pHost;
     final String codePage = cp;
     try {
@@ -130,6 +135,10 @@ public class Main {
 
           //frm.setBounds(0, 0, 570, 510);
           frm.centerOnScreen(70);
+          if (maximized) {
+            frm.doNotPackOnStartup();
+            frm.setExtendedState(Frame.MAXIMIZED_BOTH);
+          }
           frm.setVisible(true);
         }
       });
