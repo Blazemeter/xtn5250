@@ -58,6 +58,7 @@ public abstract class XIEbcdicTranslator {
     registerTranslator("CP424", XIEbcdicNTranslator.TRANSLATOR_CP424);
     registerTranslator("CP500", XIEbcdicNTranslator.TRANSLATOR_CP500);
     registerTranslator("CP850", XIEbcdicNTranslator.TRANSLATOR_CP850);
+    registerTranslator("CP870", XIEbcdicNTranslator.TRANSLATOR_CP870);
     registerTranslator("CP1140", XIEbcdicNTranslator.TRANSLATOR_CP1140);
     registerTranslator("CP1141", XIEbcdicNTranslator.TRANSLATOR_CP1141);
     registerTranslator("CP1144", XIEbcdicNTranslator.TRANSLATOR_CP1144);
