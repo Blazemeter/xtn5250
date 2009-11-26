@@ -477,8 +477,8 @@ public class XIEbcdicNTranslator extends XIEbcdicTranslator {
     0x00AD, 0x00B1, 0x2017, 0x00BE, 0x00B6, 0x00A7, 0x00F7, 0x00B8, 
     0x00B0, 0x00A8, 0x00B7, 0x00B9, 0x00B3, 0x00B2, 0x25A0, 0x00A0,
   };
-
-  private static final int[] CP1153 = {
+  
+  private static final int[] CP870 = {
     0x0000, 0x0001, 0x0002, 0x0003, 0x009C,   '\t', 0x0086, 0x007F, 
     0x0097, 0x008D, 0x008E, 0x000B,   '\f',   '\r', 0x000E, 0x000F,
     0x0010, 0x0011, 0x0012, 0x0013, 0x009D, 0x0085,   '\b', 0x0087, 
@@ -498,7 +498,7 @@ public class XIEbcdicNTranslator extends XIEbcdicTranslator {
     0x02D8, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 
     0x0068, 0x0069, 0x015B, 0x0148, 0x0111, 0x00FD, 0x0159, 0x015F,
     0x00B0, 0x006A, 0x006B, 0x006C, 0x006D, 0x006E, 0x006F, 0x0070, 
-    0x0071, 0x0072, 0x0142, 0x0144, 0x0161, 0x00B8, 0x02DB, 0x20AC,
+    0x0071, 0x0072, 0x0142, 0x0144, 0x0161, 0x00B8, 0x02DB, 0x00A4,
     0x0105, 0x007E, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 
     0x0079, 0x007A, 0x015A, 0x0147, 0x0110, 0x00DD, 0x0158, 0x015E,
     0x02D9, 0x0104, 0x017C, 0x0162, 0x017B, 0x00A7, 0x017E, 0x017A, 
@@ -535,6 +535,9 @@ public class XIEbcdicNTranslator extends XIEbcdicTranslator {
     new XIEbcdicNTranslator(CP500);
   public static final XIEbcdicNTranslator TRANSLATOR_CP850 = 
     new XIEbcdicNTranslator(CP850);
+  public static final XIEbcdicNTranslator TRANSLATOR_CP870 = 
+    new XIEbcdicNTranslator(CP870);
+  // Derived with €
   public static final XIEbcdicNTranslator TRANSLATOR_CP1140 = 
     new XIEbcdicNTranslator.Euro(CP37, (byte)159);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1141 = 
@@ -544,5 +547,5 @@ public class XIEbcdicNTranslator extends XIEbcdicTranslator {
   public static final XIEbcdicNTranslator TRANSLATOR_CP1147 = 
     new XIEbcdicNTranslator.Euro(CP297, (byte)159);
   public static final XIEbcdicNTranslator TRANSLATOR_CP1153 = 
-    new XIEbcdicNTranslator(CP1153);
+    new XIEbcdicNTranslator.Euro(CP870, (byte)159);
 }
