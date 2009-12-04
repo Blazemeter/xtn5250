@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.19d";
+  public static final String VERSION = "1.19e";
   
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
@@ -321,6 +321,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   //!!1.02
   private String                 ivTermType;
+  private String                 ivTelnetEnv;
 
   //!!1.02d
   transient private TelnetEmulator         ivTelnetEmulator = new TelnetEmulator();
@@ -335,6 +336,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   public static final String       ACTIVE            = "active";
   public static final String       TERMINAL_TYPE     = "terminalType";
   public static final String       ALTFKEY_REMAP     = "altFKeyRemap";
+  
+  public static final String       TELNET_ENV        = "telnetEnv";
 
   public static final String       STRPCCMD_ENABLED  = "strPcCmd";
 
@@ -550,6 +553,32 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   
   /**
+   * See: http://www.faqs.org/rfcs/rfc2877.html and 
+   *      http://www.faqs.org/rfcs/rfc1572.html
+   */
+  public void setTelnetEnv(String env) {
+    if (env != null && env.equals(ivTelnetEnv))
+      return;
+
+    if (isActive())
+      throw new IllegalArgumentException(
+          "Cannot change the device name, close the connection first.");
+
+    String old = ivTelnetEnv;
+    ivTelnetEnv = env;
+
+    firePropertyChange(TELNET_ENV, old, ivTelnetEnv);
+  }
+
+
+  /**
+   */
+  public String getTelnetEnv() {
+    return ivTelnetEnv;
+  }
+
+
+  /**
    * @param value - if true FKEYS are accepted even if pressed in combination
    *   with the ALT key (usefull with platforms where FKEYS can be captured by 
    *   the OS itself, such as MAX-OSX). 
@@ -737,6 +766,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     // sets required telnet options
     ivTelnet.setTerminalType(ivTermType);
+    
+    if (ivTelnetEnv != null)
+      ivTelnet.setEnvironment(ivTelnetEnv);
 
     ivTelnet.setLocalReqFlag(XITelnet.TELOPT_BINARY, true);
     ivTelnet.setLocalReqFlag(XITelnet.TELOPT_TTYPE, true);
