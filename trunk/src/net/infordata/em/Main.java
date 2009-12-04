@@ -28,7 +28,7 @@ public class Main {
 
   private static void usageError(String msg) {
     System.err.println(msg);
-    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-maximized] [-cp codepage] host-name");
+    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-maximized] [-cp codepage] [-devName name] host-name");
     System.err.println("Supported code pages:");
     for (String cp : XIEbcdicTranslator.getRegisteredTranslators().keySet()) {
       System.err.println("  " + cp + 
@@ -50,7 +50,9 @@ public class Main {
     String arg;
     String pHost = null;
     boolean expectCP = false;
+    boolean expectDevName = false;
     String cp = null;
+    String devName = null;
     for (int i = 0; i < args.length; i++) {
       arg = args[i];
       if (arg.startsWith("-")) {
@@ -66,6 +68,8 @@ public class Main {
           pAltFKeyRemap = true;
         else if ("-cp".equalsIgnoreCase(arg))
           expectCP = true;
+        else if ("-devName".equalsIgnoreCase(arg))
+          expectDevName = true;
         else
           usageError("Wrong option: " + arg);
       }
@@ -74,6 +78,10 @@ public class Main {
         if (XIEbcdicTranslator.getTranslator(arg) == null)
           usageError("Unknown codepage: " + arg);
         cp = arg;
+      }
+      else if (expectDevName) {
+        expectDevName = false;
+        devName = arg;
       }
       else {
         if (pHost == null)
@@ -92,6 +100,7 @@ public class Main {
     final boolean maximized = pMaximized;
     final String host = pHost;
     final String codePage = cp;
+    final String deviceName = devName;
     try {
       SwingUtilities.invokeAndWait(new Runnable() {
         public void run() {
@@ -112,6 +121,9 @@ public class Main {
           em.setStrPcCmdEnabled(enableSTRPCCMD);
           em.setAltFKeyRemap(altFKeyRemap);
           em.setCodePage(codePage);
+          
+          if (deviceName != null)
+            em.setTelnetEnv("\u0003DEVNAME\u0001" + deviceName);
           
           if (host != null) {
             em.setHost(host);

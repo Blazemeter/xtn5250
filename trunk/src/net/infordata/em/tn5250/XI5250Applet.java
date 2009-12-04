@@ -129,6 +129,7 @@ public class XI5250Applet extends JApplet {
     final String codePage = getParameter("codePage");
     final boolean requestFocus = !"false".equalsIgnoreCase(getParameter("requestFocus"));
     final boolean pSTRPCCMD = "true".equalsIgnoreCase(getParameter("STRPCCMD"));
+    final String deviceName = getParameter("devName");
 
     ivEmulatorCtrl = new XI5250EmulatorCtrl(createEmulator());
     getEmulator().setTerminalType("IBM-3477-FC");
@@ -141,6 +142,8 @@ public class XI5250Applet extends JApplet {
     getEmulator().setAltFKeyRemap(altFKeyRemap);
     getEmulator().setCodePage(codePage);
     getEmulator().setStrPcCmdEnabled(pSTRPCCMD);
+    if (deviceName != null)
+      getEmulator().setTelnetEnv("\u0003DEVNAME\u0001" + deviceName);
 
     //!! 1.11a execution moved to the EventQueueThread
     if (inplace)
