@@ -19,7 +19,7 @@ import net.infordata.em.tn5250ext.XI5250PanelsDispatcher;
 
 
 /**
- * Command line startup. 
+ * Command line startup utility. 
  * @author valentino.proietti
  */
 public class Main {
