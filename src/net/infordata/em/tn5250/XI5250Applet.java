@@ -180,9 +180,14 @@ public class XI5250Applet extends JApplet {
   public void start() {
     if (DEBUG >= 1)
       System.out.println("start()");
-
-    if (getEmulator().getHost() != null)
-      getEmulator().setActive(true);
+    
+    if (getEmulator().getHost() != null) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          getEmulator().setActive(true);
+        }
+      });
+    }
   }
 
 
