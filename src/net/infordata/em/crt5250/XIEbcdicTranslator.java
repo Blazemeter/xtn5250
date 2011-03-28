@@ -66,6 +66,36 @@ public abstract class XIEbcdicTranslator {
     registerTranslator("CP1147", XIEbcdicNTranslator.TRANSLATOR_CP1147);
     registerTranslator("CP1153", XIEbcdicNTranslator.TRANSLATOR_CP1153);
     registerTranslator("CP1160", XIEbcdicNTranslator.TRANSLATOR_CP1160);
+    //
+    registerTranslator("CP1025", XIEbcdicNTranslator.TRANSLATOR_CP1025);
+    registerTranslator("CP1026", XIEbcdicNTranslator.TRANSLATOR_CP1026);
+    
+    registerTranslator("CP1112", XIEbcdicNTranslator.TRANSLATOR_CP1112);
+    registerTranslator("CP1122", XIEbcdicNTranslator.TRANSLATOR_CP1122);
+    registerTranslator("CP1123", XIEbcdicNTranslator.TRANSLATOR_CP1123);
+    registerTranslator("CP1125", XIEbcdicNTranslator.TRANSLATOR_CP1125);
+    
+    registerTranslator("CP1130", XIEbcdicNTranslator.TRANSLATOR_CP1130);
+    registerTranslator("CP1132", XIEbcdicNTranslator.TRANSLATOR_CP1132);
+    registerTranslator("CP1137", XIEbcdicNTranslator.TRANSLATOR_CP1137);
+    
+    registerTranslator("CP1142", XIEbcdicNTranslator.TRANSLATOR_CP1142);
+    registerTranslator("CP1145", XIEbcdicNTranslator.TRANSLATOR_CP1145);
+    registerTranslator("CP1146", XIEbcdicNTranslator.TRANSLATOR_CP1146);
+    registerTranslator("CP1148", XIEbcdicNTranslator.TRANSLATOR_CP1148);
+    registerTranslator("CP1149", XIEbcdicNTranslator.TRANSLATOR_CP1149);
+    
+    registerTranslator("CP1154", XIEbcdicNTranslator.TRANSLATOR_CP1154);
+    registerTranslator("CP1155", XIEbcdicNTranslator.TRANSLATOR_CP1155);
+    registerTranslator("CP1156", XIEbcdicNTranslator.TRANSLATOR_CP1156);
+    registerTranslator("CP1157", XIEbcdicNTranslator.TRANSLATOR_CP1157);
+    registerTranslator("CP1158", XIEbcdicNTranslator.TRANSLATOR_CP1158);
+    
+    registerTranslator("CP1164", XIEbcdicNTranslator.TRANSLATOR_CP1164);
+
+    registerTranslator("CP420", XIEbcdicNTranslator.TRANSLATOR_CP420);
+    registerTranslator("CP871", XIEbcdicNTranslator.TRANSLATOR_CP871);
+    registerTranslator("CP875", XIEbcdicNTranslator.TRANSLATOR_CP875);
   }
   
   

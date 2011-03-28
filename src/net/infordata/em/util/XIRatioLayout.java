@@ -197,8 +197,8 @@ public class XIRatioLayout implements LayoutManager2, java.io.Serializable {
       {
         int nComps = parent.getComponentCount();
         for (int i = LEFT; i <= RIGHT; i++) {
-          comps[i] = new ArrayList(nComps);
-          constrs[i] = new ArrayList(nComps);
+          comps[i] = new ArrayList<Component>(nComps);
+          constrs[i] = new ArrayList<Constraints>(nComps);
         }
         Component comp;
         Constraints constr;
