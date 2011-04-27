@@ -126,7 +126,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String VERSION = "1.19h";
+  public static final String VERSION = "1.19i";
   
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
