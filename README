@@ -1,0 +1,10 @@
+New -autoLogon command line option, usage sample:
+  -autoLogon "5;Utente;Parola d'ordine;valentino;password"
+where:
+  "5" is the number of fields showed on the logon page
+  "Utente" is the italian label for the user field (the one showed on the left of it) 
+  "Parola d'ordine" is the italian label for the password field
+  "valentino" is the user name
+  "password" is its password
+  
+     

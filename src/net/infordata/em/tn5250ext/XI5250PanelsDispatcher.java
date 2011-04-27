@@ -34,7 +34,7 @@ import net.infordata.em.tn5250.XI5250EmulatorEvent;
 
 
 /**
- * Mantains a set of XI5250PanelHandler and activates them when the related 5250
+ * Maintains a set of XI5250PanelHandler and activates them when the related 5250
  * screen (or panel) is received.
  *
  * @version

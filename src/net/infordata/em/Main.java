@@ -1,6 +1,7 @@
 package net.infordata.em;
 
 import java.awt.Frame;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -28,7 +29,10 @@ public class Main {
 
   private static void usageError(String msg) {
     System.err.println(msg);
-    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap] [-maximized] [-cp codepage] [-devName name] host-name");
+    System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap]" +
+    		" [-maximized] [-cp codepage] [-devName name]" +
+    		" [-autoLogon <fieldsCount>;<usrFieldLabel>;<pwdFieldLabel>;<user>;<passwd>]" +
+    		" host-name");
     System.err.println("Supported code pages:");
     for (String cp : XIEbcdicTranslator.getRegisteredTranslators().keySet()) {
       System.err.println("  " + cp + 
@@ -51,8 +55,10 @@ public class Main {
     String pHost = null;
     boolean expectCP = false;
     boolean expectDevName = false;
+    boolean expectLogonInfo = false;
     String cp = null;
     String devName = null;
+    LogonInfo logonInfo = null;
     for (int i = 0; i < args.length; i++) {
       arg = args[i];
       if (arg.startsWith("-")) {
@@ -70,6 +76,8 @@ public class Main {
           expectCP = true;
         else if ("-devName".equalsIgnoreCase(arg))
           expectDevName = true;
+        else if ("-autoLogon".equalsIgnoreCase(arg))
+          expectLogonInfo = true;
         else
           usageError("Wrong option: " + arg);
       }
@@ -82,6 +90,15 @@ public class Main {
       else if (expectDevName) {
         expectDevName = false;
         devName = arg;
+      }
+      else if (expectLogonInfo) {
+        expectLogonInfo = false;
+        try {
+          logonInfo = new LogonInfo(arg);
+        }
+        catch (IllegalArgumentException ex) {
+          usageError(ex.getMessage());
+        }
       }
       else {
         if (pHost == null)
@@ -101,6 +118,7 @@ public class Main {
     final String host = pHost;
     final String codePage = cp;
     final String deviceName = devName;
+    final LogonInfo autoLogonInfo = logonInfo;
     try {
       SwingUtilities.invokeAndWait(new Runnable() {
         public void run() {
@@ -110,6 +128,15 @@ public class Main {
             PanelsDispatcher disp = new PanelsDispatcher();
             disp.setEmulator(emext);
             new PSHBTNCHCHandler(disp);
+            if (autoLogonInfo != null)
+              new AutoLogonHandler(disp, autoLogonInfo);
+            em = emext;
+          }
+          else if (autoLogonInfo != null) {
+            XI5250EmulatorExt emext = new XI5250EmulatorExt();
+            PanelsDispatcher disp = new PanelsDispatcher();
+            disp.setEmulator(emext);
+            new AutoLogonHandler(disp, autoLogonInfo);
             em = emext;
           }
           else {
@@ -167,10 +194,17 @@ public class Main {
   
   private static class PanelsDispatcher extends XI5250PanelsDispatcher {
 
+    private AutoLogonHandler   ivAutoLogonHandler;
     private XI5250PanelHandler ivHandler;
     
     @Override
     public synchronized void addPanelHandler(XI5250PanelHandler panel) {
+      if (panel instanceof AutoLogonHandler) {
+        if (ivAutoLogonHandler != null)
+          throw new IllegalArgumentException("Handler already setted");
+        ivAutoLogonHandler = (AutoLogonHandler)panel;
+        return;
+      }
       if (ivHandler != null)
         throw new IllegalArgumentException("Handler already setted");
       ivHandler = panel;
@@ -178,7 +212,7 @@ public class Main {
 
     @Override
     protected synchronized XI5250PanelHandler getCurrentPanelHandler() {
-      return ivHandler;
+      return (ivAutoLogonHandler != null && ivAutoLogonHandler.detailedTest()) ? ivAutoLogonHandler : ivHandler;
     }
 
     @Override
@@ -186,6 +220,80 @@ public class Main {
       if (ivHandler != panel)
         throw new IllegalArgumentException("Not the registered handler " + panel);
       ivHandler = null;
+    }
+  }
+  
+  //////
+  
+  private static class LogonInfo {
+    
+    final int fieldsCount;
+    final String userLabel;
+    final String passwdLabel;
+    final String user;
+    final String passwd;
+    
+    LogonInfo(String info) {
+      String[] ss = info.split(";", 5);
+      if (ss.length < 5)
+        throw new IllegalArgumentException("Invalid autoLogon argument");
+      try {
+        fieldsCount = Integer.parseInt(ss[0]);
+      }
+      catch (NumberFormatException ex) {
+        throw new IllegalArgumentException("Invalid autoLogon argument: " + ex.getMessage());
+      }
+      userLabel = ss[1];
+      passwdLabel = ss[2];
+      user = ss[3];
+      passwd = ss[4];
+    }
+  }
+  
+  //////
+  
+  private static class AutoLogonHandler extends XI5250PanelHandler {
+    
+    private final LogonInfo ivLogonInfo;
+    private boolean ivLoggedOn;
+
+    public AutoLogonHandler(XI5250PanelsDispatcher aPanelDisp, LogonInfo info) {
+      super(aPanelDisp);
+      ivLogonInfo = info;
+    }
+
+    @Override
+    protected boolean detailedTest() {
+      if (ivLoggedOn)
+        return false;
+      // I'm expecting xx fields in the logon panel
+      if (getFields().size() != ivLogonInfo.fieldsCount)
+        return false;
+      // Is there the user id field ?
+      if (!checkField(getFieldNextTo(ivLogonInfo.userLabel), 10))
+        return false;
+      // Is there the password field ?
+      if (!checkField(getFieldNextTo(ivLogonInfo.passwdLabel), 10))
+        return false;
+      return true;
+    }
+
+    @Override
+    protected void start() {
+      ivLoggedOn = true;
+      // Start logon panel processing
+      XI5250Field userField = getFieldNextTo(ivLogonInfo.userLabel);
+      XI5250Field passwdField = getFieldNextTo(ivLogonInfo.passwdLabel);
+      userField.setString(ivLogonInfo.user);    // Your user id
+      passwdField.setString(ivLogonInfo.passwd);  // Your password
+      // Simulate the user ENTER key pressed
+      getEmulator().processRawKeyEvent(
+          new KeyEvent(getEmulator(), KeyEvent.KEY_PRESSED,
+              0, 0, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));
+    }
+
+    @Override
+    protected void stop() {
     }
   }
 }
