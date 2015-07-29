@@ -227,6 +227,13 @@ public class XITelnet {
     }
     catch (NoSuchElementException ex) {
     }
+    {
+      String[] parts = ivFirstHost.split(":");
+      if (parts.length == 2) {
+        ivFirstHost = parts[0];
+        ivPort = Integer.parseInt(parts[1]);
+      }
+    }
   }
 
 
