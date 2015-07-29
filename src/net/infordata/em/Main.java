@@ -32,6 +32,7 @@ public class Main {
     System.err.println("Usage: [-3dFX] [-PSHBTNCHC] [-STRPCCMD] [-altFKeyRemap]" +
     		" [-maximized] [-cp codepage] [-devName name]" +
     		" [-autoLogon <fieldsCount>;<usrFieldLabel>;<pwdFieldLabel>;<user>;<passwd>]" +
+    		" [-hideToolBar] [-hideMenuBar]" +
     		" host-name");
     System.err.println("Supported code pages:");
     for (String cp : XIEbcdicTranslator.getRegisteredTranslators().keySet()) {
@@ -50,6 +51,8 @@ public class Main {
     boolean pPSHBTNCHC = false;
     boolean pSTRPCCMD = false;
     boolean pMaximized = false;
+    boolean wkToolBar = true;
+    boolean wkMenuBar = true;
 
     String arg;
     String pHost = null;
@@ -78,6 +81,10 @@ public class Main {
           expectDevName = true;
         else if ("-autoLogon".equalsIgnoreCase(arg))
           expectLogonInfo = true;
+        else if ("-hideToolBar".equalsIgnoreCase(arg))
+          wkToolBar = false;
+        else if ("-hideMenuBar".equalsIgnoreCase(arg))
+          wkMenuBar = false;
         else
           usageError("Wrong option: " + arg);
       }
@@ -107,6 +114,8 @@ public class Main {
           usageError("Too many host names.");
       }
     }
+    final boolean dspToolBar = wkToolBar;
+    final boolean dspMenuBar = wkMenuBar;
     if (expectCP)
       usageError("A code page is expected");
     
@@ -158,7 +167,7 @@ public class Main {
           }
 
           XI5250Frame frm = new XI5250Frame("tn5250" + " " +
-                                            XI5250Emulator.VERSION, em);
+                                            XI5250Emulator.VERSION, em, dspToolBar, dspMenuBar);
           frm.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -264,11 +273,12 @@ public class Main {
 
     @Override
     protected boolean detailedTest() {
-      if (ivLoggedOn)
+      if (ivLoggedOn) 
         return false;
       // I'm expecting xx fields in the logon panel
       if (getFields().size() != ivLogonInfo.fieldsCount)
         return false;
+
       // Is there the user id field ?
       if (!checkField(getFieldNextTo(ivLogonInfo.userLabel), 10))
         return false;

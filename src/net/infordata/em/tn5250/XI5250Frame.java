@@ -72,12 +72,20 @@ public class XI5250Frame extends XI5250CrtFrame {
     init(aCrt);
   }
 
+  /**
+   */
+  public XI5250Frame(String aTitle, XI5250Emulator aCrt, boolean dspToolBar, boolean dspMenuBar) {
+    super(aTitle, aCrt, dspToolBar, dspMenuBar);
+    ivTitle = aTitle;
+    init(aCrt);
+  }
+
 
   /**
    */
   public XI5250Frame(String aTitle, XI5250Emulator aCrt,
-                     boolean sizeControlledFrame) {
-    super(aTitle, aCrt, sizeControlledFrame);
+                     boolean sizeControlledFrame, boolean dspToolBar, boolean dspMenuBar) {
+    super(aTitle, aCrt, sizeControlledFrame, dspToolBar, dspMenuBar);
     ivTitle = aTitle;
     init(aCrt);
   }

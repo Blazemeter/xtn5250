@@ -78,14 +78,21 @@ public class XI5250CrtFrame extends JFrame {
   /**
    */
   public XI5250CrtFrame(String aTitle, XI5250Crt aCrt) {
-    this(aTitle, aCrt, false);
+    this(aTitle, aCrt, false, true, true);
+  }
+
+
+  /**
+   */
+  public XI5250CrtFrame(String aTitle, XI5250Crt aCrt, boolean dspToolBar, boolean dspMenuBar) {
+    this(aTitle, aCrt, false, dspToolBar, dspMenuBar);
   }
 
 
   /**
    */
   public XI5250CrtFrame(String aTitle, XI5250Crt aCrt,
-                        boolean sizeControlledFrame) {
+                        boolean sizeControlledFrame, boolean dspToolBar, boolean dspMenuBar) {
     super(aTitle);
 
     ivSizeControlledFrame = sizeControlledFrame;
@@ -110,11 +117,14 @@ public class XI5250CrtFrame extends JFrame {
     });
 
     //
-    JToolBar toolBar = createToolBar();
-    JMenuBar menuBar = createMenuBar();
-
-    setJMenuBar(menuBar);
-    getContentPane().add(toolBar, BorderLayout.NORTH);
+    if (dspToolBar) {
+      JToolBar toolBar = createToolBar();
+      getContentPane().add(toolBar, BorderLayout.NORTH);
+    }
+    if (dspMenuBar) {
+      JMenuBar menuBar = createMenuBar();
+      setJMenuBar(menuBar);
+    }
 
     // Exit command
     getCommandMgr().setCommand(EXIT_CMD,  new XICommand() {
