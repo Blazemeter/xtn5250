@@ -6,5 +6,7 @@ where:
   "Parola d'ordine" is the italian label for the password field
   "valentino" is the user name
   "password" is its password
-  
-     
+
+---  
+
+New -hideMenuBar and -hideToolBar options, thanks to -hideMenuBar / -hideToolBar.     
