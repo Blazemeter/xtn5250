@@ -30,17 +30,18 @@ limitations under the License.
 package net.infordata.em.tnprot;
 
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
+import javax.net.SocketFactory;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -139,16 +140,17 @@ public class XITelnet {
   static final int  SIAC_WCMD  = 1;
   static final int  SIAC_WOPT  = 2;
   static final int  SIAC_WSTR  = 3;
-  
+
   private String         ivHost;                    
-  private int            ivPort;                       
-  
+  private int            ivPort;
+  private final SocketFactory socketFactory;
+
   /**
    * if null then the connection is closed
    */
   transient private Socket         ivSocket;                       
   transient private InputStream    ivIn;                 
-  transient private OutputStream   ivOut;               
+  transient private BufferedOutputStream   ivOut;
   transient private RxThread       ivReadTh;
   
   transient private byte           ivIACCmd;
@@ -206,19 +208,20 @@ public class XITelnet {
    * Uses telnet default port for socket connection.
    */
   public XITelnet(String aHost) {
-    this(aHost, 23);
+    this(aHost, 23, SocketFactory.getDefault());
   }
 
 
   /**
    * Uses the given port for socket connection.
    */
-  public XITelnet(String aHost, int aPort) {
+  public XITelnet(String aHost, int aPort, SocketFactory socketFactory) {
     if (aHost == null)
       throw new IllegalArgumentException("Host cannot be null");
 
     ivHost = aHost;
     ivPort = aPort;
+    this.socketFactory = socketFactory;
 
     try {
       StringTokenizer st  = new StringTokenizer(ivHost, "#");
@@ -367,10 +370,15 @@ public class XITelnet {
     connecting();
 
     try {
-      ivSocket = new Socket(ivFirstHost, ivPort);
+      ivSocket = socketFactory.createSocket();
+      ivSocket.connect(new InetSocketAddress(ivFirstHost, ivPort));
 
       ivIn = ivSocket.getInputStream();
-      ivOut = ivSocket.getOutputStream();
+      /*
+         we use a BufferedOutputStream to avoid sending many small packets and ease tracing with
+         Wireshark by keeping packets unaltered
+          */
+      ivOut = new BufferedOutputStream(ivSocket.getOutputStream());
 
       ivReadTh = new RxThread();
       ivReadTh.start();
@@ -669,6 +677,11 @@ public class XITelnet {
         if (aBuf[i] == IAC)
           ivOut.write(IAC);
       }
+      /*
+       this is the only method from XITelnet that does not invoke flush, and since we are now using
+       a BufferedOutputStream we need all methods to flush.
+        */
+      ivOut.flush();
     }
     catch (IOException ex) {
       catchedIOException(ex);

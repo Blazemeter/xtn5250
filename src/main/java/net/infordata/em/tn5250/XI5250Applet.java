@@ -133,6 +133,7 @@ public class XI5250Applet extends JApplet {
 
     ivEmulatorCtrl = new XI5250EmulatorCtrl(createEmulator());
     getEmulator().setTerminalType("IBM-3477-FC");
+    getEmulator().setKeyboardQueue(true);
     getEmulator().setHost(host);
     //3D FX
     if (p3dFX) {

@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.util.Optional;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import net.infordata.em.crt5250.XI5250Field;
 import net.infordata.em.tn5250.XI5250Emulator;
 import net.infordata.em.tn5250.XI5250EmulatorListener;
@@ -15,8 +17,8 @@ public class TerminalClient {
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClient.class);
 
   private XI5250Emulator em;
-
   private String terminalType = "IBM-3179-2";
+  private SocketFactory socketFactory = SocketFactory.getDefault();
 
   /**
    * Sets the type of terminal to emulate.
@@ -26,6 +28,17 @@ public class TerminalClient {
    */
   public void setTerminalType(String terminalType) {
     this.terminalType = terminalType;
+  }
+
+  /**
+   * Allows setting the {@link SocketFactory} to be used to create sockets which allows using SSL
+   * sockets.
+   *
+   * @param socketFactory the {@link SocketFactory} to use. If non is specified {@link
+   * SocketFactory#getDefault()} will be used.
+   */
+  public void setSocketFactory(SSLSocketFactory socketFactory) {
+    this.socketFactory = socketFactory;
   }
 
   /**
@@ -39,6 +52,7 @@ public class TerminalClient {
     em.setHost(host);
     em.setPort(port);
     em.setTerminalType(terminalType);
+    em.setSocketFactory(socketFactory);
     em.setActive(true);
   }
 

@@ -8,10 +8,16 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import net.infordata.em.tn5250.XI5250EmulatorEvent;
 import net.infordata.em.tn5250.XI5250EmulatorListener;
 import org.junit.After;
@@ -27,6 +33,7 @@ public class TerminalClientTest {
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClientTest.class);
   private static final long TIMEOUT_MILLIS = 10000;
   private static final String SERVICE_HOST = "localhost";
+  public static final String TERMINAL_TYPE = "IBM-3477-FC";
 
   private VirtualTcpService service = new VirtualTcpService();
   private TerminalClient client;
@@ -37,7 +44,7 @@ public class TerminalClientTest {
     service.setFlow(Flow.fromYml(new File(getResourceFilePath("/login.yml"))));
     service.start();
     client = new TerminalClient();
-    client.setTerminalType("IBM-3477-FC");
+    client.setTerminalType(TERMINAL_TYPE);
     client.connect(SERVICE_HOST, service.getPort());
   }
 
@@ -145,6 +152,48 @@ public class TerminalClientTest {
   private String getFileContent(String resourceFile) throws IOException {
     return Resources.toString(Resources.getResource(resourceFile),
         Charsets.UTF_8);
+  }
+
+  @Test
+  public void shouldGetWelcomeScreenWhenConnectWithSsl() throws Exception {
+    awaitLoginScreen();
+    client.disconnect();
+    service.stop(TIMEOUT_MILLIS);
+
+    service.setSslEnabled(true);
+    System.setProperty("javax.net.ssl.keyStore", getResourceFilePath("/keystore.jks"));
+    System.setProperty("javax.net.ssl.keyStorePassword", "changeit");
+    service.start();
+
+    client = new TerminalClient();
+    client.setTerminalType(TERMINAL_TYPE);
+    client.setSocketFactory(buildSslContext().getSocketFactory());
+    client.connect(SERVICE_HOST, service.getPort());
+
+    awaitLoginScreen();
+    assertThat(client.getScreenText())
+        .isEqualTo(getWelcomeScreen());
+  }
+
+  private SSLContext buildSslContext() throws GeneralSecurityException {
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    TrustManager trustManager = new X509TrustManager() {
+
+      public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+      }
+
+      public void checkClientTrusted(
+          java.security.cert.X509Certificate[] certs, String authType) {
+      }
+
+      public void checkServerTrusted(
+          java.security.cert.X509Certificate[] certs, String authType) {
+      }
+    };
+    sslContext.init(null, new TrustManager[]{trustManager},
+        new SecureRandom());
+    return sslContext;
   }
 
   @Test

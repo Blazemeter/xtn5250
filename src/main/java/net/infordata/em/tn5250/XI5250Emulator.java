@@ -90,6 +90,7 @@ import java.util.EventListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.net.SocketFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -345,6 +346,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   //!!1.07
   private String ivHost;
   private int ivPort = 23;
+  private SocketFactory socketFactory = SocketFactory.getDefault();
 
   private boolean ivAltFKeyRemap;
 
@@ -367,8 +369,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     setState(ST_POWER_ON);
 
     setErrorRow(getCrtSize().height - 1);
-
-    setKeyboardQueue(true);
   }
 
 
@@ -495,6 +495,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivPort = aPort;
   }
 
+  public void setSocketFactory(SocketFactory socketFactory) {
+    this.socketFactory = socketFactory;
+  }
+
   /**
    * Activate or deactivate the connection.
    */
@@ -507,7 +511,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       }
 
       if (activate) {
-        ivTelnet = new XITelnet(ivHost, ivPort);
+        ivTelnet = new XITelnet(ivHost, ivPort, socketFactory);
         ivTelnet.setEmulator(ivTelnetEmulator);
         ivTelnet.connect();
       } else {
