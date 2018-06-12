@@ -50,7 +50,7 @@ public interface XITelnetEmulator {
   /**
    * @see    XITelnet#disconnected
    */
-  public void disconnected();
+  public void disconnected(boolean remote);
 
   /**
    * @see    XITelnet#catchedIOException

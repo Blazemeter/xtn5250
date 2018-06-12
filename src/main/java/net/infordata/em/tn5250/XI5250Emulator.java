@@ -300,41 +300,32 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   transient private XI5250StatusBar ivStatusBar;
 
-  //
-  //!!1.06a protected Vector        ivSavedScreenList = new Vector(10, 5);
-  //!!!.06a replace the vector with a circular buffer
   transient protected XI5250EmulatorMemento[] ivSavedScreens =
       new XI5250EmulatorMemento[10];
   transient protected int ivSavedScreensIdx = 0;
 
-  //!!0.91
   transient KeyEventQueue ivKeybEventQueue;
   transient KeyEventDispatchThread ivKeybThread;
 
-  //!!0.92 used when the user switches to SYSTEM_REQUEST state
+  //used when the user switches to SYSTEM_REQUEST state
   transient private XI5250EmulatorMemento ivSysReqMemento;
   transient private XI5250Field ivSysReqField;
 
-  //!!0.93 used when the emulator switch to PRE_HELP state
+  //used when the emulator switch to PRE_HELP state
   transient private XI5250CrtBuffer ivPreHelpErrorLine;
 
-  //!!0.95
   transient private XI5250EmulatorListener ivEmulatorListener;
 
-  //!!1.02
   private String ivTermType;
   private String ivTelnetEnv;
 
-  //!!1.02d
   transient private TelnetEmulator ivTelnetEmulator = new TelnetEmulator();
 
-  //!!1.03a
   /**
    * Used when switching from 24x80 to ...
    */
   transient protected Font ivPrevFont;
 
-  //!!1.04c
   public static final String ACTIVE = "active";
   public static final String TERMINAL_TYPE = "terminalType";
   public static final String ALTFKEY_REMAP = "altFKeyRemap";
@@ -343,10 +334,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   public static final String STRPCCMD_ENABLED = "strPcCmd";
 
-  //!!1.07
   private String ivHost;
   private int ivPort = 23;
   private SocketFactory socketFactory = SocketFactory.getDefault();
+  private boolean disconnectOnSocketException;
+  private int connectionTimeoutMillis;
 
   private boolean ivAltFKeyRemap;
 
@@ -430,20 +422,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Redefined to move the status bar.
-   protected void processCrtEvent(XI5250CrtEvent e) {
-   switch (e.getID()) {
-   case XI5250CrtEvent.SIZE_CHANGED:
-   if (ivStatusBar != null)
-   moveStatusBar();
-   break;
-   }
-   super.processCrtEvent(e);
-   }
-   */
-
-
-  /**
-   * Redefined to move the status bar.
    */
   @Override
   public void doLayout() {
@@ -451,9 +429,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     moveStatusBar();
   }
 
-
-  /**
-   */
   private void moveStatusBar() {
     synchronized (getTreeLock()) {
       ivStatusBar.setFont(getFont());
@@ -463,7 +438,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       ivStatusBar.setVisible(true);
     }
   }
-
 
   /**
    * Sets the host name, a previuos open connection is closed.
@@ -477,7 +451,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     setActive(false);
     ivHost = aHost;
   }
-
 
   /**
    * Returns the host name.
@@ -499,6 +472,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     this.socketFactory = socketFactory;
   }
 
+  public void setDisconnectOnSocketException(boolean disconnectOnSocketException) {
+    this.disconnectOnSocketException = disconnectOnSocketException;
+  }
+
+  public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
+    this.connectionTimeoutMillis = connectionTimeoutMillis;
+  }
+
   /**
    * Activate or deactivate the connection.
    */
@@ -511,10 +492,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       }
 
       if (activate) {
-        ivTelnet = new XITelnet(ivHost, ivPort, socketFactory);
+        ivTelnet = new XITelnet(ivHost, ivPort);
+        ivTelnet.setSocketFactory(socketFactory);
+        ivTelnet.setConnectionTimeoutMillis(connectionTimeoutMillis);
         ivTelnet.setEmulator(ivTelnetEmulator);
+        ivTelnet.setDisconnectOnException(disconnectOnSocketException);
         ivTelnet.connect();
       } else {
+        setBlinkingCursor(false);
         ivTelnet.disconnect();
         ivTelnet.setEmulator(null);
         ivTelnet = null;
@@ -524,14 +509,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     firePropertyChange(ACTIVE, wasActive, isActive());
   }
 
-
   /**
    * True if the connection is active.
    */
   public boolean isActive() {
     return (ivTelnet == null) ? false : ivTelnet.isConnected();
   }
-
 
   /**
    * Sets the terminal type.
@@ -562,13 +545,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     firePropertyChange(TERMINAL_TYPE, oldTermType, ivTermType);
   }
 
-
-  /**
-   */
   public String getTerminalType() {
     return ivTermType;
   }
-
 
   /**
    * See: http://www.faqs.org/rfcs/rfc2877.html and http://www.faqs.org/rfcs/rfc1572.html
@@ -589,13 +568,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     firePropertyChange(TELNET_ENV, old, ivTelnetEnv);
   }
 
-
   /**
    */
   public String getTelnetEnv() {
     return ivTelnetEnv;
   }
-
 
   /**
    * @param value - if true FKEYS are accepted even if pressed in combination with the ALT key
@@ -645,7 +622,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     });
   }
 
-
   /**
    * Redefined to take care of the status-bar presence
    */
@@ -655,7 +631,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     size.height += getCharSize().height + 4;
     return size;
   }
-
 
   /**
    * Redefined to take care of the status-bar presence
@@ -667,11 +642,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return size;
   }
 
-
   /**
    * Redefined to take care of the status-bar presence
    *
-   * @see crt.XICrt#getTestSize
+   * @see net.infordata.em.crt.XICrt#getTestSize
    */
   @Override
   protected Dimension getTestSize(Font aFont) {
@@ -681,7 +655,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return res;
   }
 
-
   /**
    * Factory method for XI5250Field creation.
    */
@@ -690,7 +663,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       int aLen, int aAttr) {
     return new XI5250Field(this, aFFW, aFCW, aCol, aRow, aLen, aAttr);
   }
-
 
   /**
    * Creates a XI5250EmulatorMemento instance. It is like a snapshot of the current internal state.
@@ -704,12 +676,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         (XI5250CrtBuffer) getCrtBuffer().clone());
   }
 
-
   /**
    * Restores the internal state to a previous saved state.
    */
   public void restoreMemento(XI5250EmulatorMemento aMemento) {
-    //!!0.95 this statement avoids deadlocks with component resizing.
+    //this statement avoids deadlocks with component resizing.
     synchronized (getTreeLock()) {
       synchronized (this) {
         Dimension dim = aMemento.ivCrtBuffer.getCrtSize();
@@ -731,7 +702,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     repaint();
   }
 
-
   /**
    * Works as createMemento but it is used when it switches to the System Request State.
    */
@@ -746,20 +716,16 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
             0, ivErrorRow, getCrtSize().width, 1));
   }
 
-
   /**
    * @see #createSysReqMemento
    */
   protected void restoreSysReqMemento(XI5250EmulatorMemento aMemento) {
-    //!!0.95 this statement avoids deadlocks with component resizing
+    //this statement avoids deadlocks with component resizing
     synchronized (getTreeLock()) {
       synchronized (this) {
         ivFields = aMemento.ivFields;
         ivFunctionKeysMask = aMemento.ivFunctionKeysMask;
         ivPendingCmd = aMemento.ivPendingCmd;
-        //!! NO
-        //setState(aMemento.ivState);
-        //ivPrevState = aMemento.ivPrevState;
         setErrorRow(aMemento.ivErrorRow);
         setCursorPos(aMemento.ivCol, aMemento.ivRow);
 
@@ -821,18 +787,16 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Called by XITelnet when a connection is closed. Fires the XI5250EmulatorEvent.DISCONNECTED
    * event.
    */
-  protected void disconnected() {
+  protected void disconnected(boolean remote) {
     if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("disconnected()");
     }
 
-    { //!!1.07
-      setState(ST_POWER_ON);
-      setDefAttr(0x20);
-      clear();
-      removeFields();
-      setCursorPos(0, 0);
-    }
+    setState(ST_POWER_ON);
+    setDefAttr(0x20);
+    clear();
+    removeFields();
+    setCursorPos(0, 0);
 
     processEmulatorEvent(
         new XI5250EmulatorEvent(XI5250EmulatorEvent.DISCONNECTED, this));
@@ -987,11 +951,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           ivCmdList = cmdList;
           SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
-              //!!0.95 this statement avoids deadlocks during component resizing
+              //this statement avoids deadlocks during component resizing
               synchronized (getTreeLock()) {
                 synchronized (this) {
-                  if (getState() == ST_SYSTEM_REQUEST)  //!!1.01b
-                  {
+                  if (getState() == ST_SYSTEM_REQUEST) {
                     setPrevState();
                   }
 
@@ -1086,15 +1049,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivRXBufLen = 0;
   }
 
-
-  /**
-   */
   protected void localFlagsChanged(byte aIACOpt) {
   }
 
-
-  /**
-   */
   protected void remoteFlagsChanged(byte aIACOpt) {
     if (aIACOpt == XITelnet.TELOPT_EOR &&
         ivTelnet.isRemoteFlagON(XITelnet.TELOPT_EOR)) {
@@ -1102,15 +1059,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
-  /**
-   */
   protected void unhandledRequest(byte aIACOpt, String aIACStr) {
     if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("unhandledRequest()");
     }
   }
-
 
   /**
    * Turns on or off the message icon on the status bar.
@@ -1120,7 +1073,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         XI5250StatusBar.MESSAGE_OFF);
   }
 
-
   /**
    * Answers to cancel invite request.
    */
@@ -1129,7 +1081,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     send5250Packet((byte) 0x00, OPCODE_CANCEL_INVITE, null);
   }
-
 
   /**
    * Enables or disables the keyboard queue. (DEFAULT enabled)
@@ -1148,13 +1099,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
-  /**
-   */
   public boolean isKeyboardQueue() {
     return (ivKeybEventQueue != null);
   }
-
 
   /**
    * Removes all entries in keyboard queue.
@@ -1165,9 +1112,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
-  /**
-   */
   protected void startKeybThread() {
     if (!isKeyboardQueue() || ivKeybThread != null) {
       return;
@@ -1181,9 +1125,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivKeybThread.start();
   }
 
-
-  /**
-   */
   protected void stopKeybThread() {
     if (!isKeyboardQueue() || ivKeybThread == null) {
       return;
@@ -1196,7 +1137,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivKeybThread.stopDispatching();
     ivKeybThread = null;
   }
-
 
   /**
    * Changes the emulator state.
@@ -1239,24 +1179,20 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     // things to do after entering a new state
     switch (aState) {
-      //
       case ST_POWER_ON:
         ivStatusBar.setFlashArea(true);
         break;
-      //
       case ST_POWERED:
         ivStatusBar.setFlashArea(false);
         break;
-      //
       case ST_TEMPORARY_LOCK:
       case ST_NORMAL_LOCKED:
         stopKeybThread();
         break;
-      //
       case ST_SYSTEM_REQUEST:
         ivSysReqMemento = createSysReqMemento();
         removeFields();
-        ivPendingCmd = null;                      //!!0.92a
+        ivPendingCmd = null;
         drawString(String.valueOf(XI5250Emulator.ATTRIBUTE_PLACE_HOLDER),
             0, ivErrorRow, 0x34);
         ivSysReqField =
@@ -1267,7 +1203,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         setCursorPos(1, ivErrorRow);
         startKeybThread();
         break;
-      //
       case ST_PRE_HELP:
         // save error row
         ivPreHelpErrorLine = new XI5250CrtBuffer((XI5250CrtBuffer) getCrtBuffer(),
@@ -1275,7 +1210,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
             getCrtSize().width, 1);
         startKeybThread();
         break;
-      //
       default:
         startKeybThread();
         break;
@@ -1284,14 +1218,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.STATE_CHANGED, this));
   }
 
-
   /**
    * Returns the current emulator state.
    */
   public int getState() {
     return ivState;
   }
-
 
   /**
    * Switches back to the previous state.
@@ -1300,13 +1232,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     setState(ivPrevState);
   }
 
-
-  /**
-   */
   public int getPrevState() {
     return ivPrevState;
   }
-
 
   /**
    * Factory method for XI5250CmdList class.
@@ -1315,14 +1243,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return new XI5250CmdList(aEm);
   }
 
-
   /**
    * Factory method for XI5250OrdList class
    */
   protected XI5250OrdList createOrdList(XI5250Emulator aEm) {
     return new XI5250OrdList(aEm);
   }
-
 
   /**
    * Changes the error row.
@@ -1331,13 +1257,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivErrorRow = Math.min(aRow, getCrtSize().height - 1);
   }
 
-
   /**
    */
   protected int getErrorRow() {
     return ivErrorRow;
   }
-
 
   /**
    */
@@ -1345,14 +1269,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     ivFunctionKeysMask = aMask;
   }
 
-
-  /**
-   */
   protected boolean isMasterMDTSet() {
     //TODO ??
     return true;
   }
-
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
@@ -1379,7 +1299,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
    */
@@ -1387,16 +1306,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     send5250Packet(flags, opcode, buf, (buf != null) ? buf.length : 0);
   }
 
-
-  /**
-   */
   public void send5250UserError(int aErrorCode) {
     XIEbcdicTranslator translator = getTranslator();
     byte[] buf = translator.toPacked(aErrorCode, 4);
 
     send5250Packet(FLAG_HLP, OPCODE_NOP, buf);
   }
-
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 error decoding request.
@@ -1407,7 +1322,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     send5250Packet(FLAG_ERR, OPCODE_NOP, buf);
   }
-
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 data-stream. To store in the output
@@ -1451,7 +1365,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
   /**
    * DO NOT USE, reserved for commands and orders
    */
@@ -1460,7 +1373,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     send5250Packet((byte) 0x00, OPCODE_SAVE_SCREEN, cBuf);
   }
-
 
   /**
    * DO NOT USE, reserved for commands and orders
@@ -1486,7 +1398,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     send5250Packet((byte) 0x00, OPCODE_READ_SCREEN, buf);
   }
 
-
   /**
    * Updates the status-bar shift area.
    */
@@ -1496,7 +1407,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         XI5250StatusBar.SHIFT_UP);
   }
 
-
   /**
    * DO NOT USE, reserved for commands and orders Removes all fields.
    */
@@ -1505,7 +1415,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     super.removeFields();
     processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.FIELDS_REMOVED, this));
   }
-
 
   /**
    * Redefined to request 5250 error decoding.
@@ -1517,24 +1426,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     send5250UserError(aError);
   }
 
-
-  /**
-   */
   @Override
   protected void processMouseEvent(MouseEvent e) {
     updateStatusBar(e);
     super.processMouseEvent(e);
   }
 
-
-  /**
-   */
   @Override
   protected void processKeyEvent(KeyEvent e) {
     updateStatusBar(e);
     super.processKeyEvent(e);
   }
-
 
   /**
    * Avoid concurrent access with the synchronized part of receivedEOR() method. When we get there
@@ -1559,7 +1461,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
             }
             break;
           //
-          case KeyEvent.VK_CONTROL:      //!!1.01b
+          case KeyEvent.VK_CONTROL:
             if (e.getModifiers() == KeyEvent.CTRL_MASK && ivKeybEventQueue != null) {
               ivKeybEventQueue.removeAll();
             }
@@ -1576,12 +1478,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           e.getKeyCode(), e.getKeyChar()));
     }
 
-    //!!1.13a consume anything, except ALT+... key combinations
+    //consume anything, except ALT+... key combinations
     if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0) {
       e.consume();
     }
   }
-
 
   /**
    * Here is where the real keyboard handling is done. If the keyboard queue is enabled we get there
@@ -1601,21 +1502,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     // keyboard handling that depends on 5250 state
     switch (getState()) {
-      //
       case ST_TEMPORARY_LOCK:
       case ST_NORMAL_LOCKED:
         break;
-      //
       case ST_SYSTEM_REQUEST:
         processKeySystemRequest(e);
         break;
-      //
       case ST_NORMAL_UNLOCKED:
         processKeyNormalUnlocked(e);
         break;
     }
   }
-
 
   /**
    * Keyboard handling during the System request state.
@@ -1628,7 +1525,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     boolean res = false;
     switch (e.getID()) {
-      //
       case KeyEvent.KEY_TYPED:
         if (isCharKey(e)) {
           // if we get there then a key has been pressed outside of an input field
@@ -1637,7 +1533,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           res = true;
         }
         break;
-      //
       case KeyEvent.KEY_PRESSED:
         switch (e.getKeyCode()) {
           case KeyEvent.VK_ESCAPE:
@@ -1645,7 +1540,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
               setPrevState();
             }
             break;
-          //
           case KeyEvent.VK_ENTER:
             String aStr = ivSysReqField.getString();
             setPrevState();
@@ -1653,7 +1547,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
             // exclude trailing null chars
             for (i = aStr.length() - 1; (i >= 0) && (aStr.charAt(i) == '\u0000'); i--) {
-              ;
             }
 
             byte[] buf = getTranslator().toText(aStr, i + 1);
@@ -1676,7 +1569,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return res;
   }
 
-
   /**
    * Keyboard handling during the Normal unlocked state.
    */
@@ -1688,7 +1580,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     boolean res = false;
     switch (e.getID()) {
-      //
       case KeyEvent.KEY_TYPED:
         if (isCharKey(e)) {
           // if we get there then a key was pressed outside of an input field
@@ -1696,21 +1587,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           res = true;
         }
         break;
-      //
       case KeyEvent.KEY_PRESSED:
         switch (e.getKeyCode()) {
-          //
           case KeyEvent.VK_ESCAPE:
             // Attn
             if (e.getModifiers() == 0) {
               send5250Packet(FLAG_ATN, OPCODE_NOP, null);
             }
             break;
-          //
           case KeyEvent.VK_ENTER:
             res = processKeyEnter(e.getModifiers());
             break;
-          //
           case KeyEvent.VK_F1:
           case KeyEvent.VK_F2:
           case KeyEvent.VK_F3:
@@ -1725,12 +1612,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           case KeyEvent.VK_F12:
             res = processKeyFXX(e.getKeyCode(), e.getModifiers());
             break;
-          //
           case KeyEvent.VK_PAGE_UP:
           case KeyEvent.VK_PAGE_DOWN:
             res = processKeyPageXX(e.getKeyCode(), e.getModifiers());
             break;
-          //
           case KeyEvent.VK_PAUSE:
             res = processKeyPause(e.getModifiers());
             break;
@@ -1741,12 +1626,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return res;
   }
 
-
   private static final int AUTO_ENTER_MODIFIERS = (new KeyEvent(new JLabel(""),
       KeyEvent.KEY_PRESSED, 0, -1, KeyEvent.VK_ENTER, (char) KeyEvent.VK_ENTER)).getModifiers();
 
-  /**
-   */
   protected boolean processKeyEnter(int aModifier) {
     // Cannot detect -1 modifier directly
     if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIERS) {
@@ -1761,9 +1643,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return true;
   }
 
-
-  /**
-   */
   protected boolean processKeyFXX(int aKey, int aModifier) {
     int ofs = aKey - KeyEvent.VK_F1;
     int aidCode;
@@ -1785,9 +1664,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return true;
   }
 
-
-  /**
-   */
   protected boolean processKeyPageXX(int aKey, int aModifier) {
     if (aModifier != 0) {
       return false;
@@ -1802,8 +1678,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return true;
   }
 
-  /**
-   */
   protected boolean processKeyPause(int aModifier) {
     if (aModifier != 0) {
       return false;
@@ -1839,14 +1713,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return e;
   }
 
-  /**
-   */
   @Override
   protected void finalize() throws Throwable {
     setActive(false);
     super.finalize();
   }
-
 
   void receivedStrPcCmd() {
     if (!isStrPcCmdEnabled()) {
@@ -1884,8 +1755,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       super(a, b);
     }
 
-
-    //!!1.03a
     @Override
     protected EventListener remove(EventListener oldl) {
       if (oldl == a) {
@@ -1902,7 +1771,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       return add((XI5250EmulatorListener) a2, (XI5250EmulatorListener) b2);
     }
 
-
     public static XI5250EmulatorListener add(XI5250EmulatorListener a,
         XI5250EmulatorListener b) {
       if (a == null) {
@@ -1914,63 +1782,41 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       return new Multicaster(a, b);
     }
 
-
     public static XI5250EmulatorListener remove(XI5250EmulatorListener a,
         XI5250EmulatorListener b) {
       return (XI5250EmulatorListener) removeInternal(a, b);
     }
 
-
-    /**
-     */
     public void connecting(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).connecting(e);
       ((XI5250EmulatorListener) b).connecting(e);
     }
 
-
-    /**
-     */
     public void connected(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).connected(e);
       ((XI5250EmulatorListener) b).connected(e);
     }
 
-
-    /**
-     */
     public void disconnected(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).disconnected(e);
       ((XI5250EmulatorListener) b).disconnected(e);
     }
 
-
-    /**
-     */
     public void stateChanged(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).stateChanged(e);
       ((XI5250EmulatorListener) b).stateChanged(e);
     }
 
-
-    /**
-     */
     public void newPanelReceived(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).newPanelReceived(e);
       ((XI5250EmulatorListener) b).newPanelReceived(e);
     }
 
-
-    /**
-     */
     public void fieldsRemoved(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).fieldsRemoved(e);
       ((XI5250EmulatorListener) b).fieldsRemoved(e);
     }
 
-
-    /**
-     */
     public void dataSended(XI5250EmulatorEvent e) {
       ((XI5250EmulatorListener) a).dataSended(e);
       ((XI5250EmulatorListener) b).dataSended(e);
@@ -2006,10 +1852,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
     private KeyEventQueueItem ivQueue;
 
-
     public KeyEventQueue() {
     }
-
 
     public synchronized void postEvent(AWTEvent theEvent) {
       KeyEventQueueItem eqi = new KeyEventQueueItem(theEvent);
@@ -2024,7 +1868,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       }
     }
 
-
     public synchronized AWTEvent getNextEvent() throws InterruptedException {
       while (ivQueue == null) {
         wait();
@@ -2038,7 +1881,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       }
       return eqi.ivEvent;
     }
-
 
     public synchronized void removeAll() {
       ivQueue = null;
@@ -2058,25 +1900,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     protected XI5250Emulator ivEmulator;
     protected boolean ivStop = false;
 
-
-    /**
-     */
     public KeyEventDispatchThread(XI5250Emulator aEmulator) {
       super("5250 Keyboard event dispatching thread");
       ivEmulator = aEmulator;
     }
 
-
     public void stopDispatching() {
       ivStop = true;
-      if (this != Thread.currentThread()) {  //!!V 06/07/98
+      if (this != Thread.currentThread()) {
         interrupt();
       }
     }
 
-
-    /**
-     */
     @Override
     public void run() {
       while (!ivStop && ivEmulator.isKeyboardQueue()) {
@@ -2104,8 +1939,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  /**
-   */
   class TelnetEmulator implements XITelnetEmulator {
 
     public final void connecting() {
@@ -2116,8 +1949,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       XI5250Emulator.this.connected();
     }
 
-    public final void disconnected() {
-      XI5250Emulator.this.disconnected();
+    public final void disconnected(boolean remote) {
+      XI5250Emulator.this.disconnected(remote);
     }
 
     public final void catchedIOException(IOException ex) {

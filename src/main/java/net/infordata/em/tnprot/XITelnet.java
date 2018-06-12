@@ -143,7 +143,9 @@ public class XITelnet {
 
   private String         ivHost;                    
   private int            ivPort;
-  private final SocketFactory socketFactory;
+  private int connectionTimeoutMillis;
+  private SocketFactory socketFactory = SocketFactory.getDefault();
+  private boolean disconnectOnException = true;
 
   /**
    * if null then the connection is closed
@@ -170,10 +172,10 @@ public class XITelnet {
 
   private   XITelnetEmulator ivEmulator;
 
-  transient private String  ivFirstHost;      //!!1.01
-  transient private String  ivSecondHost;     //!!1.01
+  transient private String  ivFirstHost;
+  transient private String  ivSecondHost;
 
-  transient private boolean ivUsed = false;   //!!1.07
+  transient private boolean ivUsed = false;
 
   /**
    * Converts byte to int without sign
@@ -181,7 +183,6 @@ public class XITelnet {
   public static final int toInt(byte bb) {
     return ((int)bb & 0xff);
   }
-
 
   /**
    * Converts byte to hexadecimal string rappresentation
@@ -203,25 +204,22 @@ public class XITelnet {
     return toHex(buf, buf.length);
   }
 
-
   /**
    * Uses telnet default port for socket connection.
    */
   public XITelnet(String aHost) {
-    this(aHost, 23, SocketFactory.getDefault());
+    this(aHost, 23);
   }
-
 
   /**
    * Uses the given port for socket connection.
    */
-  public XITelnet(String aHost, int aPort, SocketFactory socketFactory) {
+  public XITelnet(String aHost, int aPort) {
     if (aHost == null)
       throw new IllegalArgumentException("Host cannot be null");
 
     ivHost = aHost;
     ivPort = aPort;
-    this.socketFactory = socketFactory;
 
     try {
       StringTokenizer st  = new StringTokenizer(ivHost, "#");
@@ -239,14 +237,12 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Returns the host-name or ip address.
    */
   public String getHost() {
     return ivHost;
   }
-
 
   /**
    * Returns the telnet port.
@@ -255,6 +251,17 @@ public class XITelnet {
     return ivPort;
   }
 
+  public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
+    this.connectionTimeoutMillis = connectionTimeoutMillis;
+  }
+
+  public void setSocketFactory(SocketFactory socketFactory) {
+    this.socketFactory = socketFactory;
+  }
+
+  public void setDisconnectOnException(boolean disconnectOnException) {
+    this.disconnectOnException = disconnectOnException;
+  }
 
   /**
    * Sets the receiving notifications XITelnetEmulator instance.
@@ -263,13 +270,9 @@ public class XITelnet {
     ivEmulator = aEmulator;
   }
 
-
-  /**
-   */
   public boolean isConnected() {
     return (ivSocket != null);
   }
-
 
   /**
    * Sets the telnet terminal type option.
@@ -283,13 +286,9 @@ public class XITelnet {
     ivTermType = aTerminalType;
   }
 
-
-  /**
-   */
   public String getTerminalType() {
     return ivTermType;
   }
-
 
   /**
    * Sets the telnet environment option.
@@ -303,13 +302,9 @@ public class XITelnet {
     ivEnvironment = aEnv;
   }
 
-
-  /**
-   */
   public String getEnvironment() {
     return ivEnvironment;
   }
-
 
   /**
    * Sets the local requested flags.
@@ -325,7 +320,6 @@ public class XITelnet {
     ivLocalReqFlags[flag] = b;
   }
 
-
   /**
    * Sets the remote requested flags.
    * Must be used before that a connection is established.
@@ -340,14 +334,12 @@ public class XITelnet {
     ivRemoteReqFlags[flag] = b;
   }
 
-
   /**
    * Can be used to query a local flag status.
    */
   public boolean isLocalFlagON(byte flag) {
     return ivLocalFlags[flag];
   }
-
 
   /**
    * Can be used to query a remote flag status.
@@ -356,9 +348,8 @@ public class XITelnet {
     return ivRemoteFlags[flag];
   }
 
-
   /**
-   * Tryes to establish a telnet connection.
+   * Tries to establish a telnet connection.
    * If a connection is already established then a call to disconnect() is maded.
    */
   public synchronized void connect() {
@@ -371,7 +362,7 @@ public class XITelnet {
 
     try {
       ivSocket = socketFactory.createSocket();
-      ivSocket.connect(new InetSocketAddress(ivFirstHost, ivPort));
+      ivSocket.connect(new InetSocketAddress(ivFirstHost, ivPort), connectionTimeoutMillis);
 
       ivIn = ivSocket.getInputStream();
       /*
@@ -385,18 +376,6 @@ public class XITelnet {
 
       ivUsed = true;
 
-      // avvio scambio caratteristiche con server
-      /* NO!!! da problemi con AS/400
-      for (int i = 0; i < ivRemoteReqFlags.length; i++) {
-        if (ivRemoteReqFlags[i])
-          sendIACCmd(DO, (byte)i);
-      }
-      for (int i = 0; i < ivLocalReqFlags.length; i++) {
-        if (ivLocalReqFlags[i])
-          sendIACCmd(WILL, (byte)i);
-      }
-      */
-
       connected();
     }
     catch (IOException ex) {
@@ -404,10 +383,7 @@ public class XITelnet {
     }
   }
 
-
-  /**
-   */
-  private void closeSocket() {
+  private void closeSocket(boolean remote) {
     if (ivSocket != null) {
       try {
         if (LOGGER.isLoggable(Level.FINE))
@@ -418,23 +394,24 @@ public class XITelnet {
         // non richiamare catchedIOException();
       }
       ivSocket = null;
-      ivIn = null;
-      ivOut = null;
 
-      disconnected();
+      disconnected(remote);
     }
   }
-
 
   /**
    * Closes the telnet connection.
    */
-  public synchronized void disconnect() { //!!V 03/03/98
+  public synchronized void disconnect() {
+    disconnect(false);
+  }
+
+  private synchronized void disconnect(boolean remote) {
     if (ivReadTh != null) {
       ivReadTh.terminate();
       ivReadTh = null;
     }
-    closeSocket();
+    closeSocket(remote);
   }
 
 
@@ -445,7 +422,6 @@ public class XITelnet {
     int res = 1;
 
     switch (ivIACParserStatus) {
-      //
       case SIAC_START:
         switch (bb) {
           case IAC:
@@ -604,11 +580,10 @@ public class XITelnet {
     return res;
   }
 
-
   /**
    * Sends an telnet EOR sequence.
    */
-  public void sendEOR() throws IOException {
+  public synchronized void sendEOR() throws IOException {
     byte[] buf = {IAC, EOR};
 
     try {
@@ -620,11 +595,10 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Sends a telnet IAC sequence.
    */
-  public void sendIACCmd(byte aCmd, byte aOpt) {
+  public synchronized void sendIACCmd(byte aCmd, byte aOpt) {
     if (LOGGER.isLoggable(Level.FINE))
       LOGGER.fine(" t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
           TELOPT[aOpt]);
@@ -640,11 +614,10 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Sends a telnet IAC sequence with a string argument.
    */
-  public void sendIACStr(byte aCmd, byte aOpt, boolean sendIS, String aString) {
+  public synchronized void sendIACStr(byte aCmd, byte aOpt, boolean sendIS, String aString) {
     if (LOGGER.isLoggable(Level.FINE))
       LOGGER.fine("t " + aCmd + " " + TELCMD[-(aCmd + 1)] + " " +
           TELOPT[aOpt] + " " + aString);
@@ -652,9 +625,6 @@ public class XITelnet {
     byte[] endBuf = {IAC, SE};
     byte[] startBuf = 
       sendIS ? new byte[] {IAC, aCmd, aOpt, IS} : new byte[] {IAC, aCmd, aOpt};
-//    String str = new String(startBuf) + aString + new String(endBuf);
-//    byte[] buf = str.getBytes();
-
     try {
       ivOut.write(startBuf);
       ivOut.write(aString.getBytes());
@@ -666,11 +636,10 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Sends a data buffer (IAC bytes are doubled).
    */
-  public void send(byte[] aBuf, int aLen) {
+  public synchronized void send(byte[] aBuf, int aLen) {
     try {
       for (int i = 0; i < aLen; i++) {
         ivOut.write(aBuf[i]);
@@ -688,7 +657,6 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Sends a data buffer (IAC bytes are doubled).
    */
@@ -696,11 +664,10 @@ public class XITelnet {
     send(aBuf, aBuf.length);
   }
 
-
   /**
    * Flushes output buffer.
    */
-  public void flush() {
+  public synchronized void flush() {
     try {
       ivOut.flush();
     }
@@ -709,7 +676,6 @@ public class XITelnet {
     }
   }
 
-
   /**
    * Called just before trying to connect.
    */
@@ -717,7 +683,6 @@ public class XITelnet {
     if (ivEmulator != null)
       ivEmulator.connecting();
   }
-
 
   /**
    * Called after that a connection is established.
@@ -730,15 +695,13 @@ public class XITelnet {
       ivEmulator.connected();
   }
 
-
   /**
    * Called after that the connection is closed.
    */
-  protected void disconnected() {
+  protected void disconnected(boolean remote) {
     if (ivEmulator != null)
-      ivEmulator.disconnected();
+      ivEmulator.disconnected(remote);
   }
-
 
   /**
    * Called when an IOException is catched.
@@ -749,13 +712,14 @@ public class XITelnet {
 
     try {
       if (ivEmulator != null)
-        ivEmulator.catchedIOException(ex);
+          ivEmulator.catchedIOException(ex);
     }
     finally {
-      disconnect();
+      if (disconnectOnException) {
+        disconnect();
+      }
     }
   }
-
 
   /**
    * Called when an unhandled IAC request is received.
@@ -765,7 +729,6 @@ public class XITelnet {
       ivEmulator.unhandledRequest(aIACOpt, aIACStr);
   }
 
-
   /**
    * Called when a local flags has been changed.
    */
@@ -774,7 +737,6 @@ public class XITelnet {
       ivEmulator.localFlagsChanged(aIACOpt);
   }
 
-
   /**
    * Called when a remote flags has been changed.
    */
@@ -782,7 +744,6 @@ public class XITelnet {
     if (ivEmulator != null)
       ivEmulator.remoteFlagsChanged(aIACOpt);
   }
-
 
   /**
    * Called when data are received.
@@ -798,7 +759,6 @@ public class XITelnet {
       ivEmulator.receivedData(buf, len);
   }
 
-
   /**
    * Called when a telnet EOR sequence is received.
    * NOTE: receivedEOR is always called in the receiving thread.
@@ -811,28 +771,11 @@ public class XITelnet {
       ivEmulator.receivedEOR();
   }
 
-
-  /**
-   */
   @Override
   protected void finalize() throws Throwable {
     disconnect();
     super.finalize();
   }
-
-
-  /**
-   * Only for test purposes.
-   */
-//  static void showFlagsStatus(boolean[] aFlags) {
-//    for (int i = TELOPT_BINARY; i <= TELOPT_NEW_ENVIRON; i++) {
-//      Diagnostic.getOut().print(TELOPT[i] + " " + aFlags[i] + "  -  ");
-//      if ((i % 3) == 0)
-//        Diagnostic.getOut().println();
-//    }
-//    Diagnostic.getOut().println();
-//  }
-
 
   /**
    * Used only for test purposes.
@@ -843,13 +786,9 @@ public class XITelnet {
 
     tn.setLocalReqFlag(TELOPT_BINARY, true);
     tn.setLocalReqFlag(TELOPT_TTYPE, true);
-    //tn.setLocalReqFlag(TELOPT_NEW_ENVIRON, true);
     tn.setLocalReqFlag(TELOPT_EOR, true);
 
     tn.setRemoteReqFlag(TELOPT_BINARY, true);
-    //tn.setRemoteReqFlag(TELOPT_ECHO, true);
-    //tn.setRemoteReqFlag(TELOPT_SGA, true);
-    //tn.setRemoteReqFlag(TELOPT_STATUS, true);
     tn.setRemoteReqFlag(TELOPT_EOR, true);
 
     try {
@@ -864,11 +803,6 @@ public class XITelnet {
     }
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   class RxThread extends Thread {
 
     private boolean ivTerminate = false;
@@ -903,11 +837,10 @@ public class XITelnet {
 
       try {
         while(!ivTerminate) {
-          try {
-            len = ivIn.read(buf);
-          }
-          catch (InterruptedIOException iex) { //!!V 03/03/98
-            len = 0;
+          len = ivIn.read(buf);
+          if (len < 0) {
+            disconnect(true);
+            return;
           }
 
           // process all IAC commands
@@ -934,11 +867,6 @@ public class XITelnet {
         if (!ivTerminate)
           catchedIOException(ex);
       }
-      /*
-      catch (ThreadDeath ex) {
-        throw ex;
-      }
-      */
     }
   }
 }

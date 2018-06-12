@@ -3,6 +3,7 @@ package net.infordata.em;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.Optional;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -16,9 +17,45 @@ public class TerminalClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClient.class);
 
-  private XI5250Emulator em;
+  private TerminalClientEmulator em;
   private String terminalType = "IBM-3179-2";
   private SocketFactory socketFactory = SocketFactory.getDefault();
+  private ExceptionHandler exceptionHandler;
+  private int connectionTimeoutMillis;
+
+  private static class TerminalClientEmulator extends XI5250Emulator {
+
+    private ExceptionHandler exceptionHandler;
+
+    private TerminalClientEmulator() {
+    }
+
+    public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+      this.exceptionHandler = exceptionHandler;
+    }
+
+    @Override
+    protected void catchedIOException(IOException ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void catchedException(Throwable ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void disconnected(boolean remote) {
+      if (exceptionHandler != null && remote) {
+        exceptionHandler.onConnectionClosed();
+      }
+    }
+
+  }
 
   /**
    * Sets the type of terminal to emulate.
@@ -28,6 +65,16 @@ public class TerminalClient {
    */
   public void setTerminalType(String terminalType) {
     this.terminalType = terminalType;
+  }
+
+  /**
+   * Sets a class to handle general exception handler.
+   *
+   * @param exceptionHandler a class to handle exceptions. If none is provided then exceptions stack
+   * trace will be printed to error output.
+   */
+  public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+    this.exceptionHandler = exceptionHandler;
   }
 
   /**
@@ -42,17 +89,30 @@ public class TerminalClient {
   }
 
   /**
+   * Sets the timeout for the socket connection.
+   *
+   * @param connectionTimeoutMillis Number of millis to wait for a connection to be established
+   * before it fails. If not specified no timeout (same as 0 value) will be applied.
+   */
+  public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
+    this.connectionTimeoutMillis = connectionTimeoutMillis;
+  }
+
+  /**
    * Connect to a terminal server.
    *
    * @param host host name of the terminal server.
    * @param port port where the terminal server is listening for connections.
    */
   public void connect(String host, int port) {
-    em = new XI5250Emulator();
+    em = new TerminalClientEmulator();
+    em.setExceptionHandler(exceptionHandler);
     em.setHost(host);
     em.setPort(port);
     em.setTerminalType(terminalType);
     em.setSocketFactory(socketFactory);
+    em.setConnectionTimeoutMillis(connectionTimeoutMillis);
+    em.setDisconnectOnSocketException(false);
     em.setActive(true);
   }
 

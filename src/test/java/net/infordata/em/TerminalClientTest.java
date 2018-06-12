@@ -33,10 +33,11 @@ public class TerminalClientTest {
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClientTest.class);
   private static final long TIMEOUT_MILLIS = 10000;
   private static final String SERVICE_HOST = "localhost";
-  public static final String TERMINAL_TYPE = "IBM-3477-FC";
+  private static final String TERMINAL_TYPE = "IBM-3477-FC";
 
   private VirtualTcpService service = new VirtualTcpService();
   private TerminalClient client;
+  private ExceptionWaiter exceptionWaiter;
 
   @Before
   public void setup() throws IOException {
@@ -45,11 +46,39 @@ public class TerminalClientTest {
     service.start();
     client = new TerminalClient();
     client.setTerminalType(TERMINAL_TYPE);
+    client.setConnectionTimeoutMillis(5000);
+    exceptionWaiter = new ExceptionWaiter();
+    client.setExceptionHandler(exceptionWaiter);
     client.connect(SERVICE_HOST, service.getPort());
   }
 
   private String getResourceFilePath(String resourcePath) {
     return getClass().getResource(resourcePath).getFile();
+  }
+
+  private static class ExceptionWaiter implements ExceptionHandler {
+
+    private CountDownLatch exceptionLatch = new CountDownLatch(1);
+    private CountDownLatch closeLatch = new CountDownLatch(1);
+
+    @Override
+    public void onException(Throwable ex) {
+      exceptionLatch.countDown();
+    }
+
+    @Override
+    public void onConnectionClosed() {
+      closeLatch.countDown();
+    }
+
+    private void awaitException() throws InterruptedException {
+      assertThat(exceptionLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+    }
+
+    private void awaitClose() throws InterruptedException {
+      assertThat(closeLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+    }
+
   }
 
   @After
@@ -241,11 +270,32 @@ public class TerminalClientTest {
     }
   }
 
+  @Test
+  public void shouldSendExceptionToExceptionHandlerWhenConnectWithInvalidPort() throws Exception {
+    client.connect(SERVICE_HOST, 1);
+    exceptionWaiter.awaitException();
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldPosition()
       throws Exception {
     awaitLoginScreen();
     client.setFieldText(0, 1, "test");
+  }
+
+  @Test
+  public void shouldSendCloseToExceptionHandlerWhenServerDown() throws Exception {
+    awaitLoginScreen();
+    service.stop(TIMEOUT_MILLIS);
+    exceptionWaiter.awaitClose();
+  }
+
+  @Test
+  public void shouldSendExceptionToExceptionHandlerWhenSendAndServerDown() throws Exception {
+    awaitLoginScreen();
+    service.stop(TIMEOUT_MILLIS);
+    sendUserField();
+    exceptionWaiter.awaitException();
   }
 
 }
