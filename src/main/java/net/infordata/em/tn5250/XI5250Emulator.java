@@ -102,7 +102,6 @@ import net.infordata.em.crt5250.XIEbcdicTranslator;
 import net.infordata.em.tnprot.XITelnet;
 import net.infordata.em.tnprot.XITelnetEmulator;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -118,7 +117,7 @@ import net.infordata.em.tnprot.XITelnetEmulator;
  *
  * </pre>
  *
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250Emulator extends XI5250Crt implements Serializable {
 
@@ -127,174 +126,176 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public static final String VERSION = "1.19m";
-  
+
   public static final int MAX_ROWS = 27;
   public static final int MAX_COLS = 132;
 
   // opcodes
-  protected static final byte OPCODE_NOP              = (byte)0x00;
-  protected static final byte OPCODE_INVITE_OPERATION = (byte)0x01;
-  protected static final byte OPCODE_OUTPUT_ONLY      = (byte)0x02;
-  protected static final byte OPCODE_PUT_GET          = (byte)0x03;
-  protected static final byte OPCODE_SAVE_SCREEN      = (byte)0x04;
-  protected static final byte OPCODE_RESTORE_SCREEN   = (byte)0x05;
-  protected static final byte OPCODE_READ_IMM         = (byte)0x06;
-  protected static final byte OPCODE_RESERVED1        = (byte)0x07;
-  protected static final byte OPCODE_READ_SCREEN      = (byte)0x08;
-  protected static final byte OPCODE_RESERVED2        = (byte)0x09;
-  protected static final byte OPCODE_CANCEL_INVITE    = (byte)0x0A;
-  protected static final byte OPCODE_TURN_ON_MSG      = (byte)0x0B;
-  protected static final byte OPCODE_TURN_OFF_MSG     = (byte)0x0C;
+  protected static final byte OPCODE_NOP = (byte) 0x00;
+  protected static final byte OPCODE_INVITE_OPERATION = (byte) 0x01;
+  protected static final byte OPCODE_OUTPUT_ONLY = (byte) 0x02;
+  protected static final byte OPCODE_PUT_GET = (byte) 0x03;
+  protected static final byte OPCODE_SAVE_SCREEN = (byte) 0x04;
+  protected static final byte OPCODE_RESTORE_SCREEN = (byte) 0x05;
+  protected static final byte OPCODE_READ_IMM = (byte) 0x06;
+  protected static final byte OPCODE_RESERVED1 = (byte) 0x07;
+  protected static final byte OPCODE_READ_SCREEN = (byte) 0x08;
+  protected static final byte OPCODE_RESERVED2 = (byte) 0x09;
+  protected static final byte OPCODE_CANCEL_INVITE = (byte) 0x0A;
+  protected static final byte OPCODE_TURN_ON_MSG = (byte) 0x0B;
+  protected static final byte OPCODE_TURN_OFF_MSG = (byte) 0x0C;
   protected static final String[] OPCODE =
-                                 {"No operation",
-                                  "Invite operation",
-                                  "Output only",
-                                  "Put/Get Operation",
-                                  "Save screen operation",
-                                  "Restore screen operation",
-                                  "Read immediate operation",
-                                  "Reserved 1",
-                                  "Read screen operation",
-                                  "Reserved 2",
-                                  "Cancel invite operation",
-                                  "Turn ON message light",
-                                  "Turn OFF message light"};
-  
+      {"No operation",
+          "Invite operation",
+          "Output only",
+          "Put/Get Operation",
+          "Save screen operation",
+          "Restore screen operation",
+          "Read immediate operation",
+          "Reserved 1",
+          "Read screen operation",
+          "Reserved 2",
+          "Cancel invite operation",
+          "Turn ON message light",
+          "Turn OFF message light"};
+
   // 5250 stream parsing errors
-  protected static final int ERR_INVALID_COMMAND        = 10030101;
+  protected static final int ERR_INVALID_COMMAND = 10030101;
   protected static final int ERR_INVALID_CLEAR_UNIT_ALT = 10030105;
-  protected static final int ERR_INVALID_SOH_LENGTH     = 10050131;
-  protected static final int ERR_INVALID_ROW_COL_ADDR   = 10050122;
-  protected static final int ERR_INVALID_EXT_ATTR_TYPE  = 10050132;
-  protected static final int ERR_INVALID_SF_CLASS_TYPE  = 10050111;
+  protected static final int ERR_INVALID_SOH_LENGTH = 10050131;
+  protected static final int ERR_INVALID_ROW_COL_ADDR = 10050122;
+  protected static final int ERR_INVALID_EXT_ATTR_TYPE = 10050132;
+  protected static final int ERR_INVALID_SF_CLASS_TYPE = 10050111;
 
   // flags
-  protected static final byte FLAG_HLP                = (byte)0x01;
-  protected static final byte FLAG_TRQ                = (byte)0x02;
-  protected static final byte FLAG_SRQ                = (byte)0x04;
-  protected static final byte FLAG_ATN                = (byte)0x40;
-  protected static final byte FLAG_ERR                = (byte)0x80;
+  protected static final byte FLAG_HLP = (byte) 0x01;
+  protected static final byte FLAG_TRQ = (byte) 0x02;
+  protected static final byte FLAG_SRQ = (byte) 0x04;
+  protected static final byte FLAG_ATN = (byte) 0x40;
+  protected static final byte FLAG_ERR = (byte) 0x80;
 
-  protected static final byte ESC       = (byte)0x04;
+  protected static final byte ESC = (byte) 0x04;
   // read commands
-  protected static final byte CMD_QUERY_DEVICE    = (byte)0xF3;
-  protected static final byte CMD_READ_IMMEDIATE  = (byte)0x72;
-  protected static final byte CMD_READ_FIELDS     = (byte)0x42;
-  protected static final byte CMD_READ_MDT_FIELDS = (byte)0x52;
-  protected static final byte CMD_READ_SCREEN     = (byte)0x62;
-  protected static final byte CMD_SAVE_SCREEN     = (byte)0x02;
+  protected static final byte CMD_QUERY_DEVICE = (byte) 0xF3;
+  protected static final byte CMD_READ_IMMEDIATE = (byte) 0x72;
+  protected static final byte CMD_READ_FIELDS = (byte) 0x42;
+  protected static final byte CMD_READ_MDT_FIELDS = (byte) 0x52;
+  protected static final byte CMD_READ_SCREEN = (byte) 0x62;
+  protected static final byte CMD_SAVE_SCREEN = (byte) 0x02;
   // output commands
-  protected static final byte CMD_CLEAR_FMT_TABLE = (byte)0x50;
-  protected static final byte CMD_CLEAR_UNIT      = (byte)0x40;
-  protected static final byte CMD_CLEAR_UNIT_ALT  = (byte)0x20;
-  protected static final byte CMD_RESTORE_SCREEN  = (byte)0x12;
-  protected static final byte CMD_ROLL            = (byte)0x23;
-  protected static final byte CMD_WRITE_ERROR_CODE= (byte)0x21;
-  protected static final byte CMD_WRITE_TO_DISPLAY= (byte)0x11;
+  protected static final byte CMD_CLEAR_FMT_TABLE = (byte) 0x50;
+  protected static final byte CMD_CLEAR_UNIT = (byte) 0x40;
+  protected static final byte CMD_CLEAR_UNIT_ALT = (byte) 0x20;
+  protected static final byte CMD_RESTORE_SCREEN = (byte) 0x12;
+  protected static final byte CMD_ROLL = (byte) 0x23;
+  protected static final byte CMD_WRITE_ERROR_CODE = (byte) 0x21;
+  protected static final byte CMD_WRITE_TO_DISPLAY = (byte) 0x11;
 
   // orders
   // see http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.3?DT=19950629163252
-  protected static final byte ORD_SBA  = (byte)0x11;  // Set buffer address 
-  protected static final byte ORD_IC   = (byte)0x13;  // Insert cursor
-  protected static final byte ORD_MC   = (byte)0x14;  // Move cursor 
-  protected static final byte ORD_RA   = (byte)0x02;  // Repeat to address
-  protected static final byte ORD_EA   = (byte)0x03;  // Erase to address 
-  protected static final byte ORD_SOH  = (byte)0x01;  // Start of header
-  protected static final byte ORD_TD   = (byte)0x10;  // Transparent data 
-  protected static final byte ORD_WEA  = (byte)0x12;  // Write extended attributes 
-  protected static final byte ORD_SF   = (byte)0x1D;  // Start of field
-  protected static final byte ORD_WDSF = (byte)0x15;  // Write to Display Structured Field
-  
-  protected static final byte[] STRPCCMD = new byte[] {
-    (byte)0x27, (byte)0x80, (byte)0xfc, (byte)0xd7, (byte)0xc3, (byte)0xd6, (byte)0x40, (byte)0x83, (byte)0x80, (byte)0xa1, (byte)0x80
+  protected static final byte ORD_SBA = (byte) 0x11;  // Set buffer address
+  protected static final byte ORD_IC = (byte) 0x13;  // Insert cursor
+  protected static final byte ORD_MC = (byte) 0x14;  // Move cursor
+  protected static final byte ORD_RA = (byte) 0x02;  // Repeat to address
+  protected static final byte ORD_EA = (byte) 0x03;  // Erase to address
+  protected static final byte ORD_SOH = (byte) 0x01;  // Start of header
+  protected static final byte ORD_TD = (byte) 0x10;  // Transparent data
+  protected static final byte ORD_WEA = (byte) 0x12;  // Write extended attributes
+  protected static final byte ORD_SF = (byte) 0x1D;  // Start of field
+  protected static final byte ORD_WDSF = (byte) 0x15;  // Write to Display Structured Field
+
+  protected static final byte[] STRPCCMD = new byte[]{
+      (byte) 0x27, (byte) 0x80, (byte) 0xfc, (byte) 0xd7, (byte) 0xc3, (byte) 0xd6, (byte) 0x40,
+      (byte) 0x83, (byte) 0x80, (byte) 0xa1, (byte) 0x80
   };  // Start PC Command
-  protected static final byte[] ENDSTRPCCMD = new byte[] {
-    (byte)0x27, (byte)0x00, (byte)0xfc, (byte)0xd7, (byte)0xc3, (byte)0xd6, (byte)0x40, (byte)0x83, (byte)0x80, (byte)0x82, (byte)0x00
+  protected static final byte[] ENDSTRPCCMD = new byte[]{
+      (byte) 0x27, (byte) 0x00, (byte) 0xfc, (byte) 0xd7, (byte) 0xc3, (byte) 0xd6, (byte) 0x40,
+      (byte) 0x83, (byte) 0x80, (byte) 0x82, (byte) 0x00
   };  // Start PC Command
 
   // aid codes
-  public static final byte AID_COMMAND   = (byte)0x31;
-  public static final byte AID_FUNCTION  = (byte)0x32;
-  public static final byte AID_F3        = (byte)0x33;
-  public static final byte AID_F4        = (byte)0x34;
-  public static final byte AID_F5        = (byte)0x35;
-  public static final byte AID_F6        = (byte)0x36;
-  public static final byte AID_F7        = (byte)0x37;
-  public static final byte AID_F8        = (byte)0x38;
-  public static final byte AID_F9        = (byte)0x39;
-  public static final byte AID_F10       = (byte)0x3A;
-  public static final byte AID_F11       = (byte)0x3B;
-  public static final byte AID_F12       = (byte)0x3C;
-  public static final byte AID_F13       = (byte)0xB1;
-  public static final byte AID_F14       = (byte)0xB2;
-  public static final byte AID_F15       = (byte)0xB3;
-  public static final byte AID_F16       = (byte)0xB4;
-  public static final byte AID_F17       = (byte)0xB5;
-  public static final byte AID_F18       = (byte)0xB6;
-  public static final byte AID_F19       = (byte)0xB7;
-  public static final byte AID_F20       = (byte)0xB8;
-  public static final byte AID_F21       = (byte)0xB9;
-  public static final byte AID_F22       = (byte)0xBA;
-  public static final byte AID_F23       = (byte)0xBB;
-  public static final byte AID_F24       = (byte)0xBC;
-  public static final byte AID_CLEAR     = (byte)0xBD;
-  public static final byte AID_ENTER     = (byte)0xF1;
-  public static final byte AID_HELP      = (byte)0xF3;
-  public static final byte AID_ROLL_DN   = (byte)0xF4;
-  public static final byte AID_ROLL_UP   = (byte)0xF5;
-  public static final byte AID_PRINT     = (byte)0xF6;
-  public static final byte AID_REC_BACKSP= (byte)0xF8;
-  public static final byte AID_AUTO_ENTER= (byte)0x3F;
+  public static final byte AID_COMMAND = (byte) 0x31;
+  public static final byte AID_FUNCTION = (byte) 0x32;
+  public static final byte AID_F3 = (byte) 0x33;
+  public static final byte AID_F4 = (byte) 0x34;
+  public static final byte AID_F5 = (byte) 0x35;
+  public static final byte AID_F6 = (byte) 0x36;
+  public static final byte AID_F7 = (byte) 0x37;
+  public static final byte AID_F8 = (byte) 0x38;
+  public static final byte AID_F9 = (byte) 0x39;
+  public static final byte AID_F10 = (byte) 0x3A;
+  public static final byte AID_F11 = (byte) 0x3B;
+  public static final byte AID_F12 = (byte) 0x3C;
+  public static final byte AID_F13 = (byte) 0xB1;
+  public static final byte AID_F14 = (byte) 0xB2;
+  public static final byte AID_F15 = (byte) 0xB3;
+  public static final byte AID_F16 = (byte) 0xB4;
+  public static final byte AID_F17 = (byte) 0xB5;
+  public static final byte AID_F18 = (byte) 0xB6;
+  public static final byte AID_F19 = (byte) 0xB7;
+  public static final byte AID_F20 = (byte) 0xB8;
+  public static final byte AID_F21 = (byte) 0xB9;
+  public static final byte AID_F22 = (byte) 0xBA;
+  public static final byte AID_F23 = (byte) 0xBB;
+  public static final byte AID_F24 = (byte) 0xBC;
+  public static final byte AID_CLEAR = (byte) 0xBD;
+  public static final byte AID_ENTER = (byte) 0xF1;
+  public static final byte AID_HELP = (byte) 0xF3;
+  public static final byte AID_ROLL_DN = (byte) 0xF4;
+  public static final byte AID_ROLL_UP = (byte) 0xF5;
+  public static final byte AID_PRINT = (byte) 0xF6;
+  public static final byte AID_REC_BACKSP = (byte) 0xF8;
+  public static final byte AID_AUTO_ENTER = (byte) 0x3F;
 
   // emulator state
   // state less than 0 are not saved in ivPrevState
-  public static final int ST_NULL              = -2;
-  public static final int ST_TEMPORARY_LOCK    = -1;
-  public static final int ST_HARDWARE_ERROR    = 0;
-  public static final int ST_NORMAL_LOCKED     = 1;
-  public static final int ST_NORMAL_UNLOCKED   = 2;
-  public static final int ST_POST_HELP         = 3;
-  public static final int ST_POWER_ON          = 4;
-  public static final int ST_PRE_HELP          = 5;
-  public static final int ST_SS_MESSAGE        = 6;
-  public static final int ST_SYSTEM_REQUEST    = 7;
-  public static final int ST_POWERED           = 8;   //!!1.01
+  public static final int ST_NULL = -2;
+  public static final int ST_TEMPORARY_LOCK = -1;
+  public static final int ST_HARDWARE_ERROR = 0;
+  public static final int ST_NORMAL_LOCKED = 1;
+  public static final int ST_NORMAL_UNLOCKED = 2;
+  public static final int ST_POST_HELP = 3;
+  public static final int ST_POWER_ON = 4;
+  public static final int ST_PRE_HELP = 5;
+  public static final int ST_SS_MESSAGE = 6;
+  public static final int ST_SYSTEM_REQUEST = 7;
+  public static final int ST_POWERED = 8;   //!!1.01
 
   private static final String[] ST_DESCRIPTION =
-                           {"ST_NULL",
-                            "ST_TEMPORARY_LOCK",
-                            "ST_HARDWARE_ERROR",
-                            "ST_NORMAL_LOCKED",
-                            "ST_NORMAL_UNLOCKED",
-                            "ST_POST_HELP",
-  	                        "ST_POWER_ON",
-                            "ST_PRE_HELP",
-                            "ST_SS_MESSAGE",
-                            "ST_SYSTEM_REQUEST",
-                            "ST_POWERED"};
+      {"ST_NULL",
+          "ST_TEMPORARY_LOCK",
+          "ST_HARDWARE_ERROR",
+          "ST_NORMAL_LOCKED",
+          "ST_NORMAL_UNLOCKED",
+          "ST_POST_HELP",
+          "ST_POWER_ON",
+          "ST_PRE_HELP",
+          "ST_SS_MESSAGE",
+          "ST_SYSTEM_REQUEST",
+          "ST_POWERED"};
 
   // telnet connection
-  transient private XITelnet        ivTelnet;
-  transient private byte[]          ivRXBuf    = new byte[1024 * 8];
-  transient private int             ivRXBufLen;
+  transient private XITelnet ivTelnet;
+  transient private byte[] ivRXBuf = new byte[1024 * 8];
+  transient private int ivRXBufLen;
 
   // one bit for each function key
-  transient private int             ivFunctionKeysMask;
+  transient private int ivFunctionKeysMask;
 
   /**
    * The current commands list.
    */
-  transient XI5250CmdList   ivCmdList;
+  transient XI5250CmdList ivCmdList;
   /**
    * The pending command (used when an aid code is pressed).
    */
-  transient XI5250Cmd       ivPendingCmd;
+  transient XI5250Cmd ivPendingCmd;
 
   // current and previouos state
-  transient private int         ivState = ST_NULL;
-  transient private int         ivPrevState = ST_NULL;
+  transient private int ivState = ST_NULL;
+  transient private int ivPrevState = ST_NULL;
 
-  transient private int         ivErrorRow;
+  transient private int ivErrorRow;
 
   transient private XI5250StatusBar ivStatusBar;
 
@@ -306,50 +307,51 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   transient protected int ivSavedScreensIdx = 0;
 
   //!!0.91
-  transient KeyEventQueue           ivKeybEventQueue;
-  transient KeyEventDispatchThread  ivKeybThread;
+  transient KeyEventQueue ivKeybEventQueue;
+  transient KeyEventDispatchThread ivKeybThread;
 
   //!!0.92 used when the user switches to SYSTEM_REQUEST state
-  transient private XI5250EmulatorMemento  ivSysReqMemento;
-  transient private XI5250Field            ivSysReqField;
+  transient private XI5250EmulatorMemento ivSysReqMemento;
+  transient private XI5250Field ivSysReqField;
 
   //!!0.93 used when the emulator switch to PRE_HELP state
-  transient private XI5250CrtBuffer        ivPreHelpErrorLine;
+  transient private XI5250CrtBuffer ivPreHelpErrorLine;
 
   //!!0.95
   transient private XI5250EmulatorListener ivEmulatorListener;
 
   //!!1.02
-  private String                 ivTermType;
-  private String                 ivTelnetEnv;
+  private String ivTermType;
+  private String ivTelnetEnv;
 
   //!!1.02d
-  transient private TelnetEmulator         ivTelnetEmulator = new TelnetEmulator();
+  transient private TelnetEmulator ivTelnetEmulator = new TelnetEmulator();
 
   //!!1.03a
   /**
    * Used when switching from 24x80 to ...
    */
-  transient protected Font                   ivPrevFont;
+  transient protected Font ivPrevFont;
 
   //!!1.04c
-  public static final String       ACTIVE            = "active";
-  public static final String       TERMINAL_TYPE     = "terminalType";
-  public static final String       ALTFKEY_REMAP     = "altFKeyRemap";
-  
-  public static final String       TELNET_ENV        = "telnetEnv";
+  public static final String ACTIVE = "active";
+  public static final String TERMINAL_TYPE = "terminalType";
+  public static final String ALTFKEY_REMAP = "altFKeyRemap";
 
-  public static final String       STRPCCMD_ENABLED  = "strPcCmd";
+  public static final String TELNET_ENV = "telnetEnv";
+
+  public static final String STRPCCMD_ENABLED = "strPcCmd";
 
   //!!1.07
-  private String                   ivHost;
-  
-  private boolean                  ivAltFKeyRemap;
-  
-  private boolean                  ivStrPcCmdEnabled;
-  private boolean                  ivReceivedStrPcCmd;
-  private boolean                  ivReceivedEndStrPcCmd;
-  
+  private String ivHost;
+  private int ivPort = 23;
+
+  private boolean ivAltFKeyRemap;
+
+  private boolean ivStrPcCmdEnabled;
+  private boolean ivReceivedStrPcCmd;
+  private boolean ivReceivedEndStrPcCmd;
+
   /**
    * Default contructor.
    */
@@ -390,8 +392,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Routes XI5250EmulatorEvent to listeners
    */
   protected void processEmulatorEvent(XI5250EmulatorEvent e) {
-    if (ivEmulatorListener == null)
+    if (ivEmulatorListener == null) {
       return;
+    }
 
     switch (e.getID()) {
       //
@@ -425,18 +428,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
   /**
    * Redefined to move the status bar.
-  protected void processCrtEvent(XI5250CrtEvent e) {
-    switch (e.getID()) {
-      case XI5250CrtEvent.SIZE_CHANGED:
-        if (ivStatusBar != null)
-          moveStatusBar();
-        break;
-    }
-    super.processCrtEvent(e);
-  }
+   protected void processCrtEvent(XI5250CrtEvent e) {
+   switch (e.getID()) {
+   case XI5250CrtEvent.SIZE_CHANGED:
+   if (ivStatusBar != null)
+   moveStatusBar();
+   break;
+   }
+   super.processCrtEvent(e);
+   }
    */
 
 
@@ -456,8 +458,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     synchronized (getTreeLock()) {
       ivStatusBar.setFont(getFont());
       ivStatusBar.setBounds(0, getCrtBufferSize().height,
-                            getCrtBufferSize().width,
-                            getCharSize().height + 4);
+          getCrtBufferSize().width,
+          getCharSize().height + 4);
       ivStatusBar.setVisible(true);
     }
   }
@@ -468,8 +470,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   public synchronized void setHost(String aHost) {
     if (aHost == ivHost ||
-        (aHost != null && aHost.equals(ivHost)))
+        (aHost != null && aHost.equals(ivHost))) {
       return;
+    }
 
     setActive(false);
     ivHost = aHost;
@@ -483,6 +486,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return ivHost;
   }
 
+  public synchronized void setPort(int aPort) {
+    if (aPort == ivPort) {
+      return;
+    }
+
+    setActive(false);
+    ivPort = aPort;
+  }
 
   /**
    * Activate or deactivate the connection.
@@ -491,15 +502,15 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     boolean wasActive;
     synchronized (this) {
       wasActive = isActive();
-      if (activate == wasActive)
+      if (activate == wasActive) {
         return;
+      }
 
       if (activate) {
-        ivTelnet = new XITelnet(ivHost);
+        ivTelnet = new XITelnet(ivHost, ivPort);
         ivTelnet.setEmulator(ivTelnetEmulator);
         ivTelnet.connect();
-      }
-      else {
+      } else {
         ivTelnet.disconnect();
         ivTelnet.setEmulator(null);
         ivTelnet = null;
@@ -527,16 +538,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * </pre>
    */
   public void setTerminalType(String aTermType) {
-    if (aTermType != null && aTermType.equals(ivTermType))
+    if (aTermType != null && aTermType.equals(ivTermType)) {
       return;
+    }
 
-    if (isActive())
+    if (isActive()) {
       throw new IllegalArgumentException(
           "Cannot change the terminal type, close the connection first.");
+    }
 
-    if (!"IBM-3179-2".equals(aTermType) && !"IBM-3477-FC".equals(aTermType))
+    if (!"IBM-3179-2".equals(aTermType) && !"IBM-3477-FC".equals(aTermType)) {
       throw new IllegalArgumentException(
           "Wrong terminal type, valid values are IBM-3179-2 or IBM-3477-FC.");
+    }
 
     String oldTermType = ivTermType;
     ivTermType = aTermType;
@@ -551,18 +565,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return ivTermType;
   }
 
-  
+
   /**
-   * See: http://www.faqs.org/rfcs/rfc2877.html and 
-   *      http://www.faqs.org/rfcs/rfc1572.html
+   * See: http://www.faqs.org/rfcs/rfc2877.html and http://www.faqs.org/rfcs/rfc1572.html
    */
   public void setTelnetEnv(String env) {
-    if (env != null && env.equals(ivTelnetEnv))
+    if (env != null && env.equals(ivTelnetEnv)) {
       return;
+    }
 
-    if (isActive())
+    if (isActive()) {
       throw new IllegalArgumentException(
           "Cannot change the device name, close the connection first.");
+    }
 
     String old = ivTelnetEnv;
     ivTelnetEnv = env;
@@ -579,40 +594,41 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * @param value - if true FKEYS are accepted even if pressed in combination
-   *   with the ALT key (usefull with platforms where FKEYS can be captured by 
-   *   the OS itself, such as MAX-OSX). 
+   * @param value - if true FKEYS are accepted even if pressed in combination with the ALT key
+   * (usefull with platforms where FKEYS can be captured by the OS itself, such as MAX-OSX).
    */
   public void setAltFKeyRemap(boolean value) {
-    if (value == ivAltFKeyRemap)
+    if (value == ivAltFKeyRemap) {
       return;
+    }
     boolean old = ivAltFKeyRemap;
     ivAltFKeyRemap = value;
     firePropertyChange(ALTFKEY_REMAP, old, ivAltFKeyRemap);
   }
-  
+
   public boolean getAltFKeyRemap() {
     return ivAltFKeyRemap;
   }
 
   /**
-   * @param value - if true the STRPCCMD order is enabled. 
+   * @param value - if true the STRPCCMD order is enabled.
    */
   public void setStrPcCmdEnabled(boolean value) {
-    if (value == ivStrPcCmdEnabled)
+    if (value == ivStrPcCmdEnabled) {
       return;
+    }
     boolean old = ivStrPcCmdEnabled;
     ivStrPcCmdEnabled = value;
     firePropertyChange(STRPCCMD_ENABLED, old, ivStrPcCmdEnabled);
   }
-  
+
   public boolean isStrPcCmdEnabled() {
     return ivStrPcCmdEnabled;
   }
 
   /**
-   * Moves the cursor to the given position.
-   * It updates also the status bar area with the new cursor coordinates.
+   * Moves the cursor to the given position. It updates also the status bar area with the new cursor
+   * coordinates.
    */
   @Override
   public void setCursorPos(int aCol, int aRow) {
@@ -650,13 +666,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Redefined to take care of the status-bar presence
-   * @see    crt.XICrt#getTestSize
+   *
+   * @see crt.XICrt#getTestSize
    */
   @Override
   protected Dimension getTestSize(Font aFont) {
     FontMetrics fm = getFontMetrics(aFont);
     Dimension res = new Dimension(fm.charWidth('W') * getCrtSize().width,
-                                  fm.getHeight() * (getCrtSize().height + 1) + 4);
+        fm.getHeight() * (getCrtSize().height + 1) + 4);
     return res;
   }
 
@@ -665,23 +682,22 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Factory method for XI5250Field creation.
    */
   protected XI5250Field create5250Field(byte[] aFFW, byte[] aFCW,
-                                        int aCol, int aRow,
-                                        int aLen, int aAttr) {
+      int aCol, int aRow,
+      int aLen, int aAttr) {
     return new XI5250Field(this, aFFW, aFCW, aCol, aRow, aLen, aAttr);
   }
 
 
   /**
-   * Creates a XI5250EmulatorMemento instance.
-   * It is like a snapshot of the current internal state.
+   * Creates a XI5250EmulatorMemento instance. It is like a snapshot of the current internal state.
    */
   public synchronized XI5250EmulatorMemento createMemento() {
-    return new XI5250EmulatorMemento((XI5250FieldsList)ivFields.clone(),
-                                     ivFunctionKeysMask, ivPendingCmd,
-                                     ivState, ivPrevState,
-                                     getCursorCol(), getCursorRow(),
-                                     ivErrorRow,
-                                     (XI5250CrtBuffer)getCrtBuffer().clone());
+    return new XI5250EmulatorMemento((XI5250FieldsList) ivFields.clone(),
+        ivFunctionKeysMask, ivPendingCmd,
+        ivState, ivPrevState,
+        getCursorCol(), getCursorRow(),
+        ivErrorRow,
+        (XI5250CrtBuffer) getCrtBuffer().clone());
   }
 
 
@@ -697,7 +713,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
         ivFields = aMemento.ivFields;
         ivFunctionKeysMask = aMemento.ivFunctionKeysMask;
-        ivPendingCmd =  aMemento.ivPendingCmd;
+        ivPendingCmd = aMemento.ivPendingCmd;
         setState(aMemento.ivState);
         ivPrevState = aMemento.ivPrevState;
         setErrorRow(aMemento.ivErrorRow);
@@ -705,7 +721,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         getCrtBuffer().copyFrom(aMemento.ivCrtBuffer);
 
         processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
-                                                     this));
+            this));
       }
     }
     repaint();
@@ -716,19 +732,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Works as createMemento but it is used when it switches to the System Request State.
    */
   protected synchronized XI5250EmulatorMemento createSysReqMemento() {
-    return new XI5250EmulatorMemento((XI5250FieldsList)ivFields.clone(),
-                                     ivFunctionKeysMask, ivPendingCmd,
-                                     ivState, ivPrevState,
-                                     getCursorCol(), getCursorRow(),
-                                     ivErrorRow,
-                                     new XI5250CrtBuffer(
-                                         (XI5250CrtBuffer)getCrtBuffer(),
-                                         0, ivErrorRow, getCrtSize().width, 1));
+    return new XI5250EmulatorMemento((XI5250FieldsList) ivFields.clone(),
+        ivFunctionKeysMask, ivPendingCmd,
+        ivState, ivPrevState,
+        getCursorCol(), getCursorRow(),
+        ivErrorRow,
+        new XI5250CrtBuffer(
+            (XI5250CrtBuffer) getCrtBuffer(),
+            0, ivErrorRow, getCrtSize().width, 1));
   }
 
 
   /**
-   * @see    #createSysReqMemento
+   * @see #createSysReqMemento
    */
   protected void restoreSysReqMemento(XI5250EmulatorMemento aMemento) {
     //!!0.95 this statement avoids deadlocks with component resizing
@@ -736,7 +752,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       synchronized (this) {
         ivFields = aMemento.ivFields;
         ivFunctionKeysMask = aMemento.ivFunctionKeysMask;
-        ivPendingCmd =  aMemento.ivPendingCmd;
+        ivPendingCmd = aMemento.ivPendingCmd;
         //!! NO
         //setState(aMemento.ivState);
         //ivPrevState = aMemento.ivPrevState;
@@ -744,11 +760,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         setCursorPos(aMemento.ivCol, aMemento.ivRow);
 
         getCrtBuffer().copyFrom(0, ivErrorRow, aMemento.ivCrtBuffer, 0, 0,
-                                getCrtSize().width, 1);
+            getCrtSize().width, 1);
 
         processEmulatorEvent(
             new XI5250EmulatorEvent(XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
-                                    this));
+                this));
       }
     }
     repaint();
@@ -756,19 +772,20 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * Called by XITelnet just before trying to connect.
-   * Sets the 5250 telnet requested flags (ie. TELOPT_BINARY, TELOPT_TTYPE, TELOPT_EOR).
-   * Fires the XI5250EmulatorEvent.CONNECTING event.
+   * Called by XITelnet just before trying to connect. Sets the 5250 telnet requested flags (ie.
+   * TELOPT_BINARY, TELOPT_TTYPE, TELOPT_EOR). Fires the XI5250EmulatorEvent.CONNECTING event.
    */
   protected void connecting() {
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("connecting()");
+    }
 
     // sets required telnet options
     ivTelnet.setTerminalType(ivTermType);
-    
-    if (ivTelnetEnv != null)
+
+    if (ivTelnetEnv != null) {
       ivTelnet.setEnvironment(ivTelnetEnv);
+    }
 
     ivTelnet.setLocalReqFlag(XITelnet.TELOPT_BINARY, true);
     ivTelnet.setLocalReqFlag(XITelnet.TELOPT_TTYPE, true);
@@ -783,12 +800,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * Called by XITelnet when a connection is established.
-   * Fires the XI5250EmulatorEvent.CONNECTED event.
+   * Called by XITelnet when a connection is established. Fires the XI5250EmulatorEvent.CONNECTED
+   * event.
    */
   protected void connected() {
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("connected()");
+    }
 
     processEmulatorEvent(
         new XI5250EmulatorEvent(XI5250EmulatorEvent.CONNECTED, this));
@@ -796,12 +814,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * Called by XITelnet when a connection is closed.
-   * Fires the XI5250EmulatorEvent.DISCONNECTED event.
+   * Called by XITelnet when a connection is closed. Fires the XI5250EmulatorEvent.DISCONNECTED
+   * event.
    */
   protected void disconnected() {
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("disconnected()");
+    }
 
     { //!!1.07
       setState(ST_POWER_ON);
@@ -820,14 +839,15 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Called by XITelnet when an IOException is catched.
    */
   protected void catchedIOException(final IOException ex) {
-    if (LOGGER.isLoggable(Level.WARNING))
+    if (LOGGER.isLoggable(Level.WARNING)) {
       LOGGER.log(Level.WARNING, "catchedIOException()", ex);
+    }
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        JOptionPane.showMessageDialog(XI5250Emulator.this, 
-            ex.getClass().getName() + "\n" + 
-            ex.getMessage() + 
-            "\nSee the log for details ",
+        JOptionPane.showMessageDialog(XI5250Emulator.this,
+            ex.getClass().getName() + "\n" +
+                ex.getMessage() +
+                "\nSee the log for details ",
             "WARNING", JOptionPane.WARNING_MESSAGE);
       }
     });
@@ -835,23 +855,22 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Called when 5250 stream parsing exception is catched.
-   * @param ex
    */
   protected void catched5250Exception(XI5250Exception ex) {
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.log(Level.FINE, "catched5250Exception()", ex);
+    }
     send5250Error(ex.getErrorCode());
   }
-  
+
   /**
    * Called when an generic exception is catched.
-   * @param ex
    */
   protected void catchedException(final Throwable ex) {
     LOGGER.log(Level.SEVERE, "catchedException()", ex);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        JOptionPane.showMessageDialog(XI5250Emulator.this, 
+        JOptionPane.showMessageDialog(XI5250Emulator.this,
             ex.getMessage() + "\nSee the log for details ",
             "ERROR", JOptionPane.ERROR_MESSAGE);
       }
@@ -862,8 +881,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected void receivedData(byte[] buf, int len) {
     if (getState() == ST_POWER_ON) {
-      if (LOGGER.isLoggable(Level.WARNING))
+      if (LOGGER.isLoggable(Level.WARNING)) {
         LOGGER.log(Level.WARNING, "Discarding received data len: " + len);
+      }
       return;
     }
 
@@ -897,45 +917,48 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
       if (LOGGER.isLoggable(Level.FINER)) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ivRXBufLen; i++)
+        for (int i = 0; i < ivRXBufLen; i++) {
           sb.append(XITelnet.toHex(ivRXBuf[i]) + "  ");
+        }
         LOGGER.finer(sb.toString());
       }
     }
 
     // verify packet header
     int packetLen = (XITelnet.toInt(ivRXBuf[0]) << 8) +
-                    XITelnet.toInt(ivRXBuf[1]);
-    if (packetLen != ivRXBufLen || ivRXBuf[2] != (byte)0x12 ||
-        ivRXBuf[3] != (byte)0xA0) {
+        XITelnet.toInt(ivRXBuf[1]);
+    if (packetLen != ivRXBufLen || ivRXBuf[2] != (byte) 0x12 ||
+        ivRXBuf[3] != (byte) 0xA0) {
       //TODO ??
-      if (LOGGER.isLoggable(Level.FINE))
+      if (LOGGER.isLoggable(Level.FINE)) {
         LOGGER.fine("malformed packet");
+      }
 
       ivRXBufLen = 0;
       return;
     }
 
     // variable header part
-    int     varHdrLen = XITelnet.toInt(ivRXBuf[6]);
-    int     dataStart = 6 + varHdrLen;                // start of data
-    @SuppressWarnings("unused") 
-    final boolean errFlag   = (ivRXBuf[7] & FLAG_ERR) != 0; // data stream output error
-    @SuppressWarnings("unused") 
-    final boolean atnFlag   = (ivRXBuf[7] & FLAG_ATN) != 0; // attention key pressed
-    @SuppressWarnings("unused") 
-    final boolean srqFlag   = (ivRXBuf[7] & FLAG_SRQ) != 0; // system request key pressed
-    @SuppressWarnings("unused") 
-    final boolean trqFlag   = (ivRXBuf[7] & FLAG_TRQ) != 0; // test request key
-    @SuppressWarnings("unused") 
-    final boolean hlpFlag   = (ivRXBuf[7] & FLAG_HLP) != 0; // help error state
+    int varHdrLen = XITelnet.toInt(ivRXBuf[6]);
+    int dataStart = 6 + varHdrLen;                // start of data
+    @SuppressWarnings("unused") final boolean errFlag =
+        (ivRXBuf[7] & FLAG_ERR) != 0; // data stream output error
+    @SuppressWarnings("unused") final boolean atnFlag =
+        (ivRXBuf[7] & FLAG_ATN) != 0; // attention key pressed
+    @SuppressWarnings("unused") final boolean srqFlag =
+        (ivRXBuf[7] & FLAG_SRQ) != 0; // system request key pressed
+    @SuppressWarnings("unused") final boolean trqFlag =
+        (ivRXBuf[7] & FLAG_TRQ) != 0; // test request key
+    @SuppressWarnings("unused") final boolean hlpFlag =
+        (ivRXBuf[7] & FLAG_HLP) != 0; // help error state
 
-    byte    opCode    = ivRXBuf[9];
+    byte opCode = ivRXBuf[9];
 
     ByteArrayInputStream dataStream = new ByteArrayInputStream(ivRXBuf, dataStart,
-                                                               ivRXBufLen - dataStart);
-    if (LOGGER.isLoggable(Level.FINE))
+        ivRXBufLen - dataStart);
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("OPCODE : " + OPCODE[opCode]);
+    }
 
     switch (opCode) {
       //
@@ -964,7 +987,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
               synchronized (getTreeLock()) {
                 synchronized (this) {
                   if (getState() == ST_SYSTEM_REQUEST)  //!!1.01b
+                  {
                     setPrevState();
+                  }
 
                   setFreeze(true);
                   try {
@@ -974,10 +999,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
                     processEmulatorEvent(
                         new XI5250EmulatorEvent(
-                                XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
-                                XI5250Emulator.this));
-                  }
-                  finally {
+                            XI5250EmulatorEvent.NEW_PANEL_RECEIVED,
+                            XI5250Emulator.this));
+                  } finally {
                     setFreeze(false);
                   }
                 }
@@ -988,61 +1012,57 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
                 String cmd = getString(1, 0, 132 - STRPCCMD.length);
                 {
                   int k = cmd.length() - 1;
-                  for ( ; k >= 0; k--) {
+                  for (; k >= 0; k--) {
                     char ch = cmd.charAt(k);
-                    if (!Character.isISOControl(ch) && !Character.isWhitespace(ch))
+                    if (!Character.isISOControl(ch) && !Character.isWhitespace(ch)) {
                       break;
+                    }
                   }
                   cmd = cmd.substring(0, k + 1);
                 }
                 try {
                   if (LOGGER.isLoggable(Level.INFO)) {
-                    if (wait)
+                    if (wait) {
                       LOGGER.info("Executing and waiting for local command: " + cmd);
-                    else
+                    } else {
                       LOGGER.info("Executing local command: " + cmd);
+                    }
                   }
                   try {
                     strPcCmd(wait, cmd);
-                  }
-                  catch (IOException ex) {
+                  } catch (IOException ex) {
                     catchedIOException(ex);
-                  }
-                  catch (InterruptedException ex) {
+                  } catch (InterruptedException ex) {
                     catchedException(ex);
                   }
-                }
-                finally {
+                } finally {
                   // AUTOENTER
                   processRawKeyEvent(
                       new KeyEvent(XI5250Emulator.this, KeyEvent.KEY_PRESSED,
-                      0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));                  
+                          0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));
                 }
-              }
-              else if (ivReceivedEndStrPcCmd) {
+              } else if (ivReceivedEndStrPcCmd) {
                 if (LOGGER.isLoggable(Level.INFO)) {
-                  LOGGER.info("Received STRPCCMD shutdown" );
+                  LOGGER.info("Received STRPCCMD shutdown");
                 }
                 // AUTOENTER
                 processRawKeyEvent(
                     new KeyEvent(XI5250Emulator.this, KeyEvent.KEY_PRESSED,
-                    0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));                  
+                        0, -1, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED));
               }
             }
           });
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
           catchedException(ex);
-        }
-        catch (XI5250Exception ex) {
+        } catch (XI5250Exception ex) {
           catched5250Exception(ex);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
           catchedException(ex);
         }
 
-        if (LOGGER.isLoggable(Level.FINER))
+        if (LOGGER.isLoggable(Level.FINER)) {
           LOGGER.finer("" + cmdList);
+        }
 
         break;
       //
@@ -1073,16 +1093,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected void remoteFlagsChanged(byte aIACOpt) {
     if (aIACOpt == XITelnet.TELOPT_EOR &&
-        ivTelnet.isRemoteFlagON(XITelnet.TELOPT_EOR))
+        ivTelnet.isRemoteFlagON(XITelnet.TELOPT_EOR)) {
       setState(ST_POWERED);
+    }
   }
 
 
   /**
    */
   protected void unhandledRequest(byte aIACOpt, String aIACStr) {
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("unhandledRequest()");
+    }
   }
 
 
@@ -1091,7 +1113,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected void switchMsgLight(boolean turnOn) {
     ivStatusBar.setMessageArea((turnOn) ? XI5250StatusBar.MESSAGE_ON :
-                                          XI5250StatusBar.MESSAGE_OFF);
+        XI5250StatusBar.MESSAGE_OFF);
   }
 
 
@@ -1101,7 +1123,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   protected void receivedCancelInvite() {
     ivPendingCmd = null;
 
-    send5250Packet((byte)0x00, OPCODE_CANCEL_INVITE, null);
+    send5250Packet((byte) 0x00, OPCODE_CANCEL_INVITE, null);
   }
 
 
@@ -1109,14 +1131,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Enables or disables the keyboard queue. (DEFAULT enabled)
    */
   public synchronized void setKeyboardQueue(boolean flag) {
-    if (flag == isKeyboardQueue())
+    if (flag == isKeyboardQueue()) {
       return;
+    }
 
     if (flag) {
       ivKeybEventQueue = new KeyEventQueue();
       startKeybThread();
-    }
-    else {
+    } else {
       ivKeybEventQueue = null;
       stopKeybThread();
     }
@@ -1133,20 +1155,23 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Removes all entries in keyboard queue.
    */
-  public void	clearKeyboardQueue() {
-    if (ivKeybEventQueue != null)
+  public void clearKeyboardQueue() {
+    if (ivKeybEventQueue != null) {
       ivKeybEventQueue.removeAll();
+    }
   }
 
 
   /**
    */
   protected void startKeybThread() {
-    if (!isKeyboardQueue() || ivKeybThread != null)
+    if (!isKeyboardQueue() || ivKeybThread != null) {
       return;
+    }
 
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("startKeybThread()");
+    }
 
     ivKeybThread = new KeyEventDispatchThread(this);
     ivKeybThread.start();
@@ -1156,11 +1181,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected void stopKeybThread() {
-    if (!isKeyboardQueue() || ivKeybThread == null)
+    if (!isKeyboardQueue() || ivKeybThread == null) {
       return;
+    }
 
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("stopKeybThread()");
+    }
 
     ivKeybThread.stopDispatching();
     ivKeybThread = null;
@@ -1171,20 +1198,23 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * Changes the emulator state.
    */
   protected synchronized void setState(int aState) {
-    if (aState == ivState)
+    if (aState == ivState) {
       return;
+    }
 
     int oldState = ivState;
 
     // ST_TEMPORARY_LOCK must not be saved !!!
-    if (ivState >= 0)
+    if (ivState >= 0) {
       ivPrevState = ivState;
+    }
     ivState = aState;
     ivStatusBar.setStateArea(aState);
 
-    if (LOGGER.isLoggable(Level.FINE))
+    if (LOGGER.isLoggable(Level.FINE)) {
       LOGGER.fine("ivPrevState = " + ST_DESCRIPTION[ivPrevState - ST_NULL] + "    " +
           "ivState = " + ST_DESCRIPTION[ivState - ST_NULL]);
+    }
 
     // things to do after exiting from a state
     switch (oldState) {
@@ -1198,7 +1228,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       case ST_PRE_HELP:
         // restore error row
         getCrtBuffer().copyFrom(0, ivErrorRow, ivPreHelpErrorLine,
-                                0, 0, getCrtSize().width, 1);
+            0, 0, getCrtSize().width, 1);
         repaint();
         break;
     }
@@ -1224,7 +1254,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         removeFields();
         ivPendingCmd = null;                      //!!0.92a
         drawString(String.valueOf(XI5250Emulator.ATTRIBUTE_PLACE_HOLDER),
-                   0, ivErrorRow, 0x34);
+            0, ivErrorRow, 0x34);
         ivSysReqField =
             new XI5250Field(this, 1, ivErrorRow, getCrtSize().width - 2, -1);
         addField(ivSysReqField);
@@ -1236,9 +1266,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       //
       case ST_PRE_HELP:
         // save error row
-        ivPreHelpErrorLine = new XI5250CrtBuffer((XI5250CrtBuffer)getCrtBuffer(),
-                                                 0, ivErrorRow,
-                                                 getCrtSize().width, 1);
+        ivPreHelpErrorLine = new XI5250CrtBuffer((XI5250CrtBuffer) getCrtBuffer(),
+            0, ivErrorRow,
+            getCrtSize().width, 1);
         startKeybThread();
         break;
       //
@@ -1321,35 +1351,33 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * DO NOT USE, reserved for commands and orders
-   * Sends a 5250 data stream.
+   * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
    */
   public void send5250Packet(byte flags, byte opcode, byte[] buf, int aLen) {
-    byte[] cBuf = {(byte)0x00, (byte)0x00,   //len
-                   (byte)0x12, (byte)0xA0,
-                   (byte)0x00, (byte)0x00,
-                   (byte)0x04, flags,
-                   (byte)0x00, opcode};
+    byte[] cBuf = {(byte) 0x00, (byte) 0x00,   //len
+        (byte) 0x12, (byte) 0xA0,
+        (byte) 0x00, (byte) 0x00,
+        (byte) 0x04, flags,
+        (byte) 0x00, opcode};
     int len = aLen + cBuf.length;
 
-    cBuf[0] = (byte)((len & 0xFF00)>> 8);
-    cBuf[1] = (byte)(len & 0x00FF);
+    cBuf[0] = (byte) ((len & 0xFF00) >> 8);
+    cBuf[1] = (byte) (len & 0x00FF);
 
     try {
       ivTelnet.send(cBuf);
-      if (buf != null  && aLen != 0)
+      if (buf != null && aLen != 0) {
         ivTelnet.send(buf, aLen);
+      }
       ivTelnet.sendEOR();
-    }
-    catch (IOException ex) {
+    } catch (IOException ex) {
       catchedIOException(ex);
     }
   }
 
 
   /**
-   * DO NOT USE, reserved for commands and orders
-   * Sends a 5250 data stream.
+   * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
    */
   public void send5250Packet(byte flags, byte opcode, byte[] buf) {
     send5250Packet(flags, opcode, buf, (buf != null) ? buf.length : 0);
@@ -1359,7 +1387,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   public void send5250UserError(int aErrorCode) {
-    XIEbcdicTranslator    translator = getTranslator();
+    XIEbcdicTranslator translator = getTranslator();
     byte[] buf = translator.toPacked(aErrorCode, 4);
 
     send5250Packet(FLAG_HLP, OPCODE_NOP, buf);
@@ -1367,11 +1395,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * DO NOT USE, reserved for commands and orders
-   * Sends a 5250 error decoding request.
+   * DO NOT USE, reserved for commands and orders Sends a 5250 error decoding request.
    */
   public void send5250Error(int aErrorCode) {
-    XIEbcdicTranslator    translator = getTranslator();
+    XIEbcdicTranslator translator = getTranslator();
     byte[] buf = translator.toPacked(aErrorCode, 8);
 
     send5250Packet(FLAG_ERR, OPCODE_NOP, buf);
@@ -1379,43 +1406,43 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * DO NOT USE, reserved for commands and orders
-   * Sends a 5250 data-stream.
-   * To store in the output stream the fields content uses an instance of XIFieldTo5250Stream.
-   * @see    XIFieldTo5250Stream
+   * DO NOT USE, reserved for commands and orders Sends a 5250 data-stream. To store in the output
+   * stream the fields content uses an instance of XIFieldTo5250Stream.
    *
-   * @param    anAidCode          the aid code to use AID_...
-   * @param    includeFields      fields content must be sended
-   * @param    includeMDTOnly     send only modified fields
+   * @param anAidCode the aid code to use AID_...
+   * @param includeFields fields content must be sended
+   * @param includeMDTOnly send only modified fields
+   * @see XIFieldTo5250Stream
    */
   public void send5250Data(int anAidCode, boolean includeFields,
-                           boolean includeMDTOnly) {
+      boolean includeMDTOnly) {
     ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
-    byte[] cBuf = {(byte)(getCursorRow() + 1), (byte)(getCursorCol() + 1),
-                   (byte)anAidCode};
+    byte[] cBuf = {(byte) (getCursorRow() + 1), (byte) (getCursorCol() + 1),
+        (byte) anAidCode};
 
     try {
       out.write(cBuf);
 
-      if (includeFields)
+      if (includeFields) {
         ivFields.saveTo(new XIFieldTo5250Stream(this, out, includeMDTOnly));
+      }
 
       byte[] buf = out.toByteArray();
 
       if (LOGGER.isLoggable(Level.FINER)) {
         LOGGER.finer("---->Send5250Data");
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < buf.length; i++)
+        for (int i = 0; i < buf.length; i++) {
           sb.append(XITelnet.toHex(buf[i]) + "  ");
+        }
         LOGGER.finer(sb.toString());
       }
 
-      send5250Packet((byte)0x00, OPCODE_NOP, buf);
+      send5250Packet((byte) 0x00, OPCODE_NOP, buf);
 
       processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.DATA_SENDED,
-                                                   this, (byte)anAidCode));
-    }
-    catch (IOException ex) {
+          this, (byte) anAidCode));
+    } catch (IOException ex) {
       catchedIOException(ex);
     }
   }
@@ -1425,9 +1452,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * DO NOT USE, reserved for commands and orders
    */
   public void send5250SavedScreen(int aScreenNum) {
-    byte[] cBuf = {ESC, CMD_RESTORE_SCREEN, (byte)aScreenNum};
+    byte[] cBuf = {ESC, CMD_RESTORE_SCREEN, (byte) aScreenNum};
 
-    send5250Packet((byte)0x00, OPCODE_SAVE_SCREEN, cBuf);
+    send5250Packet((byte) 0x00, OPCODE_SAVE_SCREEN, cBuf);
   }
 
 
@@ -1435,24 +1462,24 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * DO NOT USE, reserved for commands and orders
    */
   public void send5250Screen() {
-    XIEbcdicTranslator    translator = getTranslator();
+    XIEbcdicTranslator translator = getTranslator();
     ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 
     for (int row = 0; row < getCrtSize().height; row++) {
       for (int col = 0; col < getCrtSize().width; col++) {
         char ch = getChar(col, row);
         if (ch == ATTRIBUTE_PLACE_HOLDER) {
-          ch = (char)getAttr(col, row);
-          out.write((byte)ch);
-        }
-        else
+          ch = (char) getAttr(col, row);
+          out.write((byte) ch);
+        } else {
           out.write(translator.toEBCDIC(ch));
+        }
       }
     }
 
     byte[] buf = out.toByteArray();
 
-    send5250Packet((byte)0x00, OPCODE_READ_SCREEN, buf);
+    send5250Packet((byte) 0x00, OPCODE_READ_SCREEN, buf);
   }
 
 
@@ -1461,14 +1488,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected void updateStatusBar(InputEvent e) {
     ivStatusBar.setShiftArea((e.isShiftDown()) ?
-                               XI5250StatusBar.SHIFT_DOWN :
-                               XI5250StatusBar.SHIFT_UP);
+        XI5250StatusBar.SHIFT_DOWN :
+        XI5250StatusBar.SHIFT_UP);
   }
 
 
   /**
-   * DO NOT USE, reserved for commands and orders
-   * Removes all fields.
+   * DO NOT USE, reserved for commands and orders Removes all fields.
    */
   @Override
   public void removeFields() {
@@ -1507,8 +1533,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
   /**
-   * Avoid concurrent access with the synchronized part of receivedEOR() method.
-   * When we get there the translation process has already been done.
+   * Avoid concurrent access with the synchronized part of receivedEOR() method. When we get there
+   * the translation process has already been done.
    */
   @Override
   public synchronized void processRawKeyEvent(KeyEvent e) {
@@ -1519,38 +1545,43 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         switch (e.getKeyCode()) {
           //
           case KeyEvent.VK_ESCAPE:
-            if (ivKeybEventQueue != null)
+            if (ivKeybEventQueue != null) {
               ivKeybEventQueue.removeAll();
+            }
 
             // SysReq
-            if (e.getModifiers() == KeyEvent.SHIFT_MASK)
+            if (e.getModifiers() == KeyEvent.SHIFT_MASK) {
               setState(ST_SYSTEM_REQUEST);
+            }
             break;
           //
           case KeyEvent.VK_CONTROL:      //!!1.01b
-            if (e.getModifiers() == KeyEvent.CTRL_MASK && ivKeybEventQueue != null)
+            if (e.getModifiers() == KeyEvent.CTRL_MASK && ivKeybEventQueue != null) {
               ivKeybEventQueue.removeAll();
+            }
             break;
         }
         break;
     }
 
-    if (ivKeybEventQueue == null)
+    if (ivKeybEventQueue == null) {
       doProcessKeyEvent(e);
-    else
+    } else {
       ivKeybEventQueue.postEvent(new KeyEvent(e.getComponent(), e.getID(),
-                                              e.getWhen(), e.getModifiers(),
-                                              e.getKeyCode(), e.getKeyChar()));
+          e.getWhen(), e.getModifiers(),
+          e.getKeyCode(), e.getKeyChar()));
+    }
 
     //!!1.13a consume anything, except ALT+... key combinations
-    if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0)
+    if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0) {
       e.consume();
+    }
   }
 
 
   /**
-   * Here is where the real keyboard handling is done.
-   * If the keyboard queue is enabled we get there when it is safe to handle the key event.
+   * Here is where the real keyboard handling is done. If the keyboard queue is enabled we get there
+   * when it is safe to handle the key event.
    */
   @Override
   protected synchronized void doProcessKeyEvent(KeyEvent e) {
@@ -1558,8 +1589,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     switch (e.getID()) {
       //
       case KeyEvent.KEY_PRESSED:
-        if (getState() == ST_PRE_HELP && !isCharKey(e))
+        if (getState() == ST_PRE_HELP && !isCharKey(e)) {
           setPrevState();
+        }
         break;
     }
 
@@ -1586,8 +1618,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected boolean processKeySystemRequest(KeyEvent e) {
     super.doProcessKeyEvent(e);
-    if (e.isConsumed())
+    if (e.isConsumed()) {
       return true;
+    }
 
     boolean res = false;
     switch (e.getID()) {
@@ -1604,8 +1637,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       case KeyEvent.KEY_PRESSED:
         switch (e.getKeyCode()) {
           case KeyEvent.VK_ESCAPE:
-            if (e.getModifiers() == 0)
+            if (e.getModifiers() == 0) {
               setPrevState();
+            }
             break;
           //
           case KeyEvent.VK_ENTER:
@@ -1614,16 +1648,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
             int i;
 
             // exclude trailing null chars
-            for (i = aStr.length() - 1; (i >= 0) && (aStr.charAt(i) == '\u0000'); i--)
+            for (i = aStr.length() - 1; (i >= 0) && (aStr.charAt(i) == '\u0000'); i--) {
               ;
+            }
 
             byte[] buf = getTranslator().toText(aStr, i + 1);
 
             if (LOGGER.isLoggable(Level.FINER)) {
               LOGGER.finer("---->Send5250SysReq");
               StringBuilder sb = new StringBuilder();
-              for (i = 0; i < buf.length; i++)
+              for (i = 0; i < buf.length; i++) {
                 sb.append(XITelnet.toHex(buf[i]) + "  ");
+              }
               LOGGER.finer(sb.toString());
             }
 
@@ -1642,8 +1678,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    */
   protected boolean processKeyNormalUnlocked(KeyEvent e) {
     super.doProcessKeyEvent(e);
-    if (e.isConsumed())
+    if (e.isConsumed()) {
       return true;
+    }
 
     boolean res = false;
     switch (e.getID()) {
@@ -1661,8 +1698,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
           //
           case KeyEvent.VK_ESCAPE:
             // Attn
-            if (e.getModifiers() == 0)
+            if (e.getModifiers() == 0) {
               send5250Packet(FLAG_ATN, OPCODE_NOP, null);
+            }
             break;
           //
           case KeyEvent.VK_ENTER:
@@ -1700,19 +1738,21 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
 
-  private static final int AUTO_ENTER_MODIFIERS = (new KeyEvent(new JLabel(""), 
-      KeyEvent.KEY_PRESSED, 0, -1, KeyEvent.VK_ENTER, (char)KeyEvent.VK_ENTER)).getModifiers();
-  
+  private static final int AUTO_ENTER_MODIFIERS = (new KeyEvent(new JLabel(""),
+      KeyEvent.KEY_PRESSED, 0, -1, KeyEvent.VK_ENTER, (char) KeyEvent.VK_ENTER)).getModifiers();
+
   /**
    */
   protected boolean processKeyEnter(int aModifier) {
     // Cannot detect -1 modifier directly
-    if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIERS)
+    if (aModifier != 0 && aModifier != AUTO_ENTER_MODIFIERS) {
       return false;
+    }
 
-    if (ivPendingCmd != null)
+    if (ivPendingCmd != null) {
       ivPendingCmd.executePending(
           (aModifier != AUTO_ENTER_MODIFIERS) ? AID_ENTER : AID_AUTO_ENTER, false);
+    }
 
     return true;
   }
@@ -1723,19 +1763,21 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   protected boolean processKeyFXX(int aKey, int aModifier) {
     int ofs = aKey - KeyEvent.VK_F1;
     int aidCode;
-    if (aModifier == 0)
+    if (aModifier == 0) {
       aidCode = AID_COMMAND + ofs;
-    else if (aModifier == KeyEvent.SHIFT_MASK)
+    } else if (aModifier == KeyEvent.SHIFT_MASK) {
       aidCode = AID_F13 + ofs;
-    else if (aModifier == KeyEvent.ALT_MASK && aKey == KeyEvent.VK_F1)
-      aidCode  = AID_HELP;
-    else
+    } else if (aModifier == KeyEvent.ALT_MASK && aKey == KeyEvent.VK_F1) {
+      aidCode = AID_HELP;
+    } else {
       return false;
+    }
 
     int mask = 1 << ofs;
 
-    if (ivPendingCmd != null)
+    if (ivPendingCmd != null) {
       ivPendingCmd.executePending(aidCode, ((ivFunctionKeysMask & mask) != 0));
+    }
     return true;
   }
 
@@ -1743,13 +1785,15 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected boolean processKeyPageXX(int aKey, int aModifier) {
-    if (aModifier != 0)
+    if (aModifier != 0) {
       return false;
+    }
 
-    if (ivPendingCmd != null)
+    if (ivPendingCmd != null) {
       ivPendingCmd.executePending((aKey == KeyEvent.VK_PAGE_UP) ? AID_ROLL_DN :
-                                                                  AID_ROLL_UP,
-                                  false);
+              AID_ROLL_UP,
+          false);
+    }
 
     return true;
   }
@@ -1757,11 +1801,13 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    */
   protected boolean processKeyPause(int aModifier) {
-    if (aModifier != 0)
+    if (aModifier != 0) {
       return false;
+    }
 
-    if (ivPendingCmd != null)
+    if (ivPendingCmd != null) {
       ivPendingCmd.executePending(AID_CLEAR, false);
+    }
 
     return true;
   }
@@ -1772,20 +1818,21 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   @SuppressWarnings("deprecation")
   @Override
   protected KeyEvent translateKeyEvent(KeyEvent e) {
-    if (!getAltFKeyRemap())
+    if (!getAltFKeyRemap()) {
       return e;
-    if (e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode () <= KeyEvent.VK_F12) {
+    }
+    if (e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12) {
       // ALT+SHIFT+Fx replaces ALT+Fx 
-      if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0 && 
+      if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0 &&
           (e.getModifiers() & KeyEvent.SHIFT_MASK) != 0) {
-        e.setModifiers(e.getModifiers() & ~KeyEvent.SHIFT_MASK); 
+        e.setModifiers(e.getModifiers() & ~KeyEvent.SHIFT_MASK);
       }
       // ALT+Fx replaces Fx
       else if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
-        e.setModifiers(e.getModifiers() & ~KeyEvent.ALT_MASK); 
+        e.setModifiers(e.getModifiers() & ~KeyEvent.ALT_MASK);
       }
     }
-    return e;    
+    return e;
   }
 
   /**
@@ -1796,40 +1843,38 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     super.finalize();
   }
 
-  
+
   void receivedStrPcCmd() {
-    if (!isStrPcCmdEnabled())
+    if (!isStrPcCmdEnabled()) {
       throw new IllegalStateException();
+    }
     ivReceivedStrPcCmd = true;
   }
+
   void receivedEndStrPcCmd() {
-    if (!isStrPcCmdEnabled())
+    if (!isStrPcCmdEnabled()) {
       throw new IllegalStateException();
+    }
     ivReceivedEndStrPcCmd = true;
   }
 
   /**
-   * @param wait
-   * @param cmd
    * @return the process return code if wait is true, otherwise 0
-   * @throws IOException
-   * @throws InterruptedException
    */
   protected int strPcCmd(boolean wait, String cmd) throws IOException, InterruptedException {
     Process proc = Runtime.getRuntime().exec(cmd);
     return wait ? proc.waitFor() : 0;
   }
 
-
   //////////////////////////////////////////////////////////////////////////////
 
   /**
    * Multicast Listener for XI5250Emulator
-   * @version
-   * @author   Valentino Proietti - Infordata S.p.A.
+   *
+   * @author Valentino Proietti - Infordata S.p.A.
    */
   private static class Multicaster extends AWTEventMulticaster
-                                   implements XI5250EmulatorListener {
+      implements XI5250EmulatorListener {
 
     protected Multicaster(EventListener a, EventListener b) {
       super(a, b);
@@ -1839,97 +1884,104 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     //!!1.03a
     @Override
     protected EventListener remove(EventListener oldl) {
-      if (oldl == a)  return b;
-      if (oldl == b)  return a;
+      if (oldl == a) {
+        return b;
+      }
+      if (oldl == b) {
+        return a;
+      }
       EventListener a2 = removeInternal(a, oldl);
       EventListener b2 = removeInternal(b, oldl);
-      if (a2 == a && b2 == b)
+      if (a2 == a && b2 == b) {
         return this;
-      return add((XI5250EmulatorListener)a2, (XI5250EmulatorListener)b2);
+      }
+      return add((XI5250EmulatorListener) a2, (XI5250EmulatorListener) b2);
     }
 
 
     public static XI5250EmulatorListener add(XI5250EmulatorListener a,
-                                             XI5250EmulatorListener b) {
-      if (a == null)  return b;
-      if (b == null)  return a;
+        XI5250EmulatorListener b) {
+      if (a == null) {
+        return b;
+      }
+      if (b == null) {
+        return a;
+      }
       return new Multicaster(a, b);
     }
 
 
     public static XI5250EmulatorListener remove(XI5250EmulatorListener a,
-                                                XI5250EmulatorListener b) {
-      return (XI5250EmulatorListener)removeInternal(a, b);
+        XI5250EmulatorListener b) {
+      return (XI5250EmulatorListener) removeInternal(a, b);
     }
 
 
     /**
      */
     public void connecting(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).connecting(e);
-      ((XI5250EmulatorListener)b).connecting(e);
+      ((XI5250EmulatorListener) a).connecting(e);
+      ((XI5250EmulatorListener) b).connecting(e);
     }
 
 
     /**
      */
     public void connected(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).connected(e);
-      ((XI5250EmulatorListener)b).connected(e);
+      ((XI5250EmulatorListener) a).connected(e);
+      ((XI5250EmulatorListener) b).connected(e);
     }
 
 
     /**
      */
     public void disconnected(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).disconnected(e);
-      ((XI5250EmulatorListener)b).disconnected(e);
+      ((XI5250EmulatorListener) a).disconnected(e);
+      ((XI5250EmulatorListener) b).disconnected(e);
     }
 
 
     /**
      */
     public void stateChanged(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).stateChanged(e);
-      ((XI5250EmulatorListener)b).stateChanged(e);
+      ((XI5250EmulatorListener) a).stateChanged(e);
+      ((XI5250EmulatorListener) b).stateChanged(e);
     }
 
 
     /**
      */
     public void newPanelReceived(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).newPanelReceived(e);
-      ((XI5250EmulatorListener)b).newPanelReceived(e);
+      ((XI5250EmulatorListener) a).newPanelReceived(e);
+      ((XI5250EmulatorListener) b).newPanelReceived(e);
     }
 
 
     /**
      */
     public void fieldsRemoved(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).fieldsRemoved(e);
-      ((XI5250EmulatorListener)b).fieldsRemoved(e);
+      ((XI5250EmulatorListener) a).fieldsRemoved(e);
+      ((XI5250EmulatorListener) b).fieldsRemoved(e);
     }
 
 
     /**
      */
     public void dataSended(XI5250EmulatorEvent e) {
-      ((XI5250EmulatorListener)a).dataSended(e);
-      ((XI5250EmulatorListener)b).dataSended(e);
+      ((XI5250EmulatorListener) a).dataSended(e);
+      ((XI5250EmulatorListener) b).dataSended(e);
     }
   }
-
 
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-   *
-   * @version
-   * @author   Valentino Proietti - Infordata S.p.A.
+   * @author Valentino Proietti - Infordata S.p.A.
    */
   protected static class KeyEventQueueItem {
-    AWTEvent          ivEvent;
-    int               ivId;
+
+    AWTEvent ivEvent;
+    int ivId;
     KeyEventQueueItem ivNext;
 
 
@@ -1939,15 +1991,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Implements a circular Queue.
-   * It is used when keyboard buffering is on.
+   * Implements a circular Queue. It is used when keyboard buffering is on.
    *
-   * @version
-   * @author   Valentino Proietti - Infordata S.p.A.
+   * @author Valentino Proietti - Infordata S.p.A.
    */
   protected static class KeyEventQueue {
 
@@ -1964,8 +2013,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         ivQueue = eqi;
         ivQueue.ivNext = ivQueue;
         notifyAll();
-      }
-      else {
+      } else {
         eqi.ivNext = ivQueue.ivNext;
         ivQueue.ivNext = eqi;
         ivQueue = eqi;
@@ -1974,14 +2022,16 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
 
     public synchronized AWTEvent getNextEvent() throws InterruptedException {
-      while (ivQueue == null)
+      while (ivQueue == null) {
         wait();
+      }
 
       KeyEventQueueItem eqi = ivQueue.ivNext;
-      if (eqi == ivQueue)
+      if (eqi == ivQueue) {
         ivQueue = null;
-      else
+      } else {
         ivQueue.ivNext = eqi.ivNext;
+      }
       return eqi.ivEvent;
     }
 
@@ -1991,20 +2041,18 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-   * When keyboard buffering is on all keys are posted in a KeyEventQueue.
-   * This thread dispatches such key events to the doProcessKeyEvent method of XI5250Emulator.
+   * When keyboard buffering is on all keys are posted in a KeyEventQueue. This thread dispatches
+   * such key events to the doProcessKeyEvent method of XI5250Emulator.
    *
-   * @version
-   * @author   Valentino Proietti - Infordata S.p.A.
+   * @author Valentino Proietti - Infordata S.p.A.
    */
   protected static class KeyEventDispatchThread extends Thread {
 
     protected XI5250Emulator ivEmulator;
-    protected boolean        ivStop = false;
+    protected boolean ivStop = false;
 
 
     /**
@@ -2029,7 +2077,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     public void run() {
       while (!ivStop && ivEmulator.isKeyboardQueue()) {
         try {
-          final KeyEvent e = (KeyEvent)ivEmulator.ivKeybEventQueue.getNextEvent();
+          final KeyEvent e = (KeyEvent) ivEmulator.ivKeybEventQueue.getNextEvent();
           SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
               synchronized (ivEmulator.getTreeLock()) {  // just to avoid dead-locks
@@ -2037,14 +2085,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
               }
             }
           });
-        }
-        catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
           continue;
-        }
-        catch (ThreadDeath ex) {
+        } catch (ThreadDeath ex) {
           throw ex;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
           System.err.println(
               "Exception occurred during 5250 keyboard event dispatching:");
           ex.printStackTrace();
@@ -2052,7 +2097,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       }
     }
   }
-
 
   //////////////////////////////////////////////////////////////////////////////
 

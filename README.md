@@ -20,6 +20,8 @@ To use the emulator as maven dependency include in `pom.xml`:
 
 >Check latest version in [releases](https://github.com/abstracta/xtn5250/releases).
 
+An example usage can be found in [TerminalClientTest](src/test/java/net/infordata/em/TerminalClientTest.java).
+
 ## Build
 
 To build the project is required [JDK8+](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), [maven](https://maven.apache.org/) 3.3+.
