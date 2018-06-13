@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.Optional;
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import net.infordata.em.crt5250.XI5250Field;
 import net.infordata.em.tn5250.XI5250Emulator;
 import net.infordata.em.tn5250.XI5250EmulatorListener;
@@ -17,17 +16,14 @@ public class TerminalClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClient.class);
 
-  private TerminalClientEmulator em;
-  private String terminalType = "IBM-3179-2";
-  private SocketFactory socketFactory = SocketFactory.getDefault();
-  private ExceptionHandler exceptionHandler;
-  private int connectionTimeoutMillis;
+  private TerminalClientEmulator emulator = new TerminalClientEmulator();
 
   private static class TerminalClientEmulator extends XI5250Emulator {
 
     private ExceptionHandler exceptionHandler;
 
     private TerminalClientEmulator() {
+      setDisconnectOnSocketException(false);
     }
 
     public void setExceptionHandler(ExceptionHandler exceptionHandler) {
@@ -64,7 +60,7 @@ public class TerminalClient {
    * IBM-3477-FC. If none is set, then IBM-3179-2 is used.
    */
   public void setTerminalType(String terminalType) {
-    this.terminalType = terminalType;
+    emulator.setTerminalType(terminalType);
   }
 
   /**
@@ -74,7 +70,7 @@ public class TerminalClient {
    * trace will be printed to error output.
    */
   public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-    this.exceptionHandler = exceptionHandler;
+    emulator.setExceptionHandler(exceptionHandler);
   }
 
   /**
@@ -84,8 +80,8 @@ public class TerminalClient {
    * @param socketFactory the {@link SocketFactory} to use. If non is specified {@link
    * SocketFactory#getDefault()} will be used.
    */
-  public void setSocketFactory(SSLSocketFactory socketFactory) {
-    this.socketFactory = socketFactory;
+  public void setSocketFactory(SocketFactory socketFactory) {
+    emulator.setSocketFactory(socketFactory);
   }
 
   /**
@@ -95,7 +91,7 @@ public class TerminalClient {
    * before it fails. If not specified no timeout (same as 0 value) will be applied.
    */
   public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
-    this.connectionTimeoutMillis = connectionTimeoutMillis;
+    emulator.setConnectionTimeoutMillis(connectionTimeoutMillis);
   }
 
   /**
@@ -105,15 +101,9 @@ public class TerminalClient {
    * @param port port where the terminal server is listening for connections.
    */
   public void connect(String host, int port) {
-    em = new TerminalClientEmulator();
-    em.setExceptionHandler(exceptionHandler);
-    em.setHost(host);
-    em.setPort(port);
-    em.setTerminalType(terminalType);
-    em.setSocketFactory(socketFactory);
-    em.setConnectionTimeoutMillis(connectionTimeoutMillis);
-    em.setDisconnectOnSocketException(false);
-    em.setActive(true);
+    emulator.setHost(host);
+    emulator.setPort(port);
+    emulator.setActive(true);
   }
 
   /**
@@ -124,13 +114,13 @@ public class TerminalClient {
    * @param text the text to set on the field.
    */
   public void setFieldText(int row, int column, String text) {
-    XI5250Field field = em.getFieldFromPos(column - 1, row - 1);
+    XI5250Field field = emulator.getFieldFromPos(column - 1, row - 1);
     if (field == null) {
       throw new IllegalArgumentException("Invalid field position " + row + "," + column);
     }
     field.setString(text);
-    em.setCursorPos((column - 1 + text.length()) % em.getCrtSize().width,
-        row - 1 + (column - 1 + text.length()) / em.getCrtSize().width);
+    emulator.setCursorPos((column - 1 + text.length()) % emulator.getCrtSize().width,
+        row - 1 + (column - 1 + text.length()) / emulator.getCrtSize().width);
   }
 
   /**
@@ -144,8 +134,8 @@ public class TerminalClient {
    * java.awt.event.KeyEvent#SHIFT_MASK}.
    */
   public void sendKeyEvent(int keyCode, int modifiers) {
-    em.processRawKeyEvent(
-        new KeyEvent(em, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED));
+    emulator.processRawKeyEvent(
+        new KeyEvent(emulator, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED));
   }
 
   /**
@@ -154,11 +144,11 @@ public class TerminalClient {
    * @return The screen text with newlines separating each row.
    */
   public String getScreenText() {
-    int height = em.getCrtSize().height;
-    int width = em.getCrtSize().width;
+    int height = emulator.getCrtSize().height;
+    int width = emulator.getCrtSize().width;
     StringBuilder screen = new StringBuilder();
     for (int i = 0; i < height; i++) {
-      screen.append(em.getString(0, i, width).replaceAll("[\\x00-\\x19]", " "));
+      screen.append(emulator.getString(0, i, width).replaceAll("[\\x00-\\x19]", " "));
       screen.append("\n");
     }
     return screen.toString();
@@ -170,7 +160,7 @@ public class TerminalClient {
    * @return Allows getting the number of rows and columns used by the terminal emulator.
    */
   public Dimension getScreenDimensions() {
-    return em.getCrtSize();
+    return emulator.getCrtSize();
   }
 
   /**
@@ -179,7 +169,7 @@ public class TerminalClient {
    * @return True if the keyboard is currently locked, false otherwise.
    */
   public boolean isKeyboardLocked() {
-    int state = em.getState();
+    int state = emulator.getState();
     switch (state) {
       case XI5250Emulator.ST_NULL:
       case XI5250Emulator.ST_TEMPORARY_LOCK:
@@ -207,8 +197,8 @@ public class TerminalClient {
    * cursor is not visible then empty value is returned.
    */
   public Optional<Point> getCursorPosition() {
-    return em.isCursorVisible() ? Optional
-        .of(new Point(em.getCursorCol() + 1, em.getCursorRow() + 1)) : Optional.empty();
+    return emulator.isCursorVisible() ? Optional
+        .of(new Point(emulator.getCursorCol() + 1, emulator.getCursorRow() + 1)) : Optional.empty();
   }
 
   /**
@@ -218,7 +208,7 @@ public class TerminalClient {
    * triggered by the terminal emulator.
    */
   public void addEmulatorListener(XI5250EmulatorListener listener) {
-    em.addEmulatorListener(listener);
+    emulator.addEmulatorListener(listener);
   }
 
   /**
@@ -227,7 +217,7 @@ public class TerminalClient {
    * @param listener listener to be remove from notificaitons.
    */
   public void removeEmulatorListener(XI5250EmulatorListener listener) {
-    em.removeEmulatorListener(listener);
+    emulator.removeEmulatorListener(listener);
   }
 
   /**
@@ -235,8 +225,8 @@ public class TerminalClient {
    *
    * @throws InterruptedException thrown when the disconnect is interrupted.
    */
-  protected void disconnect() {
-    em.setActive(false);
+  public void disconnect() {
+    emulator.setActive(false);
   }
 
 }
