@@ -1,5 +1,4 @@
 package net.infordata.em.tn5250ext;
-
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.SystemColor;
@@ -21,14 +20,10 @@ import net.infordata.em.crt5250.XI5250Field;
 import net.infordata.em.tn5250.XI5250Emulator;
 import net.infordata.em.tn5250.XI5250Frame;
 
-
 public class Test {
 
   private Test() { }
 
-  /**
-   * @param args
-   */
   public static void main(String[] argv) {
     XI5250EmulatorExt em  = new XI5250EmulatorExt();
     em.setTerminalType("IBM-3477-FC");
@@ -63,10 +58,6 @@ public class Test {
     frm.setVisible(true);
   }
   
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   private static class TestHandler extends XI5250PanelHandler {
     
     private FontsCache    ivFontsCache;
@@ -156,20 +147,17 @@ public class Test {
     protected void stop() {
       ivButtons.clear();
     }
-  }
 
-  ///////
+  }
   
   private static class FontsCache {
 
     private Font[] ivFonts = new Font[XICrt.MAX_FONT_SIZE - XICrt.MIN_FONT_SIZE + 1];
     private Font   ivFont;
 
-
     public FontsCache(Font font) {
       ivFont = font;
     }
-
 
     public Font getFont(int size) {
       if (ivFonts[size - XICrt.MIN_FONT_SIZE] == null) {
@@ -180,5 +168,7 @@ public class Test {
       }
       return ivFonts[size - XICrt.MIN_FONT_SIZE];
     }
+
   }
+
 }

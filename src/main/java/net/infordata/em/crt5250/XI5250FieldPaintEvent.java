@@ -20,19 +20,15 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.crt5250;
 
+package net.infordata.em.crt5250;
 
 import java.awt.Graphics;
 import java.util.EventObject;
 
-
 /**
  * XI5250Field painting event.
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250FieldPaintEvent extends EventObject {
@@ -50,46 +46,35 @@ public class XI5250FieldPaintEvent extends EventObject {
 
   private static final String[] cvIdDescr = {"FIELD_PAINT",
                                              "ROW_PAINT"};
-
   private int         ivId;
   private Graphics    ivGr;
 
-
-  /**
-   */
   public XI5250FieldPaintEvent(int aId, XI5250Field aField, Graphics aGr) {
     super(aField);
     ivId = aId;
     ivGr = aGr;
   }
 
-
-  /**
-   */
   public int getID() {
     return ivId;
   }
 
-
   /**
    * Returns the Graphics that can be used to paint.
+   *
+   * @return the Graphics that can be used to paint.
    */
   public Graphics getGraphics() {
     return ivGr;
   }
 
-
-  /**
-   */
   public XI5250Field getField() {
     return (XI5250Field)getSource();
   }
 
-
-  /**
-   */
   @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "," + getSource() + "]";
   }
+
 }

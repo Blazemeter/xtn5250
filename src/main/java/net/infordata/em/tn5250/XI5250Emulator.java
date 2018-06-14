@@ -69,9 +69,7 @@ limitations under the License.
     23/11/00 rel. 1.15d- Jdk 1.3.
 */
 
-
 package net.infordata.em.tn5250;
-
 
 import java.awt.AWTEvent;
 import java.awt.AWTEventMulticaster;
@@ -102,8 +100,6 @@ import net.infordata.em.crt5250.XI5250FieldsList;
 import net.infordata.em.crt5250.XIEbcdicTranslator;
 import net.infordata.em.tnprot.XITelnet;
 import net.infordata.em.tnprot.XITelnetEmulator;
-
-////////////////////////////////////////////////////////////////////////////////
 
 /**
  * THE 5250 EMULATOR.
@@ -347,7 +343,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   private boolean ivReceivedEndStrPcCmd;
 
   /**
-   * Default contructor.
+   * Default constructor.
    */
   public XI5250Emulator() {
     ivStatusBar = new XI5250StatusBar();
@@ -366,6 +362,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * XI5250EmulatorListener handling
+   *
+   * @param l listener to be notified of emulator events.
    */
   public synchronized void addEmulatorListener(XI5250EmulatorListener l) {
     ivEmulatorListener = Multicaster.add(ivEmulatorListener, l);
@@ -374,6 +372,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * XI5250EmulatorListener handling
+   *
+   * @param l listener to stop being notified of emulator events.
    */
   public synchronized void removeEmulatorListener(XI5250EmulatorListener l) {
     ivEmulatorListener = Multicaster.remove(ivEmulatorListener, l);
@@ -382,6 +382,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Routes XI5250EmulatorEvent to listeners
+   *
+   * @param e emulator event to process.
    */
   protected void processEmulatorEvent(XI5250EmulatorEvent e) {
     if (ivEmulatorListener == null) {
@@ -389,31 +391,24 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
 
     switch (e.getID()) {
-      //
       case XI5250EmulatorEvent.CONNECTING:
         ivEmulatorListener.connecting(e);
         break;
-      //
       case XI5250EmulatorEvent.CONNECTED:
         ivEmulatorListener.connected(e);
         break;
-      //
       case XI5250EmulatorEvent.DISCONNECTED:
         ivEmulatorListener.disconnected(e);
         break;
-      //
       case XI5250EmulatorEvent.STATE_CHANGED:
         ivEmulatorListener.stateChanged(e);
         break;
-      //
       case XI5250EmulatorEvent.NEW_PANEL_RECEIVED:
         ivEmulatorListener.newPanelReceived(e);
         break;
-      //
       case XI5250EmulatorEvent.FIELDS_REMOVED:
         ivEmulatorListener.fieldsRemoved(e);
         break;
-      //
       case XI5250EmulatorEvent.DATA_SENDED:
         ivEmulatorListener.dataSended(e);
         break;
@@ -440,7 +435,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
-   * Sets the host name, a previuos open connection is closed.
+   * Sets the host name, a previous open connection is closed.
+   *
+   * @param aHost host to connect to.
    */
   public synchronized void setHost(String aHost) {
     if (aHost == ivHost ||
@@ -454,6 +451,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Returns the host name.
+   *
+   * @return host the emulator will connect to.
    */
   public final String getHost() {
     return ivHost;
@@ -482,6 +481,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Activate or deactivate the connection.
+   *
+   * @param activate true to connect to the server, false to disconnect.
    */
   public void setActive(boolean activate) {
     boolean wasActive;
@@ -511,6 +512,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * True if the connection is active.
+   *
+   * @return true if the emulator is connected to the client, false otherwise.
    */
   public boolean isActive() {
     return (ivTelnet == null) ? false : ivTelnet.isConnected();
@@ -523,6 +526,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
    * IBM-3179-2  : 24x80  color display (DEFAULT)
    * IBM-3477-FC : 27x132 color display
    * </pre>
+   *
+   * @param aTermType terminal type to be used for the connection with the server.
    */
   public void setTerminalType(String aTermType) {
     if (aTermType != null && aTermType.equals(ivTermType)) {
@@ -550,7 +555,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
-   * See: http://www.faqs.org/rfcs/rfc2877.html and http://www.faqs.org/rfcs/rfc1572.html
+   * See: <pre><a href="http://www.faqs.org/rfcs/rfc2877.html">rfc2877</a></pre> and
+   * <pre><a href="http://www.faqs.org/rfcs/rfc1572.html">rfc1572</a></pre>.
+   *
+   * @param env telnet environment option value to use.
    */
   public void setTelnetEnv(String env) {
     if (env != null && env.equals(ivTelnetEnv)) {
@@ -568,8 +576,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     firePropertyChange(TELNET_ENV, old, ivTelnetEnv);
   }
 
-  /**
-   */
   public String getTelnetEnv() {
     return ivTelnetEnv;
   }
@@ -634,6 +640,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Redefined to take care of the status-bar presence
+   *
+   * @return the minimum screen size.
    */
   @Override
   public Dimension getMinimumSize() {
@@ -645,6 +653,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   /**
    * Redefined to take care of the status-bar presence
    *
+   * @param aFont font used to calculate the size of the screen.
+   * @return screen size for the given font.
    * @see net.infordata.em.crt.XICrt#getTestSize
    */
   @Override
@@ -657,6 +667,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Factory method for XI5250Field creation.
+   *
+   * @param aFFW field format word bytes
+   * @param aFCW field command word bytes
+   * @param aCol screen column position
+   * @param aRow screen row position
+   * @param aLen length of the field
+   * @param aAttr attributes of the field
+   * @return created field.
    */
   protected XI5250Field create5250Field(byte[] aFFW, byte[] aFCW,
       int aCol, int aRow,
@@ -666,6 +684,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Creates a XI5250EmulatorMemento instance. It is like a snapshot of the current internal state.
+   *
+   * @return created memento instance.
    */
   public synchronized XI5250EmulatorMemento createMemento() {
     return new XI5250EmulatorMemento((XI5250FieldsList) ivFields.clone(),
@@ -678,6 +698,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Restores the internal state to a previous saved state.
+   *
+   * @param aMemento state to restore to.
    */
   public void restoreMemento(XI5250EmulatorMemento aMemento) {
     //this statement avoids deadlocks with component resizing.
@@ -704,6 +726,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Works as createMemento but it is used when it switches to the System Request State.
+   *
+   * @return the created memo.
    */
   protected synchronized XI5250EmulatorMemento createSysReqMemento() {
     return new XI5250EmulatorMemento((XI5250FieldsList) ivFields.clone(),
@@ -717,6 +741,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
+   * @param aMemento memento to restore to.
    * @see #createSysReqMemento
    */
   protected void restoreSysReqMemento(XI5250EmulatorMemento aMemento) {
@@ -739,7 +764,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
     repaint();
   }
-
 
   /**
    * Called by XITelnet just before trying to connect. Sets the 5250 telnet requested flags (ie.
@@ -768,7 +792,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         new XI5250EmulatorEvent(XI5250EmulatorEvent.CONNECTING, this));
   }
 
-
   /**
    * Called by XITelnet when a connection is established. Fires the XI5250EmulatorEvent.CONNECTED
    * event.
@@ -782,10 +805,12 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         new XI5250EmulatorEvent(XI5250EmulatorEvent.CONNECTED, this));
   }
 
-
   /**
    * Called by XITelnet when a connection is closed. Fires the XI5250EmulatorEvent.DISCONNECTED
    * event.
+   *
+   * @param remote whether the disconnection was caused by a local disconnect, or by the terminal
+   * server.
    */
   protected void disconnected(boolean remote) {
     if (LOGGER.isLoggable(Level.FINE)) {
@@ -802,51 +827,46 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
         new XI5250EmulatorEvent(XI5250EmulatorEvent.DISCONNECTED, this));
   }
 
-
   /**
-   * Called by XITelnet when an IOException is catched.
+   * Called by XITelnet when an IOException is caught.
+   *
+   * @param ex exception throw when communicating with terminal server.
    */
-  protected void catchedIOException(final IOException ex) {
+  protected void caughtIOException(final IOException ex) {
     if (LOGGER.isLoggable(Level.WARNING)) {
-      LOGGER.log(Level.WARNING, "catchedIOException()", ex);
+      LOGGER.log(Level.WARNING, "caughtIOException()", ex);
     }
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        JOptionPane.showMessageDialog(XI5250Emulator.this,
-            ex.getClass().getName() + "\n" +
-                ex.getMessage() +
-                "\nSee the log for details ",
-            "WARNING", JOptionPane.WARNING_MESSAGE);
-      }
-    });
+    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(XI5250Emulator.this,
+        ex.getClass().getName() + "\n" +
+            ex.getMessage() +
+            "\nSee the log for details ",
+        "WARNING", JOptionPane.WARNING_MESSAGE));
   }
 
   /**
-   * Called when 5250 stream parsing exception is catched.
+   * Called when 5250 stream parsing exception is caught.
+   *
+   * @param ex exception throw when there is a problem parsing 5250 packet.
    */
-  protected void catched5250Exception(XI5250Exception ex) {
+  protected void caught5250Exception(XI5250Exception ex) {
     if (LOGGER.isLoggable(Level.FINE)) {
-      LOGGER.log(Level.FINE, "catched5250Exception()", ex);
+      LOGGER.log(Level.FINE, "caught5250Exception()", ex);
     }
     send5250Error(ex.getErrorCode());
   }
 
   /**
-   * Called when an generic exception is catched.
+   * Called when an generic exception is caught.
+   *
+   * @param ex exception thrown wh
    */
-  protected void catchedException(final Throwable ex) {
-    LOGGER.log(Level.SEVERE, "catchedException()", ex);
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        JOptionPane.showMessageDialog(XI5250Emulator.this,
-            ex.getMessage() + "\nSee the log for details ",
-            "ERROR", JOptionPane.ERROR_MESSAGE);
-      }
-    });
+  protected void caughtException(final Throwable ex) {
+    LOGGER.log(Level.SEVERE, "caughtException()", ex);
+    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(XI5250Emulator.this,
+        ex.getMessage() + "\nSee the log for details ",
+        "ERROR", JOptionPane.ERROR_MESSAGE));
   }
 
-  /**
-   */
   protected void receivedData(byte[] buf, int len) {
     if (getState() == ST_POWER_ON) {
       if (LOGGER.isLoggable(Level.WARNING)) {
@@ -859,7 +879,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     System.arraycopy(buf, 0, ivRXBuf, ivRXBufLen, len);
     ivRXBufLen += len;
   }
-
 
   /**
    * Processes the 5250 received stream creating a new XI5250CmdList.
@@ -998,9 +1017,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
                   try {
                     strPcCmd(wait, cmd);
                   } catch (IOException ex) {
-                    catchedIOException(ex);
+                    caughtIOException(ex);
                   } catch (InterruptedException ex) {
-                    catchedException(ex);
+                    caughtException(ex);
                   }
                 } finally {
                   // AUTOENTER
@@ -1020,11 +1039,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
             }
           });
         } catch (IOException ex) {
-          catchedException(ex);
+          caughtException(ex);
         } catch (XI5250Exception ex) {
-          catched5250Exception(ex);
+          caught5250Exception(ex);
         } catch (Exception ex) {
-          catchedException(ex);
+          caughtException(ex);
         }
 
         if (LOGGER.isLoggable(Level.FINER)) {
@@ -1067,6 +1086,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Turns on or off the message icon on the status bar.
+   *
+   * @param turnOn true to turn message icon on, false to turn it off.
    */
   protected void switchMsgLight(boolean turnOn) {
     ivStatusBar.setMessageArea((turnOn) ? XI5250StatusBar.MESSAGE_ON :
@@ -1084,6 +1105,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Enables or disables the keyboard queue. (DEFAULT enabled)
+   *
+   * @param flag true to enable keyboard queue, false to disable it.
    */
   public synchronized void setKeyboardQueue(boolean flag) {
     if (flag == isKeyboardQueue()) {
@@ -1140,6 +1163,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Changes the emulator state.
+   *
+   * @param aState state to set the emulator to.
    */
   protected synchronized void setState(int aState) {
     if (aState == ivState) {
@@ -1220,6 +1245,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Returns the current emulator state.
+   *
+   * @return the state of the emulator.
    */
   public int getState() {
     return ivState;
@@ -1238,6 +1265,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Factory method for XI5250CmdList class.
+   *
+   * @param aEm emulator to create the command list for.
+   * @return created command list
    */
   protected XI5250CmdList createCmdList(XI5250Emulator aEm) {
     return new XI5250CmdList(aEm);
@@ -1245,6 +1275,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Factory method for XI5250OrdList class
+   *
+   * @param aEm emulator to create the order list for.
+   * @return created order list
    */
   protected XI5250OrdList createOrdList(XI5250Emulator aEm) {
     return new XI5250OrdList(aEm);
@@ -1252,19 +1285,17 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Changes the error row.
+   *
+   * @param aRow row to set as error row.
    */
   protected void setErrorRow(int aRow) {
     ivErrorRow = Math.min(aRow, getCrtSize().height - 1);
   }
 
-  /**
-   */
   protected int getErrorRow() {
     return ivErrorRow;
   }
 
-  /**
-   */
   protected void setFunctionKeysMask(int aMask) {
     ivFunctionKeysMask = aMask;
   }
@@ -1276,6 +1307,11 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
+   *
+   * @param flags flags to use on the packet
+   * @param opcode operation code to use on the packet
+   * @param buf additional bytes to send in the packet
+   * @param aLen number of bytes from the buffer to send in the patcket
    */
   public void send5250Packet(byte flags, byte opcode, byte[] buf, int aLen) {
     byte[] cBuf = {(byte) 0x00, (byte) 0x00,   //len
@@ -1288,19 +1324,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     cBuf[0] = (byte) ((len & 0xFF00) >> 8);
     cBuf[1] = (byte) (len & 0x00FF);
 
-    try {
-      ivTelnet.send(cBuf);
-      if (buf != null && aLen != 0) {
-        ivTelnet.send(buf, aLen);
-      }
-      ivTelnet.sendEOR();
-    } catch (IOException ex) {
-      catchedIOException(ex);
+    ivTelnet.send(cBuf);
+    if (buf != null && aLen != 0) {
+      ivTelnet.send(buf, aLen);
     }
+    ivTelnet.sendEOR();
   }
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 data stream.
+   *
+   * @param flags flags to use on the packet
+   * @param opcode operation code to use on the packet
+   * @param buf additional bytes to send in the packet
    */
   public void send5250Packet(byte flags, byte opcode, byte[] buf) {
     send5250Packet(flags, opcode, buf, (buf != null) ? buf.length : 0);
@@ -1315,6 +1351,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * DO NOT USE, reserved for commands and orders Sends a 5250 error decoding request.
+   *
+   * @param aErrorCode the error code to send.
    */
   public void send5250Error(int aErrorCode) {
     XIEbcdicTranslator translator = getTranslator();
@@ -1361,12 +1399,14 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       processEmulatorEvent(new XI5250EmulatorEvent(XI5250EmulatorEvent.DATA_SENDED,
           this, (byte) anAidCode));
     } catch (IOException ex) {
-      catchedIOException(ex);
+      caughtIOException(ex);
     }
   }
 
   /**
    * DO NOT USE, reserved for commands and orders
+   *
+   * @param aScreenNum the screen number to send.
    */
   public void send5250SavedScreen(int aScreenNum) {
     byte[] cBuf = {ESC, CMD_RESTORE_SCREEN, (byte) aScreenNum};
@@ -1400,6 +1440,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Updates the status-bar shift area.
+   *
+   * @param e event to update the status-bar shift area with.
    */
   protected void updateStatusBar(InputEvent e) {
     ivStatusBar.setShiftArea((e.isShiftDown()) ?
@@ -1418,6 +1460,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Redefined to request 5250 error decoding.
+   *
+   * @param aError the error to send to the server.
    */
   @Override
   protected void userError(int aError) {
@@ -1516,6 +1560,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Keyboard handling during the System request state.
+   *
+   * @param e keyboard event to handle.
+   * @return true if the event was correctly processed, false otherwise.
    */
   protected boolean processKeySystemRequest(KeyEvent e) {
     super.doProcessKeyEvent(e);
@@ -1571,6 +1618,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
 
   /**
    * Keyboard handling during the Normal unlocked state.
+   *
+   * @param e keyboard event to handle.
+   * @return true if the event was correctly processed, false otherwise.
    */
   protected boolean processKeyNormalUnlocked(KeyEvent e) {
     super.doProcessKeyEvent(e);
@@ -1691,7 +1741,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
-   * Exit usefull for keyboard remapping.
+   * Exit useful for keyboard remapping.
    */
   @SuppressWarnings("deprecation")
   @Override
@@ -1734,17 +1784,19 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
   }
 
   /**
+   * @param wait true if we need to wait for the command to finish, false otherwise.
+   * @param cmd the command to execute.
    * @return the process return code if wait is true, otherwise 0
+   * @throws IOException if there is some problem running the command
+   * @throws InterruptedException if the command execution is interrupted
    */
   protected int strPcCmd(boolean wait, String cmd) throws IOException, InterruptedException {
     Process proc = Runtime.getRuntime().exec(cmd);
     return wait ? proc.waitFor() : 0;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
   /**
-   * Multicast Listener for XI5250Emulator
+   * Multi-cast Listener for XI5250Emulator
    *
    * @author Valentino Proietti - Infordata S.p.A.
    */
@@ -1823,8 +1875,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
   /**
    * @author Valentino Proietti - Infordata S.p.A.
    */
@@ -1840,8 +1890,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       ivId = evt.getID();
     }
   }
-
-  //////////////////////////////////////////////////////////////////////////////
 
   /**
    * Implements a circular Queue. It is used when keyboard buffering is on.
@@ -1887,8 +1935,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
   /**
    * When keyboard buffering is on all keys are posted in a KeyEventQueue. This thread dispatches
    * such key events to the doProcessKeyEvent method of XI5250Emulator.
@@ -1917,11 +1963,9 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       while (!ivStop && ivEmulator.isKeyboardQueue()) {
         try {
           final KeyEvent e = (KeyEvent) ivEmulator.ivKeybEventQueue.getNextEvent();
-          SwingUtilities.invokeAndWait(new Runnable() {
-            public void run() {
-              synchronized (ivEmulator.getTreeLock()) {  // just to avoid dead-locks
-                ivEmulator.doProcessKeyEvent(e);
-              }
+          SwingUtilities.invokeAndWait(() -> {
+            synchronized (ivEmulator.getTreeLock()) {  // just to avoid dead-locks
+              ivEmulator.doProcessKeyEvent(e);
             }
           });
         } catch (InterruptedException ex) {
@@ -1937,8 +1981,6 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
   class TelnetEmulator implements XITelnetEmulator {
 
     public final void connecting() {
@@ -1953,8 +1995,8 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
       XI5250Emulator.this.disconnected(remote);
     }
 
-    public final void catchedIOException(IOException ex) {
-      XI5250Emulator.this.catchedIOException(ex);
+    public final void caughtIOException(IOException ex) {
+      XI5250Emulator.this.caughtIOException(ex);
     }
 
     public final void receivedData(byte[] buf, int len) {
@@ -1976,5 +2018,7 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     public final void remoteFlagsChanged(byte aIACOpt) {
       XI5250Emulator.this.remoteFlagsChanged(aIACOpt);
     }
+
   }
+
 }

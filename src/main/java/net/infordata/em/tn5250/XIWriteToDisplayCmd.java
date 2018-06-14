@@ -18,10 +18,8 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,23 +27,15 @@ import java.util.Iterator;
 
 import net.infordata.em.crt5250.XI5250Field;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 write to display command
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIWriteToDisplayCmd extends XICCCmd {
 
   protected XI5250OrdList ivOrdList;
 
-
-  /**
-   * @exception    XI5250Exception    raised if command parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
@@ -55,13 +45,8 @@ public class XIWriteToDisplayCmd extends XICCCmd {
     ivOrdList.readFrom5250Stream(inStream);
   }
 
-
-  /**
-   */
   @Override
   protected void execute() {
-    //ivEmulator.setSBA(0, 0);
-
     executeCC1();
 
     // if format table is going to be altered then enter NORMAL_LOCKED state
@@ -94,4 +79,5 @@ public class XIWriteToDisplayCmd extends XICCCmd {
 
     executeCC2();
   }
+
 }

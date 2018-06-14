@@ -18,21 +18,15 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Roll command
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIRollCmd extends XI5250Cmd {
@@ -42,10 +36,6 @@ public class XIRollCmd extends XI5250Cmd {
   int     ivTopRow;
   int     ivBottomRow;
 
-
-  /**
-   * @exception    XI5250Exception    raised if command parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
@@ -71,9 +61,9 @@ public class XIRollCmd extends XI5250Cmd {
           XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
-
   @Override
   protected void execute() {
     ivEmulator.scroll(ivDown, ivTopRow - 1, ivBottomRow, ivNRows);
   }
+
 }

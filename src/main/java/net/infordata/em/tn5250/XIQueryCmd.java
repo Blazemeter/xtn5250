@@ -18,28 +18,21 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import net.infordata.em.crt5250.XIEbcdicTranslator;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Query command.
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIQueryCmd extends XI5250Cmd {
   protected int[] ivPar = new int[5];
-
 
   @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException {
@@ -51,7 +44,6 @@ public class XIQueryCmd extends XI5250Cmd {
         ivPar[4] != 0x00)
       ;  //!!V gestire errori
   }
-
 
   @Override
   protected void execute() {
@@ -70,8 +62,8 @@ public class XIQueryCmd extends XI5250Cmd {
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
       (byte)0x01,
-      (byte)trans.toEBCDIC('5'), (byte)trans.toEBCDIC('2'), (byte)trans.toEBCDIC('5'), (byte)trans.toEBCDIC('1'), // 5251
-      (byte)trans.toEBCDIC('0'), (byte)trans.toEBCDIC('1'), (byte)trans.toEBCDIC('1'),
+        trans.toEBCDIC('5'), (byte)trans.toEBCDIC('2'), (byte)trans.toEBCDIC('5'), (byte)trans.toEBCDIC('1'), // 5251
+        trans.toEBCDIC('0'), (byte)trans.toEBCDIC('1'), (byte)trans.toEBCDIC('1'),
       (byte)0x02, (byte)0x00,  // keyboard 
       (byte)0x00, 
       (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,  // S/N
@@ -87,4 +79,5 @@ public class XIQueryCmd extends XI5250Cmd {
 
     ivEmulator.send5250Packet((byte)0x00, (byte)0x00, buf);
   }
+
 }

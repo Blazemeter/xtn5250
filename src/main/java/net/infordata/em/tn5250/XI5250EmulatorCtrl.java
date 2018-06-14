@@ -19,9 +19,7 @@ limitations under the License.
 !!V 09/07/98 rel. 1.10 - creation.
  */
 
-
 package net.infordata.em.tn5250;
-
 
 import java.util.ResourceBundle;
 
@@ -30,8 +28,6 @@ import javax.swing.JOptionPane;
 import net.infordata.em.crt5250.XI5250Crt;
 import net.infordata.em.crt5250.XI5250CrtCtrl;
 import net.infordata.em.crt5250.XI5250CrtFrame;
-import net.infordata.em.util.XICommand;
-
 
 /**
  * Handles common commands shared by XI5250Frame and XI5250Applet.
@@ -54,9 +50,6 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
 
   private int ivSnapShotCount = 0;
 
-
-  /**
-   */
   public XI5250EmulatorCtrl(XI5250Emulator aCrt) {
     super(aCrt);
 
@@ -65,46 +58,24 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     // Connect command
     getCommandMgr().enableCommand(
         CONNECT_CMD, !getEmulator().isActive());
-    getCommandMgr().setCommand(CONNECT_CMD,  new XICommand() {
-      public void execute() {
-        processConnectCmd();
-      }
-    });
+    getCommandMgr().setCommand(CONNECT_CMD, this::processConnectCmd);
 
     // Disconnect command
     getCommandMgr().enableCommand(
         DISCONNECT_CMD, getEmulator().isActive());
-    getCommandMgr().setCommand(DISCONNECT_CMD,  new XICommand() {
-      public void execute() {
-        processDisconnectCmd();
-      }
-    });
+    getCommandMgr().setCommand(DISCONNECT_CMD, this::processDisconnectCmd);
 
     // About command
-    getCommandMgr().setCommand(ABOUT_CMD, new XICommand() {
-      public void execute() {
-        processAboutCmd();
-      }
-    });
+    getCommandMgr().setCommand(ABOUT_CMD, this::processAboutCmd);
 
     // Snapshot command
-    getCommandMgr().setCommand(SNAPSHOT_CMD, new XICommand() {
-      public void execute() {
-        processSnapShotCmd();
-      }
-    });
+    getCommandMgr().setCommand(SNAPSHOT_CMD, this::processSnapShotCmd);
   }
 
-
-  /**
-   */
-  public final XI5250Emulator getEmulator() {
+ public final XI5250Emulator getEmulator() {
     return (XI5250Emulator)getCrt();
   }
 
-
-  /**
-   */
   protected void processConnectCmd() {
     if (!getEmulator().isActive()) {
       Object ret = JOptionPane.showInputDialog(
@@ -119,9 +90,6 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     getEmulator().setActive(true);
   }
 
-
-  /**
-   */
   protected void processDisconnectCmd() {
     if (getEmulator().isActive()) {
       int ret = JOptionPane.showConfirmDialog(
@@ -134,9 +102,6 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     getEmulator().setActive(false);
   }
 
-
-  /**
-   */
   protected void processAboutCmd() {
     JOptionPane.showMessageDialog(getEmulator(),
                                   "Version " + XI5250Emulator.VERSION + "\n" +
@@ -148,9 +113,6 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
                                   cvImagesBdl.getIcon("Logo"));
   }
 
-
-  /**
-   */
   protected void processSnapShotCmd() {
     XI5250Crt clone = getEmulator().getStaticClone();
     String title = "Snap-shot " + getEmulator().getHost() + " #" +
@@ -160,9 +122,6 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     frm.centerOnScreen();
     frm.setVisible(true);
   }
-
-
-  //////////////////////////////////////////////////////////////////////////////
 
   /**
    * Usata per sincronizzare i comandi con lo stato dell' emulator.
@@ -194,7 +153,9 @@ public class XI5250EmulatorCtrl extends XI5250CrtCtrl {
     @Override
     public void stateChanged(XI5250EmulatorEvent e) {
     }
+
   }
+
 }
 
 

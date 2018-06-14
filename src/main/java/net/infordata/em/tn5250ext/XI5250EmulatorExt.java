@@ -21,9 +21,7 @@ limitations under the License.
     10/07/98 rel. _.___- Swing, JBuilder2 e VSS.
 */
 
-
 package net.infordata.em.tn5250ext;
-
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,11 +29,9 @@ import java.util.Iterator;
 
 import net.infordata.em.tn5250.XI5250Emulator;
 
-
 /**
  * THE 5250 EMULATOR extension.
  *
- * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
@@ -45,37 +41,24 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
   private   boolean ivShowHints = true;
   private   boolean ivHintOnActiveField = false;
 
-  transient private   ArrayList<XI5250PanelsDispatcher>  ivDispatchers = 
-    new ArrayList<XI5250PanelsDispatcher>();
+  transient private   ArrayList<XI5250PanelsDispatcher>  ivDispatchers =
+      new ArrayList<>();
 
   public static final String  SHOW_HINTS            = "showHints";
   public static final String  HINT_ON_ACTIVE_FIELD  = "hintOnActiveField";
 
-
-  /**
-   * Default contructor.
-   */
   public XI5250EmulatorExt() {
   }
 
-
-  /**
-   */
   protected synchronized void addDispatcher(XI5250PanelsDispatcher aDispatcher) {
     if (!ivDispatchers.contains(aDispatcher))
       ivDispatchers.add(aDispatcher);
   }
 
-
-  /**
-   */
   protected synchronized void removeDispatcher(XI5250PanelsDispatcher aDispatcher) {
     ivDispatchers.remove(aDispatcher);
   }
 
-
-  /**
-   */
   protected synchronized void refreshHint() {
     XI5250PanelsDispatcher disp;
     XI5250PanelHandler     hndl;
@@ -88,9 +71,9 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
     }
   }
 
-
   /**
    * Enables or disables the fields hints showing (default true).
+   * @param aFlag true to enable showing hints, false to disable.
    */
   public void setShowHints(boolean aFlag) {
     if (ivShowHints == aFlag)
@@ -99,21 +82,13 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
     boolean oldShowHints = ivShowHints;
     ivShowHints = aFlag;
 
-    //!!1.04d refreshHint();
-
     firePropertyChange(SHOW_HINTS, oldShowHints, ivShowHints);
   }
 
-
-  /**
-   */
   public boolean getShowHints() {
     return ivShowHints;
   }
 
-
-  /**
-   */
   public void setHintOnActiveField(boolean aFlag) {
     if (ivHintOnActiveField == aFlag)
       return;
@@ -121,27 +96,12 @@ public class XI5250EmulatorExt extends XI5250Emulator implements Serializable {
     boolean oldHintOnActiveField = ivHintOnActiveField;
     ivHintOnActiveField = aFlag;
 
-    //!!1.04d refreshHint();
-
     firePropertyChange(HINT_ON_ACTIVE_FIELD,
                        oldHintOnActiveField, ivHintOnActiveField);
   }
 
-
-  /**
-   */
   public boolean isHintOnActiveField() {
     return ivHintOnActiveField;
   }
 
-
-//  /**
-//   */
-//  void writeObject(ObjectOutputStream oos) throws IOException {
-//    oos.defaultWriteObject();
-//  }
-//
-//  void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-//    ois.defaultReadObject();
-//  }
 }

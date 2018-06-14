@@ -20,10 +20,8 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.crt5250;
 
+package net.infordata.em.crt5250;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -33,33 +31,24 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * It is used by XI5250Crt to handle the XI5250Field collection.
  *
  * @see    XI5250Crt
- *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250FieldsList implements XI5250BaseField, Cloneable {
   private XI5250Crt   ivCrt;
-  private ArrayList<XI5250Field> ivFields = new ArrayList<XI5250Field>(40);
+  private ArrayList<XI5250Field> ivFields = new ArrayList<>(40);
   private List<XI5250Field> ivROFields = Collections.unmodifiableList(ivFields);
 
-  /**
-   */
   public XI5250FieldsList(XI5250Crt aCrt) {
     ivCrt = aCrt;
   }
 
-
   /**
    * Returns a cloned XI5250FieldList
+   * @return  a cloned XI5250FieldList
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -76,75 +65,78 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     }
   }
 
-
   /**
    * Calls init for each field it owns.
    * @see    XI5250Field#init
    */
   public void init() {
-    for (int i = 0; i < ivFields.size(); i++)
-      ivFields.get(i).init();
+    for (XI5250Field ivField : ivFields) {
+      ivField.init();
+    }
   }
-
 
   /**
    * Calls removeNotify for each field it owns.
    */
   public void removeNotify() {
-    for (int i = 0; i < ivFields.size(); i++)
-      ivFields.get(i).removeNotify();
+    for (XI5250Field ivField : ivFields) {
+      ivField.removeNotify();
+    }
   }
-
 
   /**
    * Calls saveTo for each field it owns.
+   * @param aSaver saver where to save the list of fields.
    * @see    XI5250Field#saveTo
    */
   public void saveTo(XI5250FieldSaver aSaver) throws IOException {
-    for (int i = 0; i < ivFields.size(); i++)
-      ivFields.get(i).saveTo(aSaver);
+    for (XI5250Field ivField : ivFields) {
+      ivField.saveTo(aSaver);
+    }
   }
 
-
   /**
-   * Calls resized for each field it owns.
+   * Calls re-sized for each field it owns.
    * @see    XI5250Field#resized
    */
   public void resized() {
-    for (int i = 0; i < ivFields.size(); i++)
-      ivFields.get(i).resized();
+    for (XI5250Field ivField : ivFields) {
+      ivField.resized();
+    }
   }
-
 
   /**
    * Lets fields paint themselves.
+   * @param g graphic where to paint the fields list.
    */
   public void paint(Graphics g) {
-    XI5250Field field = null;
+    XI5250Field field;
     Rectangle   clip = g.getClipBounds();
 
-    for (int i = 0; i < ivFields.size(); i++) {
-      field = ivFields.get(i);
+    for (XI5250Field ivField : ivFields) {
+      field = ivField;
       Rectangle fr = field.getBoundingRect();
 
       if (clip.intersects(fr)) {
         Graphics fg = g.create(fr.x, fr.y, fr.width, fr.height);
         try {
           field.paint(fg);
-        }
-        finally {
+        } finally {
           fg.dispose();
         }
       }
     }
   }
 
-
   /**
    * Ricerca campo che inizia da tale posizione, se non lo trova
    * ritorna un numero negativo che trasformandolo con la formula
    * idx = (-idx) - 1 indica la posizione nel vettore dove dovrebbe
    * essere inserito
+   *
+   * @param aCol column from where to search the field
+   * @param aRow row from where to search the field
+   * @return the linear position of the field
    */
   private int searchField(int aCol, int aRow) {
     int kk  = ivCrt.toLinearPos(aCol, aRow);
@@ -168,19 +160,12 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     return -(min + 1);
   }
 
-
   /**
    * Adds a field to the fields collection.
+   * @param aField field to add to the list.
    */
   public void addField(XI5250Field aField) {
-    /*
-    // !!V gi� presente in quella posizione, oppure overlapping,
-    // sollevare una eccezione invece di return ??
-    if (fieldFromPos(aField.ivCol, aField.ivRow) != null)
-      return;
-    */
-
-    // !!V gi� presente in quella posizione, oppure overlapping,
+    // presente in quella posizione, oppure overlapping,
     // viene sostituito il campo
     XI5250Field field = fieldFromPos(aField.getCol(), aField.getRow());
     if (field != null) {
@@ -193,9 +178,11 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     }
   }
 
-
   /**
    * Campo presente in tale posizione oppure precedente
+   * @param aCol the column from where to search the field
+   * @param aRow the row from where to search the field
+   * @return the field found before the given position
    */
   private XI5250Field prevFieldFromPosInternal(int aCol, int aRow) {
     int idx = searchField(aCol, aRow);
@@ -211,9 +198,10 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     return ivFields.get(idx - 1);
   }
 
-
   /**
    * Ritorna indice del campo
+   * @param aField field to get the index for
+   * @return the index of the field in the list.
    */
   protected int fromFieldToIdx(XI5250Field aField) {
     XI5250Field field;
@@ -226,9 +214,11 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     return -1;
   }
 
-
   /**
    * Returns the field present in the given position, null if none.
+   * @param aCol column to get the field from
+   * @param aRow row to get the field from
+   * @return the field present in the given position, null if none.
    */
   public XI5250Field fieldFromPos(int aCol, int aRow) {
     // accedo al precedente
@@ -245,9 +235,6 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
       return null;
   }
 
-
-  /**
-   */
   public XI5250Field nextFieldFromPos(int aCol, int aRow) {
     if (ivFields.isEmpty())
       return null;
@@ -261,9 +248,6 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     return ivFields.get(idx + 1);
   }
 
-
-  /**
-   */
   public XI5250Field prevFieldFromPos(int aCol, int aRow) {
     if (ivFields.isEmpty())
       return null;
@@ -287,24 +271,24 @@ public class XI5250FieldsList implements XI5250BaseField, Cloneable {
     return field;
   }
 
-
-  /**
-   */
   public List<XI5250Field> getFields() {
     return ivROFields;
   }
 
-
   /**
    * Returns the field at the given index (null if none).
    * Fields enumeration is based on their linear buffer position.
+   *
+   * @param idx index of the field to get
+   * @return the field at the given index (null if none).
    */
   public XI5250Field getField(int idx) {
     try {
-      return (XI5250Field)ivFields.get(idx);
+      return ivFields.get(idx);
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       return null;
     }
   }
+
 }

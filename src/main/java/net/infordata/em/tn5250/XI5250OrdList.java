@@ -20,9 +20,7 @@ limitations under the License.
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
 
-
 package net.infordata.em.tn5250;
-
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,14 +32,8 @@ import java.util.logging.Logger;
 
 import net.infordata.em.tnprot.XITelnet;
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Orders list.
- *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250OrdList extends XI5250Ord {
@@ -53,7 +45,6 @@ public class XI5250OrdList extends XI5250Ord {
   protected List<XI5250Ord> ivOrdVect;
 
   protected boolean[]    ivOrdPresent = new boolean[256];
-
 
   static {
     cv5250OrdClasses[XI5250Emulator.ORD_IC] = XIICOrd.class;
@@ -68,23 +59,18 @@ public class XI5250OrdList extends XI5250Ord {
     cv5250OrdClasses[XI5250Emulator.ORD_WDSF] = XIWdsfOrd.class;
   }
 
-
-  /**
-   */
   protected XI5250OrdList(XI5250Emulator aEmulator) {
     init(aEmulator);
   }
 
-
-  /**
-   */
   public boolean isOrderPresent(byte aOrder) {
     return ivOrdPresent[aOrder];
   }
 
-
   /**
-   * @exception    XI5250Exception    raised if order parameters are wrong.
+   * @param inStream the stream from where to read the order list from.
+   * @throws XI5250Exception raised if order parameters are wrong.
+   * @throws IOException raised when there is an input/output problem.
    */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
@@ -92,12 +78,12 @@ public class XI5250OrdList extends XI5250Ord {
 
     int       bb;
     XI5250Ord ord;
-    ivOrdVect = new ArrayList<XI5250Ord>(100);
+    ivOrdVect = new ArrayList<>(100);
 
     if (LOGGER.isLoggable(Level.FINER))
       LOGGER.finer("  START OF ORDERS LIST");
     
-    for (int i = 0; ; i++) {
+    while(true) {
       inStream.mark(1);
       if ((bb = inStream.read()) == -1)
         break;
@@ -164,20 +150,19 @@ public class XI5250OrdList extends XI5250Ord {
     }
   }
 
-
-  /**
-   */
   @Override
   protected void execute() {
-    for (int i = 0; i < ivOrdVect.size(); i++)
-      ivOrdVect.get(i).execute();
+    for (XI5250Ord anIvOrdVect : ivOrdVect) {
+      anIvOrdVect.execute();
+    }
   }
-
 
   /**
    * Creates the 5250 order instance related to the given 5250 order id.
-   * @exception    IllegalAccessException .
-   * @exception    InstantiationException .
+   * @param aOrd order id to create
+   * @return created order
+   * @throws    IllegalAccessException .
+   * @throws    InstantiationException .
    */
   public XI5250Ord createOrdInstance(int aOrd)
       throws IllegalAccessException, InstantiationException {
@@ -194,13 +179,10 @@ public class XI5250OrdList extends XI5250Ord {
     else
       return null;
   }
-  
-  
-  /**
-   */
+
   @Override
   public String toString() {
-    String ss = super.toString() + ivOrdVect.toString();
-    return ss;
+    return super.toString() + ivOrdVect.toString();
   }
+
 }

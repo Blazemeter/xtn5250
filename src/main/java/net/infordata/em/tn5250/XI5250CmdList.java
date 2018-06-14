@@ -22,7 +22,6 @@ limitations under the License.
 
 package net.infordata.em.tn5250;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -32,21 +31,16 @@ import java.util.logging.Logger;
 
 import net.infordata.em.tnprot.XITelnet;
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Commands list (Works like a macro command).
  *
- * @version  
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250CmdList extends XI5250Cmd {
 
   private static final Logger LOGGER = Logger.getLogger(XI5250CmdList.class.getName());
-  
-  private static Class<?>[] cv5250CmdClasses = new Class[256];;
+
+  private static Class<?>[] cv5250CmdClasses = new Class[256];
 
   protected List<XI5250Cmd> ivCmdVect;
 
@@ -85,97 +79,93 @@ public class XI5250CmdList extends XI5250Cmd {
         XIQueryCmd.class;
   }
 
-
-  /**
-   */
   protected XI5250CmdList(XI5250Emulator aEmulator) {
     init(aEmulator);
   }
 
-
   /**
-   * @exception    XI5250Exception    raised if command parameters are wrong.
+   * Parses the command list from the given input stream.
+   *
+   * @param inStream stream to read from.
+   * @throws IOException raised if there is some problem in communication with server.
+   * @throws XI5250Exception raised if command parameters are wrong.
    */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
-    int       bb;
+    int bb;
     XI5250Cmd cmd;
-    ivCmdVect = new ArrayList<XI5250Cmd>(100);
+    ivCmdVect = new ArrayList<>(100);
 
-    if (LOGGER.isLoggable(Level.FINER))
+    if (LOGGER.isLoggable(Level.FINER)) {
       LOGGER.finer("START OF COMMANDS LIST");
+    }
 
     // jump until ESC is found
-    while ((bb = inStream.read()) != -1 && (byte)bb != XI5250Emulator.ESC)
-      ;
+    while ((bb = inStream.read()) != -1 && (byte) bb != XI5250Emulator.ESC) {
+    }
 
     // start from 1 because ESC is already read
     for (int i = 1; (bb = inStream.read()) != -1; i++) {
       switch (i % 2) {
         case 0:
-          if ((byte)bb != XI5250Emulator.ESC)
+          if ((byte) bb != XI5250Emulator.ESC) {
             throw new XI5250Exception("Malformed 5250 packet", XI5250Emulator.ERR_INVALID_COMMAND);
+          }
           break;
         case 1:
-          try {
-            cmd = createCmdInstance(XITelnet.toInt((byte)bb));
-          }
-          catch (Exception ex) {
-            throw new RuntimeException(ex);
-          }
+          cmd = createCmdInstance(XITelnet.toInt((byte) bb));
 
           if (cmd != null) {
             cmd.init(ivEmulator);
             cmd.readFrom5250Stream(inStream);
 
-            if (LOGGER.isLoggable(Level.FINER))
+            if (LOGGER.isLoggable(Level.FINER)) {
               LOGGER.finer("" + cmd);
+            }
 
             ivCmdVect.add(cmd);
-          }
-          else {
+          } else {
             throw new XI5250Exception("Command not supported : 0x" +
-                                      XITelnet.toHex((byte)bb), 
-                                      XI5250Emulator.ERR_INVALID_COMMAND);
+                XITelnet.toHex((byte) bb),
+                XI5250Emulator.ERR_INVALID_COMMAND);
           }
           break;
       }
     }
   }
 
-
-  /**
-   */
   @Override
   protected void execute() {
-    for (int i = 0; i < ivCmdVect.size(); i++)
-      ivCmdVect.get(i).execute();
+    for (XI5250Cmd anIvCmdVect : ivCmdVect) {
+      anIvCmdVect.execute();
+    }
   }
-
 
   /**
    * Creates the 5250 command related to the given 5250 command id.
-   * @exception    IllegalAccessException .
-   * @exception    InstantiationException .
+   *
+   * @param aCmd byte identification for the command.
+   * @return created command.
    */
-  protected XI5250Cmd createCmdInstance(int aCmd)
-      throws IllegalAccessException, InstantiationException {
-    Class<?>     cls;
+  protected XI5250Cmd createCmdInstance(int aCmd) {
+    Class<?> cls;
 
     cls = cv5250CmdClasses[aCmd];
-    if (cls != null)
-      return (XI5250Cmd)cls.newInstance();
-    else
+    if (cls != null) {
+      try {
+        return (XI5250Cmd) cls.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
       return null;
+    }
   }
 
-
-  /**
-   */
   @Override
   public String toString() {
-    String ss = super.toString() + ivCmdVect.toString();
-    return ss;
+    return super.toString() + ivCmdVect.toString();
   }
+
 }

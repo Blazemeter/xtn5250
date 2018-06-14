@@ -20,10 +20,8 @@ limitations under the License.
     ***
     10/07/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
 
 package net.infordata.em.tn5250ext;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +30,10 @@ import java.util.logging.Logger;
 import net.infordata.em.tn5250.XI5250EmulatorAdapter;
 import net.infordata.em.tn5250.XI5250EmulatorEvent;
 
-
 /**
  * Maintains a set of XI5250PanelHandler and activates them when the related 5250
  * screen (or panel) is received.
  *
- * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public abstract class XI5250PanelsDispatcher {
@@ -54,32 +50,28 @@ public abstract class XI5250PanelsDispatcher {
 
   transient private HashMap<Object, Object> ivSharedData;
 
-
   /**
    * Creates a XI5250PanelsDispatcher.
    */
   public XI5250PanelsDispatcher() {
   }
 
-
   /**
    * Creates a XI5250PanelsDispatcher to handle panels of the given
    * XI5250Emulator instance.
+   *
+   * @param aEmulator emulator to set on the dispatcher.
    */
   public XI5250PanelsDispatcher(XI5250EmulatorExt aEmulator) {
-    this();
     setEmulator(aEmulator);
   }
 
-
-  /**
-   */
   public synchronized void setEmulator(XI5250EmulatorExt aEmulator) {
     if (ivEm == aEmulator)
       return;
 
     if (ivEm != null) {
-      setPanelHndl(null);  //!!1.00a
+      setPanelHndl(null);
       ivEm.removeEmulatorListener(ivEmulatorAdapter);
       ivEm.removeDispatcher(this);
     }
@@ -93,8 +85,6 @@ public abstract class XI5250PanelsDispatcher {
     }
   }
 
-  /**
-   */
   public final XI5250EmulatorExt getEmulator() {
     return ivEm;
   }
@@ -106,16 +96,19 @@ public abstract class XI5250PanelsDispatcher {
   /**
    * Adds the given XI5250PanelHandler instance to the list of panel handlers
    * waiting to be activated.
+   * @param aPanel panel handler to add
    */
   public abstract void addPanelHandler(XI5250PanelHandler aPanel);
 
   /**
    * Removes the panel handler.
+   * @param aPanel panel handler to remove
    */
   public abstract void removePanelHandler(XI5250PanelHandler aPanel);
 
   /**
-   * Searches the XI5250PanelHandler instace related to the current 5250 panel.<br>
+   * Searches the XI5250PanelHandler instance related to the current 5250 panel.
+   * @return the XI5250PanelHandler instance related to the current 5250 panel
    * @see    XI5250PanelHandler#detailedTest
    */
   protected abstract XI5250PanelHandler getCurrentPanelHandler();
@@ -123,14 +116,13 @@ public abstract class XI5250PanelsDispatcher {
   /**
    * Returns a Map that can be used to store data shared by different
    * XI5250Panel instances.
+   * @return Map that can be used to store data shared by different XI5250Panel instances.
    */
   public final Map<Object, Object> getSharedData() {
     if (ivSharedData == null)
-      ivSharedData = new HashMap<Object, Object>();
-
+      ivSharedData = new HashMap<>();
     return ivSharedData;
   }
-
 
   /**
    * A new panel has been received so try to find the relative
@@ -140,7 +132,7 @@ public abstract class XI5250PanelsDispatcher {
    */
   protected synchronized void newPanelReceived() {
     if (ivEm.getState() == XI5250EmulatorExt.ST_NORMAL_UNLOCKED ||
-        ivEm.getState() == XI5250EmulatorExt.ST_PRE_HELP) {         //!!1.05b
+        ivEm.getState() == XI5250EmulatorExt.ST_PRE_HELP) {
       XI5250PanelHandler panelHndl = getCurrentPanelHandler();
 
       if (panelHndl != null)
@@ -148,25 +140,19 @@ public abstract class XI5250PanelsDispatcher {
     }
   }
 
-
-  /**
-   */
   private void fieldsRemoved() {
     // destroy old panel handler
     setPanelHndl(null);
   }
 
-
-  /**
-   */
   private void dataSended(byte anAidCode) {
     if (ivPanelHndl != null)
       ivPanelHndl.dataSended(anAidCode);
   }
 
-
   /**
    * Used to set the current XI5250PanelHandler and to stop the previous one.
+   * @param aPanelHndl panel handler to set as the current one
    */
   protected void setPanelHndl(XI5250PanelHandler aPanelHndl) {
     if (aPanelHndl == ivPanelHndl)
@@ -181,19 +167,14 @@ public abstract class XI5250PanelsDispatcher {
       ivPanelHndl.startInternal();
   }
 
-
   /**
    * Returns the current active panel handler (none if null)
+   * @return the current active panel handler (none if null)
    */
   protected XI5250PanelHandler getCurrentPanelHndl() {
     return ivPanelHndl;
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   class EmulatorAdapter extends XI5250EmulatorAdapter {
 
     @Override
@@ -219,5 +200,7 @@ public abstract class XI5250PanelsDispatcher {
     public void dataSended(XI5250EmulatorEvent e) {
       XI5250PanelsDispatcher.this.dataSended(e.getAidCode());
     }
+
   }
+
 }

@@ -19,17 +19,13 @@ limitations under the License.
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
  
- 
 package net.infordata.em.tn5250;
 
-
 import java.util.EventObject;
-
 
 /**
  * XI5250Emulator notification event.
  *
- * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250EmulatorEvent extends EventObject {
@@ -76,49 +72,36 @@ public class XI5250EmulatorEvent extends EventObject {
   protected int         ivId;
   protected byte        ivAidCode;
 
-
-  /**
-   */
   public XI5250EmulatorEvent(int aId, XI5250Emulator aEm) {
     super(aEm);
     ivId = aId;
   }
 
-
-  /**
-   */
   public XI5250EmulatorEvent(int aId, XI5250Emulator aEm, byte anAidCode) {
     this(aId, aEm);
     ivAidCode = anAidCode;
   }
 
-
-  /**
-   */
   public int getID() {
     return ivId;
   }
 
-
-  /**
-   */
   public XI5250Emulator get5250Emulator() {
     return (XI5250Emulator)getSource();
   }
 
-
   /**
    * The aid code (DATA_SENDED event)
+   *
+   * @return The aid code (DATA_SENDED event).
    */
   public byte getAidCode() {
     return ivAidCode;
   }
 
-
-  /**
-   */
   @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "]";
   }
+
 }

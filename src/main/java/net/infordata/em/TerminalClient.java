@@ -31,14 +31,14 @@ public class TerminalClient {
     }
 
     @Override
-    protected void catchedIOException(IOException ex) {
+    protected void caughtIOException(IOException ex) {
       if (exceptionHandler != null) {
         exceptionHandler.onException(ex);
       }
     }
 
     @Override
-    protected void catchedException(Throwable ex) {
+    protected void caughtException(Throwable ex) {
       if (exceptionHandler != null) {
         exceptionHandler.onException(ex);
       }
@@ -222,8 +222,6 @@ public class TerminalClient {
 
   /**
    * Disconnect the terminal emulator from the server.
-   *
-   * @throws InterruptedException thrown when the disconnect is interrupted.
    */
   public void disconnect() {
     emulator.setActive(false);

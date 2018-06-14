@@ -20,9 +20,7 @@ limitations under the License.
     04/02/99 rel. 1.11 - Swing 1.1 + ivSizeControlledFrame.
  */
 
-
 package net.infordata.em.tn5250;
-
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -47,10 +45,6 @@ import net.infordata.em.crt5250.XI5250CrtCtrl;
 import net.infordata.em.crt5250.XI5250CrtFrame;
 import net.infordata.em.util.XIUtil;
 
-
-
-/**
- */
 public class XI5250Frame extends XI5250CrtFrame {
 
   private static final long serialVersionUID = 1L;
@@ -64,32 +58,24 @@ public class XI5250Frame extends XI5250CrtFrame {
 
   private final String ivTitle;
 
-  /**
-   */
   public XI5250Frame(String aTitle, XI5250Emulator aCrt) {
     super(aTitle, aCrt);
     ivTitle = aTitle;
     init(aCrt);
   }
 
-  /**
-   */
   public XI5250Frame(String aTitle, XI5250Emulator aCrt, boolean dspToolBar, boolean dspMenuBar) {
     super(aTitle, aCrt, dspToolBar, dspMenuBar);
     ivTitle = aTitle;
     init(aCrt);
   }
 
-
-  /**
-   */
   public XI5250Frame(String aTitle, XI5250Emulator aCrt,
                      boolean sizeControlledFrame, boolean dspToolBar, boolean dspMenuBar) {
     super(aTitle, aCrt, sizeControlledFrame, dspToolBar, dspMenuBar);
     ivTitle = aTitle;
     init(aCrt);
   }
-
   
   private void init(XI5250Emulator aCrt) {
     if (aCrt.isActive())
@@ -107,45 +93,31 @@ public class XI5250Frame extends XI5250CrtFrame {
     });
   }
 
-  
-  /**
-   */
   @Override
   protected XI5250CrtCtrl createController(XI5250Crt crt) {
     return new XI5250EmulatorCtrl((XI5250Emulator)crt);
   }
 
-
-  /**
-   */
   protected final XI5250EmulatorCtrl getEmulatorCtrl() {
     return (XI5250EmulatorCtrl)getCrtCtrl();
   }
 
-
-  /**
-   */
   public final XI5250Emulator getEmulator() {
     return getEmulatorCtrl().getEmulator();
   }
 
-
-  /**
-   */
   @Override
   protected void processExitCmd() {
     if (getEmulator().isActive()) {
-      //!!1.13a otherwise a dead-lock may occur !!
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          int ret = JOptionPane.showConfirmDialog(
-                       XI5250Frame.this,
-                       cvRes.getString("TXT_ConfirmExit"),
-                       "", JOptionPane.YES_NO_OPTION);
-          if (ret != JOptionPane.NO_OPTION) {
-            setVisible(false);
-            dispose();
-          }
+      //otherwise a dead-lock may occur !!
+      SwingUtilities.invokeLater(() -> {
+        int ret = JOptionPane.showConfirmDialog(
+                     XI5250Frame.this,
+                     cvRes.getString("TXT_ConfirmExit"),
+                     "", JOptionPane.YES_NO_OPTION);
+        if (ret != JOptionPane.NO_OPTION) {
+          setVisible(false);
+          dispose();
         }
       });
     }
@@ -155,9 +127,6 @@ public class XI5250Frame extends XI5250CrtFrame {
     }
   }
 
-
-  /**
-   */
   @Override
   protected void processWindowEvent(WindowEvent e) {
     super.processWindowEvent(e);
@@ -169,9 +138,6 @@ public class XI5250Frame extends XI5250CrtFrame {
     }
   }
 
-
-  /**
-   */
   @Override
   protected JMenuBar createMenuBar() {
     String str;
@@ -263,9 +229,10 @@ public class XI5250Frame extends XI5250CrtFrame {
     return menuBar;
   }
 
-
   /**
    * Inserisce nella tool-bar i bottoni di default.
+   *
+   * @return created toolbar.
    */
   @Override
   protected JToolBar createToolBar() {
@@ -319,7 +286,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
     for (int i = 0; i < buttons.length; i++) {
       if (buttons[i] != null) {
-        AbstractButton button = (AbstractButton)buttons[i];
+        AbstractButton button = buttons[i];
         toolBar.add(button);
         button.setToolTipText(buttonHints[i]);
         button.setMinimumSize(size);
@@ -334,6 +301,7 @@ public class XI5250Frame extends XI5250CrtFrame {
 
     return toolBar;
   }
+
 }
 
 

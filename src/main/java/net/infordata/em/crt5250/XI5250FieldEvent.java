@@ -22,22 +22,17 @@ limitations under the License.
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
  
- 
 package net.infordata.em.crt5250;
-
 
 import java.awt.event.KeyEvent;
 import java.util.EventObject;
 
-
 /**
  * XI5250Field notification event.
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250FieldEvent extends EventObject {
-
 
   private static final long serialVersionUID = 1L;
 
@@ -57,10 +52,7 @@ public class XI5250FieldEvent extends EventObject {
    * The field enabled state has changed.
    */
   public static final int ENABLED_STATE_CHANGED  = 3;
-  /**
-   */
   public static final int KEY_EVENT              = 4;
-
 
   private static final String[] cvIdDescr = {"ACTIVATED",
                                              "DEACTIVATED",
@@ -71,48 +63,31 @@ public class XI5250FieldEvent extends EventObject {
   private int         ivId;
   private KeyEvent    ivKeyEvent;
 
-
-  /**
-   */
   public XI5250FieldEvent(int aId, XI5250Field aField) {
     super(aField);
     ivId = aId;
   }
 
-
-  /**
-   */
   public XI5250FieldEvent(int aId, XI5250Field aField, KeyEvent ke) {
     this(aId, aField);
     ivKeyEvent = ke;
   }
 
-
-  /**
-   */
   public final int getID() {
     return ivId;
   }
 
-
-  /**
-   */
   public final XI5250Field getField() {
     return (XI5250Field)getSource();
   }
 
-
-  /**
-   */
   public final KeyEvent getKeyEvent() {
     return ivKeyEvent;
   }
 
-
-  /**
-   */
   @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[ivId] + "," + getSource() + "]";
   }
+
 }

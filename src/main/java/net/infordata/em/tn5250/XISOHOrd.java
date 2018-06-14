@@ -18,23 +18,16 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import net.infordata.em.tnprot.XITelnet;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 SOH Order
- *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XISOHOrd extends XI5250Ord {
@@ -42,10 +35,6 @@ public class XISOHOrd extends XI5250Ord {
   protected byte[] ivData;
   protected int    ivLen;
 
-
-  /**
-   * @exception    XI5250Exception    raised if order parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
@@ -63,14 +52,13 @@ public class XISOHOrd extends XI5250Ord {
       throw new XI5250Exception("Bad SOH Order", XI5250Emulator.ERR_INVALID_SOH_LENGTH);
   }
 
-
   @Override
   protected void execute() {
     // I didn' t found them on docs, but i need them
     ivEmulator.ivCmdList.ivICOrderExecuted = false;
     ivEmulator.removeFields();
 
-    ivEmulator.ivPendingCmd = null;                      //!!0.92a
+    ivEmulator.ivPendingCmd = null;
 
     if (ivLen >= 2) {
       // resequencing byte present
@@ -80,7 +68,7 @@ public class XISOHOrd extends XI5250Ord {
           ivEmulator.setErrorRow(ivData[3] - 1);
           // function keys mask present
           if (ivLen >= 7) {
-            int xx = XITelnet.toInt(ivData[4]) << 16 |    //!!1.05a
+            int xx = XITelnet.toInt(ivData[4]) << 16 |
                      XITelnet.toInt(ivData[5]) << 8 |
                      XITelnet.toInt(ivData[6]);
 
@@ -91,7 +79,6 @@ public class XISOHOrd extends XI5250Ord {
     }
   }
 
-
   @Override
   public String toString() {
     String str = "";
@@ -99,4 +86,5 @@ public class XISOHOrd extends XI5250Ord {
       str += XITelnet.toHex(ivData[i]) + ",";
     return super.toString() + " [" + ivLen + ",[" + str + "]]";
   }
+
 }

@@ -20,9 +20,7 @@ limitations under the License.
     02/05/00 rel. 1.15b- Jdk 1.3rc2.
  */
 
-
 package net.infordata.em.util;
-
 
 import java.applet.Applet;
 import java.awt.Component;
@@ -36,9 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
-
-/**
- */
 public class XIUtil {
 
 
@@ -68,15 +63,9 @@ public class XIUtil {
     }
   }
 
-
-  /**
-   */
   private XIUtil() {
   }
 
-
-  /**
-   */
   public static final Frame getFrame(Component aComponent) {
     Component comp = aComponent;
     while (comp != null && !(comp instanceof Frame))
@@ -84,9 +73,6 @@ public class XIUtil {
     return (Frame)comp;
   }
 
-
-  /**
-   */
   public static final Window getWindow(Component aComponent) {
     Component comp = aComponent;
     while (comp != null && !(comp instanceof Window))
@@ -94,9 +80,6 @@ public class XIUtil {
     return (Window)comp;
   }
 
-
-  /**
-   */
   public static final Applet getApplet(Component aComponent) {
     Component comp = aComponent;
     while (comp != null && !(comp instanceof Applet))
@@ -104,12 +87,9 @@ public class XIUtil {
     return (Applet)comp;
   }
 
-
-  /**
-   */
   public static Image createImage(final Class<?> baseClass,
                                   final String gifFile) {
-    byte[] buffer = null;
+    byte[] buffer;
     try {
       /* Copy resource into a byte array.  This is
        * necessary because several browsers consider
@@ -146,9 +126,6 @@ public class XIUtil {
     return Toolkit.getDefaultToolkit().createImage(buffer);
   }
 
-
-  /**
-   */
   public static char getMnemonic(String str) {
     char ch;
     int state = 0;
@@ -169,9 +146,6 @@ public class XIUtil {
     return '\u0000';
   }
 
-
-  /**
-   */
   public static String removeMnemonics(String str) {
     StringBuilder sb = new StringBuilder(str.length());
     char ch;
@@ -193,4 +167,5 @@ public class XIUtil {
     }
     return sb.toString();
   }
+
 }

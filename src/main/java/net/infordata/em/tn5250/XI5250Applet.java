@@ -21,9 +21,7 @@ limitations under the License.
     08/06/99 rel. 1.11a- The emulator is centered.
  */
 
-
 package net.infordata.em.tn5250;
-
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,13 +48,9 @@ import javax.swing.UIManager;
 
 import net.infordata.em.crt5250.XI5250Crt;
 import net.infordata.em.crt5250.XI5250Field;
-import net.infordata.em.util.XICommand;
 import net.infordata.em.util.XICommandMgr;
 import net.infordata.em.util.XIUtil;
 
-
-/**
- */
 public class XI5250Applet extends JApplet {
 
   private static final long serialVersionUID = 1L;
@@ -74,56 +68,34 @@ public class XI5250Applet extends JApplet {
       ResourceBundle.getBundle("net.infordata.em.tn5250.resources.Res");
 
   private XI5250EmulatorCtrl ivEmulatorCtrl;
-  private EmulatorFrame      ivFrame;
-  private boolean            ivFirstTime = true;
+  private EmulatorFrame ivFrame;
+  private boolean ivFirstTime = true;
 
-  private boolean            ivDestroyed = false;
+  private boolean ivDestroyed = false;
 
-  private PropertyChangeListener ivPropertyChangeListener =
-      new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-          emulatorPropertyChanged(evt);
-        }
-      };
+  private PropertyChangeListener ivPropertyChangeListener = this::emulatorPropertyChanged;
 
   public static final String INFRAME_CMD = "INFRAME_CMD";
 
   protected XI5250Emulator createEmulator() {
-    return new XI5250Emulator(); 
+    return new XI5250Emulator();
   }
 
-  /**
-   */
   @Override
   public void init() {
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("init()");
-
-    /*!!1.12
-    if (System.getProperty("java.version").compareTo("1.1.1") < 0 ||
-        System.getProperty("java.version").compareTo("1.1_Final") == 0) {
-      System.err.println("!!! Use JDK 1.1.1 or newer !!!");
     }
-    */
-//    XI5250Emulator.checkJDK();
 
-    String  host = null;
+    String host;
     host = getParameter("host");
 
-    /*
-    if (host == null) {
-      System.err.println("Host name or ip address is required.");
-      System.exit(-1);
-    }
-    */
-
     boolean inplace = true;
-    {
-      String ss = getParameter("inplace");
-      if (ss != null && "false".equals(ss.toLowerCase()))
-        inplace = false;
+    String ss = getParameter("inplace");
+    if (ss != null && "false".equals(ss.toLowerCase())) {
+      inplace = false;
     }
-    
+
     final boolean p3dFX = "true".equalsIgnoreCase(getParameter("3dFX"));
     final boolean altFKeyRemap = "true".equalsIgnoreCase(getParameter("altFKeyRemap"));
     final String codePage = getParameter("codePage");
@@ -143,70 +115,54 @@ public class XI5250Applet extends JApplet {
     getEmulator().setAltFKeyRemap(altFKeyRemap);
     getEmulator().setCodePage(codePage);
     getEmulator().setStrPcCmdEnabled(pSTRPCCMD);
-    if (deviceName != null)
+    if (deviceName != null) {
       getEmulator().setTelnetEnv("\u0003DEVNAME\u0001" + deviceName);
+    }
 
-    //!! 1.11a execution moved to the EventQueueThread
-    if (inplace)
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          emulatorInPlace();
-          if (requestFocus)
-            getEmulator().requestFocusInWindow();
+    if (inplace) {
+      SwingUtilities.invokeLater(() -> {
+        emulatorInPlace();
+        if (requestFocus) {
+          getEmulator().requestFocusInWindow();
         }
       });
-    else
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          emulatorInFrame();
-          if (requestFocus)
-            getEmulator().requestFocusInWindow();
-        }
-      });
-
-    // InFrame command
-    getCommandMgr().enableCommand(
-        INFRAME_CMD, ivFrame == null);
-    getCommandMgr().setCommand(INFRAME_CMD,  new XICommand() {
-      public void execute() {
-        processInFrameCmd();
-      }
-    });
-  }
-
-
-  /**
-   */
-  @Override
-  public void start() {
-    if (DEBUG >= 1)
-      System.out.println("start()");
-    
-    if (getEmulator().getHost() != null) {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          getEmulator().setActive(true);
+    } else {
+      SwingUtilities.invokeLater(() -> {
+        emulatorInFrame();
+        if (requestFocus) {
+          getEmulator().requestFocusInWindow();
         }
       });
     }
+
+    // InFrame command
+    getCommandMgr().enableCommand(INFRAME_CMD, ivFrame == null);
+    getCommandMgr().setCommand(INFRAME_CMD, this::processInFrameCmd);
   }
 
+  @Override
+  public void start() {
+    if (DEBUG >= 1) {
+      System.out.println("start()");
+    }
 
-  /**
-   */
+    if (getEmulator().getHost() != null) {
+      SwingUtilities.invokeLater(() -> getEmulator().setActive(true));
+    }
+  }
+
   @Override
   public void stop() {
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("stop()");
+    }
   }
 
-
-  /**
-   */
   @Override
   public void destroy() {
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("destroy()");
+    }
 
     ivDestroyed = true;
     if (!UNDEAD_FRAME || ivFrame == null) {
@@ -215,42 +171,32 @@ public class XI5250Applet extends JApplet {
     }
   }
 
-
-  /**
-   */
   public final XI5250Emulator getEmulator() {
     return ivEmulatorCtrl.getEmulator();
   }
 
-
-  /**
-   */
   public final XICommandMgr getCommandMgr() {
     return ivEmulatorCtrl.getCommandMgr();
   }
 
-
-  /**
-   */
   protected void processInFrameCmd() {
     emulatorInFrame();
   }
 
-
-  /**
-   */
   protected void emulatorInPlace() {
-    if (!ivFirstTime && ivFrame == null)
+    if (!ivFirstTime && ivFrame == null) {
       return;
+    }
 
     ivFirstTime = false;
 
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("inplace");
+    }
 
     if (ivFrame != null) {
       ivFrame.setJMenuBar(null);  // work around for a Swing 1.1 bug
-      
+
       ivFrame.dispose();
       ivFrame = null;
     }
@@ -271,15 +217,14 @@ public class XI5250Applet extends JApplet {
     getEmulator().addPropertyChangeListener(ivPropertyChangeListener);
   }
 
-
-  /**
-   */
   protected void emulatorInFrame() {
-    if (ivFrame != null)
+    if (ivFrame != null) {
       return;
+    }
 
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("inframe");
+    }
 
     getCommandMgr().enableCommand(INFRAME_CMD, false);
 
@@ -290,23 +235,21 @@ public class XI5250Applet extends JApplet {
     repaint();
 
     ivFrame = new EmulatorFrame("tn5250" + " " +
-                                XI5250Emulator.VERSION,
-                                getEmulator());
+        XI5250Emulator.VERSION,
+        getEmulator());
     ivFrame.setBounds(0, 0, 648, 506);
     ivFrame.centerOnScreen();
     ivFrame.setVisible(true);
   }
 
-
-  /**
-   */
   private void frameClosed() {
-    if (DEBUG >= 1)
+    if (DEBUG >= 1) {
       System.out.println("frameClosed()");
+    }
 
-    if (UNDEAD_FRAME && ivDestroyed)
+    if (UNDEAD_FRAME && ivDestroyed) {
       getEmulator().setActive(false);
-    else {
+    } else {
       emulatorInPlace();
       invalidate();
       validate();
@@ -314,21 +257,16 @@ public class XI5250Applet extends JApplet {
     }
   }
 
-
-  /**
-   */
   private void emulatorPropertyChanged(PropertyChangeEvent evt) {
     String propertyName = evt.getPropertyName();
-    if ("background".equals(propertyName))
+    if ("background".equals(propertyName)) {
       getEmulator().getParent().setBackground(getEmulator().getBackground());
-    else if ("font".equals(propertyName) ||
-             XI5250Crt.CRT_SIZE.equals(propertyName)) 
+    } else if ("font".equals(propertyName) ||
+        XI5250Crt.CRT_SIZE.equals(propertyName)) {
       getEmulator().revalidate();
+    }
   }
 
-
-  /**
-   */
   private JMenuBar createMenuBar() {
     String str;
 
@@ -349,11 +287,11 @@ public class XI5250Applet extends JApplet {
       commMenu.add(aboutItem);
 
       getCommandMgr().handleCommand(connItem,
-                                    XI5250EmulatorCtrl.CONNECT_CMD);
+          XI5250EmulatorCtrl.CONNECT_CMD);
       getCommandMgr().handleCommand(disconnItem,
-                                    XI5250EmulatorCtrl.DISCONNECT_CMD);
+          XI5250EmulatorCtrl.DISCONNECT_CMD);
       getCommandMgr().handleCommand(aboutItem,
-                                    XI5250EmulatorCtrl.ABOUT_CMD);
+          XI5250EmulatorCtrl.ABOUT_CMD);
     }
 
     str = cvRes.getString("TXT_Edit");
@@ -367,7 +305,7 @@ public class XI5250Applet extends JApplet {
       JMenuItem snapShotItem =
           new JMenuItem(cvRes.getString("TXT_SnapShot"));
       JMenuItem printItem =
-        new JMenuItem(cvRes.getString("TXT_Print"));
+          new JMenuItem(cvRes.getString("TXT_Print"));
 
       editMenu.add(copyItem);
       editMenu.add(pasteItem);
@@ -377,13 +315,13 @@ public class XI5250Applet extends JApplet {
       editMenu.add(printItem);
 
       getCommandMgr().handleCommand(copyItem,
-                                    XI5250EmulatorCtrl.COPY_CMD);
+          XI5250EmulatorCtrl.COPY_CMD);
       getCommandMgr().handleCommand(pasteItem,
-                                    XI5250EmulatorCtrl.PASTE_CMD);
+          XI5250EmulatorCtrl.PASTE_CMD);
       getCommandMgr().handleCommand(snapShotItem,
-                                    XI5250EmulatorCtrl.SNAPSHOT_CMD);
+          XI5250EmulatorCtrl.SNAPSHOT_CMD);
       getCommandMgr().handleCommand(printItem,
-                                    XI5250EmulatorCtrl.PRINT_CMD);
+          XI5250EmulatorCtrl.PRINT_CMD);
     }
 
     str = cvRes.getString("TXT_Options");
@@ -403,11 +341,11 @@ public class XI5250Applet extends JApplet {
       optionsMenu.add(referenceCursorItem);
 
       getCommandMgr().handleCommand(inFrameItem,
-                                    INFRAME_CMD);
+          INFRAME_CMD);
       getCommandMgr().handleCommand(switch3DfxItem,
-                                    XI5250EmulatorCtrl.SWITCH_3DFX_CMD);
+          XI5250EmulatorCtrl.SWITCH_3DFX_CMD);
       getCommandMgr().handleCommand(referenceCursorItem,
-                                    XI5250EmulatorCtrl.REFERENCE_CURSOR_CMD);
+          XI5250EmulatorCtrl.REFERENCE_CURSOR_CMD);
     }
 
     JMenuBar menuBar = new JMenuBar();
@@ -417,13 +355,12 @@ public class XI5250Applet extends JApplet {
     return menuBar;
   }
 
-
   /**
    * Inserisce nella tool-bar i bottoni di default.
    */
   private JToolBar createToolBar() {
     // bottoni della tool-bar
-    AbstractButton[] buttons = new AbstractButton[] {
+    AbstractButton[] buttons = new AbstractButton[]{
         new JButton(cvImagesBdl.getIcon("Connect")),
         new JButton(cvImagesBdl.getIcon("Disconnect")),
         null,
@@ -439,36 +376,36 @@ public class XI5250Applet extends JApplet {
         new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
     };
     // action commands associati con i bottoni della tool-bar.
-    String[]   buttonsActCmd = new String[] {
-      XI5250EmulatorCtrl.CONNECT_CMD,
-      XI5250EmulatorCtrl.DISCONNECT_CMD,
-      null,
-      XI5250EmulatorCtrl.COPY_CMD,
-      XI5250EmulatorCtrl.PASTE_CMD,
-      null,
-      XI5250EmulatorCtrl.SNAPSHOT_CMD,
-      XI5250EmulatorCtrl.PRINT_CMD,
-      null,
-      INFRAME_CMD,
-      null,
-      XI5250EmulatorCtrl.SWITCH_3DFX_CMD,
-      XI5250EmulatorCtrl.REFERENCE_CURSOR_CMD,
+    String[] buttonsActCmd = new String[]{
+        XI5250EmulatorCtrl.CONNECT_CMD,
+        XI5250EmulatorCtrl.DISCONNECT_CMD,
+        null,
+        XI5250EmulatorCtrl.COPY_CMD,
+        XI5250EmulatorCtrl.PASTE_CMD,
+        null,
+        XI5250EmulatorCtrl.SNAPSHOT_CMD,
+        XI5250EmulatorCtrl.PRINT_CMD,
+        null,
+        INFRAME_CMD,
+        null,
+        XI5250EmulatorCtrl.SWITCH_3DFX_CMD,
+        XI5250EmulatorCtrl.REFERENCE_CURSOR_CMD,
     };
     // Hint associati ad i vari bottoni.
-    String[] buttonHints = new String[] {
-      cvRes.getString("TXT_Connect"),
-      cvRes.getString("TXT_Disconnect"),
-      null,
-      cvRes.getString("TXT_Copy"),
-      cvRes.getString("TXT_Paste"),
-      null,
-      cvRes.getString("TXT_SnapShot"),
-      cvRes.getString("TXT_Print"),
-      null,
-      cvRes.getString("TXT_InFrame"),
-      null,
-      cvRes.getString("TXT_3dFx"),
-      cvRes.getString("TXT_RefCursor"),
+    String[] buttonHints = new String[]{
+        cvRes.getString("TXT_Connect"),
+        cvRes.getString("TXT_Disconnect"),
+        null,
+        cvRes.getString("TXT_Copy"),
+        cvRes.getString("TXT_Paste"),
+        null,
+        cvRes.getString("TXT_SnapShot"),
+        cvRes.getString("TXT_Print"),
+        null,
+        cvRes.getString("TXT_InFrame"),
+        null,
+        cvRes.getString("TXT_3dFx"),
+        cvRes.getString("TXT_RefCursor"),
     };
 
     JToolBar toolBar = new JToolBar();
@@ -478,7 +415,7 @@ public class XI5250Applet extends JApplet {
 
     for (int i = 0; i < buttons.length; i++) {
       if (buttons[i] != null) {
-        AbstractButton button = (AbstractButton)buttons[i];
+        AbstractButton button = buttons[i];
         toolBar.add(button);
         button.setToolTipText(buttonHints[i]);
         button.setMinimumSize(size);
@@ -486,17 +423,14 @@ public class XI5250Applet extends JApplet {
         button.setMaximumSize(size);
         button.setRequestFocusEnabled(false);
         getCommandMgr().handleCommand(button, buttonsActCmd[i]);
-      }
-      else
+      } else {
         toolBar.addSeparator();
+      }
     }
 
     return toolBar;
   }
 
-
-  /**
-   */
   @Override
   public void paint(Graphics g) {
     super.paint(g);
@@ -505,16 +439,12 @@ public class XI5250Applet extends JApplet {
       g.setColor(Color.darkGray);
 
       int hh = rt.height;
-      for (int x = -hh; x < rt.width; x += 16)
+      for (int x = -hh; x < rt.width; x += 16) {
         g.drawLine(x, hh, x + hh, 0);
+      }
     }
   }
 
-  
-  ///////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   private class EmulatorFrame extends XI5250Frame {
 
     private static final long serialVersionUID = 1L;
@@ -525,21 +455,24 @@ public class XI5250Applet extends JApplet {
 
     @Override
     protected void processExitCmd() {
-      if (UNDEAD_FRAME && ivDestroyed)
+      if (UNDEAD_FRAME && ivDestroyed) {
         super.processExitCmd();
-      else
+      } else {
         dispose();
+      }
     }
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
-      switch(e.getID()) {
+      switch (e.getID()) {
         case WindowEvent.WINDOW_CLOSED:
           XI5250Applet.this.frameClosed();
           return;
       }
       super.processWindowEvent(e);
     }
+
   }
+
 }
 

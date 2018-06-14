@@ -31,56 +31,65 @@ import java.io.IOException;
 /**
  * Interface that must be implemented by an emulator to receive notification from XITelnet.
  *
- * @see    XITelnet
- *
- * @version  1.00a
- * @author   Valentino Proietti - Infordada S.p.A.
+ * @author Valentino Proietti - Infordada S.p.A.
+ * @see XITelnet
  */
 public interface XITelnetEmulator {
-  /**
-   * @see    XITelnet#connecting
-   */
-  public void connecting();
 
   /**
-   * @see    XITelnet#connected
+   * @see XITelnet#connecting
    */
-  public void connected();
+  void connecting();
 
   /**
-   * @see    XITelnet#disconnected
+   * @see XITelnet#connected
    */
-  public void disconnected(boolean remote);
+  void connected();
 
   /**
-   * @see    XITelnet#catchedIOException
+   * @param remote whether the disconnection was caused by a local disconnect, or by the terminal
+   * server.
+   * @see XITelnet#disconnected(boolean)
    */
-  public void catchedIOException(IOException ex);
+  void disconnected(boolean remote);
 
   /**
-   * @see    XITelnet#receivedData
+   * @param ex exception throw when communicating with terminal server.
+   * @see XITelnet#caughtIOException
    */
-  public void receivedData(byte[] buf, int len);
+  void caughtIOException(IOException ex);
 
   /**
-   * @see    XITelnet#receivedEOR
+   * @param buf bytes received from the terminal server.
+   * @param len number of bytes received.
+   * @see XITelnet#receivedData
    */
-  public void receivedEOR();
+  void receivedData(byte[] buf, int len);
 
   /**
-   * @see    XITelnet#unhandledRequest
+   * @see XITelnet#receivedEOR
    */
-  public void unhandledRequest(byte aIACOpt, String aIACStr);
+  void receivedEOR();
+
+  /**
+   * @param aIACOpt option of the IAC
+   * @param aIACStr body of the IAC
+   * @see XITelnet#unhandledRequest
+   */
+  void unhandledRequest(byte aIACOpt, String aIACStr);
 
 
   /**
-   * @see    XITelnet#localFlagsChanged
+   * @param aIACOpt IAC option that changed
+   * @see XITelnet#localFlagsChanged
    */
-  public void localFlagsChanged(byte aIACOpt);
+  void localFlagsChanged(byte aIACOpt);
 
 
   /**
-   * @see    XITelnet#remoteFlagsChanged
+   * @param aIACOpt IAC option that changed
+   * @see XITelnet#remoteFlagsChanged
    */
-  public void remoteFlagsChanged(byte aIACOpt);
+  void remoteFlagsChanged(byte aIACOpt);
+
 }

@@ -19,22 +19,16 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.awt.Font;
 import java.io.IOException;
 import java.io.InputStream;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * Clear Unit Alternative
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIClearUnitAltCmd extends XI5250Cmd {
@@ -43,28 +37,28 @@ public class XIClearUnitAltCmd extends XI5250Cmd {
 
   @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException, XI5250Exception {
-    ivPar = Math.max(0, inStream.read());   //!!1.02
+    ivPar = Math.max(0, inStream.read());
     if (ivPar != 0x00 && ivPar != 0x80)
       throw new XI5250Exception("Invalid clear unit param: " + ivPar, 
           XI5250Emulator.ERR_INVALID_CLEAR_UNIT_ALT);
   }
-
 
   @Override
   protected void execute() {
     ivEmulator.setState(XI5250Emulator.ST_NORMAL_LOCKED);
     ivEmulator.ivPendingCmd = null;
 
-    if (ivEmulator.ivPrevFont == null) {       //!!1.04a
+    if (ivEmulator.ivPrevFont == null) {
       Font ft = ivEmulator.getFont();
-      ivEmulator.ivPrevFont = new Font(ft.getName(), ft.getStyle(), ft.getSize());  //!!1.03a
+      ivEmulator.ivPrevFont = new Font(ft.getName(), ft.getStyle(), ft.getSize());
     }
 
-    ivEmulator.setCrtSize(132, 27);   //!!1.02
+    ivEmulator.setCrtSize(132, 27);
 
     ivEmulator.setDefAttr(0x20);
     ivEmulator.clear();
     ivEmulator.removeFields();
     ivEmulator.setErrorRow(ivEmulator.getCrtSize().height - 1);
   }
+
 }

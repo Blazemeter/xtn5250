@@ -19,9 +19,7 @@ limitations under the License.
 !!V 15/06/99 rel. 1.13 - creation.
  */
 
-
 package net.infordata.em.crt5250;
-
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -44,7 +42,6 @@ import javax.swing.UIManager;
 import net.infordata.em.util.XICommand;
 import net.infordata.em.util.XICommandMgr;
 
-
 /**
  * Handles common commands.
  */
@@ -56,7 +53,6 @@ public class XI5250CrtCtrl {
 
   private XICommandMgr ivCommandMgr = new XICommandMgr();
 
-
   public static final String SWITCH_3DFX_CMD      = "SWITCH_3DFX_CMD";
   public static final String REFERENCE_CURSOR_CMD = "REFERENCE_CURSOR_CMD";
 
@@ -65,8 +61,6 @@ public class XI5250CrtCtrl {
 
   public static final String PRINT_CMD            = "PRINT_CMD";
 
-  /**
-   */
   public XI5250CrtCtrl(XI5250Crt aCrt) {
     if (aCrt == null)
       throw new IllegalArgumentException("An XI5250Crt instance is required.");
@@ -78,87 +72,50 @@ public class XI5250CrtCtrl {
     // Copy command
     getCommandMgr().enableCommand(
         COPY_CMD, ivCrt.getSelectedArea() != null);
-    getCommandMgr().setCommand(COPY_CMD, new XICommand() {
-      public void execute() {
-        processCopyCmd();
-      }
-    });
+    getCommandMgr().setCommand(COPY_CMD, this::processCopyCmd);
 
     // Paste command
-    getCommandMgr().setCommand(PASTE_CMD, new XICommand() {
-      public void execute() {
-        processPasteCmd();
-      }
-    });
+    getCommandMgr().setCommand(PASTE_CMD, this::processPasteCmd);
 
     // 3Dfx command
     getCommandMgr().setCommandState(SWITCH_3DFX_CMD, is3DFX());
-    getCommandMgr().setCommand(SWITCH_3DFX_CMD,  new XICommand() {
-      public void execute() {
-        processSwitch3dFxCmd();
-      }
-    });
+    getCommandMgr().setCommand(SWITCH_3DFX_CMD, this::processSwitch3dFxCmd);
 
     // Reference cursor command
     getCommandMgr().setCommandState(
         REFERENCE_CURSOR_CMD, ivCrt.isReferenceCursor());
-    getCommandMgr().setCommand(REFERENCE_CURSOR_CMD,  new XICommand() {
-      public void execute() {
-        processReferenceCursorCmd();
-      }
-    });
+    getCommandMgr().setCommand(REFERENCE_CURSOR_CMD, this::processReferenceCursorCmd);
 
     // Print command
-    getCommandMgr().setCommand(PRINT_CMD, new XICommand() {
-      public void execute() {
-        processPrintCmd();
-      }
-    });
+    getCommandMgr().setCommand(PRINT_CMD, this::processPrintCmd);
+
   }
 
-
-  /**
-   */
   public final XI5250Crt getCrt() {
     return ivCrt;
   }
 
-
-  /**
-   */
   public final XICommandMgr getCommandMgr() {
     return ivCommandMgr;
   }
 
-
-  /**
-   */
   public final boolean is3DFX() {
     return
         (getCrt().getDefFieldsBorderStyle() == XI5250Field.LOWERED_BORDER);
   }
 
-
-  /**
-   */
   protected void processCopyCmd() {
     getCrt().processRawKeyEvent(
         new KeyEvent(getCrt(), KeyEvent.KEY_PRESSED,
                      0, KeyEvent.CTRL_MASK, KeyEvent.VK_INSERT, (char)KeyEvent.VK_INSERT));
   }
 
-
-  /**
-   */
   protected void processPasteCmd() {
     getCrt().processRawKeyEvent(
         new KeyEvent(getCrt(), KeyEvent.KEY_PRESSED,
                      0, KeyEvent.SHIFT_MASK, KeyEvent.VK_INSERT, (char)KeyEvent.VK_INSERT));
   }
 
-
-  /**
-   */
   protected void processSwitch3dFxCmd() {
     boolean flag = getCommandMgr().getCommandState(SWITCH_3DFX_CMD);
 
@@ -172,18 +129,12 @@ public class XI5250CrtCtrl {
     }
   }
 
-
-  /**
-   */
   protected void processReferenceCursorCmd() {
     boolean flag = getCommandMgr().getCommandState(REFERENCE_CURSOR_CMD);
 
     getCrt().setReferenceCursor(flag);
   }
 
-
-  /**
-   */
   protected void emulatorPropertyChanged(PropertyChangeEvent e) {
     String propertyName = e.getPropertyName();
 
@@ -200,53 +151,44 @@ public class XI5250CrtCtrl {
     }
   }
 
-
-  /**
-   */
   protected void processPrintCmd() {
     PrinterJob job = PrinterJob.getPrinterJob();
-    job.setPrintable(new Printable() {
-      public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
-          throws PrinterException {
-        if (pageIndex > 0) { 
-          return NO_SUCH_PAGE;
-        }
-        final int imgWidth = (int)pageFormat.getImageableWidth();
-        final int imgHeight = (int)pageFormat.getImageableHeight();
-        final XI5250Crt crt = getCrt();
-        Graphics2D g2d = (Graphics2D)graphics;
-        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-        double scale;
-        {
-          int w = crt.getSize().width;
-          int h = crt.getSize().height;
-          scale = Math.min(((double)imgWidth) / w, ((double)imgHeight) / h);
-          g2d.scale(scale, scale);
-        }
-        synchronized (crt.getTreeLock()) {
-          synchronized (crt) {
-            Color oldBG = crt.getDefBackground();
-            //int oldBS = crt.getDefFieldsBorderStyle();
-            try {
-              //crt.setDefFieldsBorderStyle(XI5250Field.NO_BORDER);
-              crt.setDefBackground(SystemColor.white);
-              crt.printAll(g2d);
-            }
-            finally {
-              //crt.setDefFieldsBorderStyle(oldBS);
-              crt.setDefBackground(oldBG);
-            }
+    job.setPrintable((graphics, pageFormat, pageIndex) -> {
+      if (pageIndex > 0) {
+        return Printable.NO_SUCH_PAGE;
+      }
+      final int imgWidth = (int)pageFormat.getImageableWidth();
+      final int imgHeight = (int)pageFormat.getImageableHeight();
+      final XI5250Crt crt = getCrt();
+      Graphics2D g2d = (Graphics2D)graphics;
+      g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+      double scale;
+      {
+        int w = crt.getSize().width;
+        int h = crt.getSize().height;
+        scale = Math.min(((double)imgWidth) / w, ((double)imgHeight) / h);
+        g2d.scale(scale, scale);
+      }
+      synchronized (crt.getTreeLock()) {
+        synchronized (crt) {
+          Color oldBG = crt.getDefBackground();
+          try {
+            crt.setDefBackground(SystemColor.white);
+            crt.printAll(g2d);
+          }
+          finally {
+            crt.setDefBackground(oldBG);
           }
         }
-        return PAGE_EXISTS;      }
-    });
+      }
+      return Printable.PAGE_EXISTS;      });
     boolean doPrint = job.printDialog();
     if (doPrint) {
       try {
         job.print();
       } 
       catch (final PrinterException ex) {
-        LOGGER.log(Level.SEVERE, "catchedException()", ex);
+        LOGGER.log(Level.SEVERE, "caughtException()", ex);
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             JOptionPane.showMessageDialog(getCrt(), 
@@ -257,10 +199,7 @@ public class XI5250CrtCtrl {
       }
     }    
   }
-
   
-  //////////////////////////////////////////////////////////////////////////////
-
   /**
    * Usata per sincronizzare i comandi con le property dell' emulatore.
    */
@@ -269,7 +208,9 @@ public class XI5250CrtCtrl {
     public void propertyChange(PropertyChangeEvent e) {
       emulatorPropertyChanged(e);
     }
+
   }
+
 }
 
 

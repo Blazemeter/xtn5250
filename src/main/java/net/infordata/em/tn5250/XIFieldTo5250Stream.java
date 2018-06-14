@@ -25,7 +25,6 @@ limitations under the License.
  
 package net.infordata.em.tn5250;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -33,15 +32,11 @@ import net.infordata.em.crt5250.XI5250Field;
 import net.infordata.em.crt5250.XI5250FieldSaver;
 import net.infordata.em.crt5250.XIEbcdicTranslator;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * Implements XI5250FieldSaver to write fields content to an OutputStream.
  *
  * @see     XI5250Emulator#send5250Data
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIFieldTo5250Stream implements XI5250FieldSaver {
@@ -50,9 +45,6 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
   OutputStream   ivOut;
   boolean        ivOnlyMDT;
 
-
-  /**
-   */
   public XIFieldTo5250Stream(XI5250Emulator aEmulator, OutputStream aOutStream,
                              boolean onlyMDT) {
     ivEmulator = aEmulator;
@@ -60,10 +52,6 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
     ivOnlyMDT = onlyMDT;
   }
 
-
-  /**
-   *
-   */
   public void write(XI5250Field aField, String aStr)
       throws IOException {
     if (ivOnlyMDT && !aField.isMDTOn())
@@ -106,7 +94,7 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
 
     int i = aStr.length() - 1;
 
-    if (ivOnlyMDT) {  //!!1.04a
+    if (ivOnlyMDT) {
       byte[] cBuf = {XI5250Emulator.ORD_SBA,
                      (byte)(aField.getRow() + 1),
                      (byte)(aField.getCol() + 1)};
@@ -154,4 +142,5 @@ public class XIFieldTo5250Stream implements XI5250FieldSaver {
       ivOut.write(strBuf, 0, i + 1);
     }
   }
+
 }

@@ -19,20 +19,14 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
+
 package net.infordata.em.tn5250;
 
-
 import java.io.InputStream;
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * 5250 Clear unit command
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIClearUnitCmd extends XI5250Cmd {
@@ -41,13 +35,12 @@ public class XIClearUnitCmd extends XI5250Cmd {
   protected void readFrom5250Stream(InputStream inStream) {
   }
 
-
   @Override
   protected void execute() {
     ivEmulator.setState(XI5250Emulator.ST_NORMAL_LOCKED);
     ivEmulator.ivPendingCmd = null;
 
-    ivEmulator.setCrtSize(80, 24);   //!!1.02
+    ivEmulator.setCrtSize(80, 24);
 
     ivEmulator.setDefAttr(0x20);
     ivEmulator.clear();
@@ -55,9 +48,10 @@ public class XIClearUnitCmd extends XI5250Cmd {
     ivEmulator.setErrorRow(ivEmulator.getCrtSize().height - 1);
 
     // switch back to the previous used font
-    if (ivEmulator.ivPrevFont != null) { //!!1.03a
+    if (ivEmulator.ivPrevFont != null) {
       ivEmulator.setFont(ivEmulator.ivPrevFont);
       ivEmulator.ivPrevFont = null;
     }
   }
+
 }

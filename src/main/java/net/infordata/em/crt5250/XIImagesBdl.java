@@ -18,8 +18,6 @@ limitations under the License.
     ***
 !!V 15/06/99 rel. 1.13 - creation.
  */
-
-
 package net.infordata.em.crt5250;
 
 import java.awt.Image;
@@ -32,60 +30,48 @@ import javax.swing.ImageIcon;
 
 import net.infordata.em.util.XIUtil;
 
-
-
 /**
  * The image bundle.
  *
- * @version
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public class XIImagesBdl extends ListResourceBundle {
 
-  private static XIImagesBdl      cvImagesBdl;
+  private static XIImagesBdl cvImagesBdl;
 
-  private static Object[][] cvContents = null;
+  private static Object[][] cvContents;
 
   static {
-    try {
-      cvContents = new Object[][] {
+    cvContents = new Object[][]{
         {"ShiftDown",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/ShiftDown.gif")},
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/ShiftDown.gif")},
         {"CapsLock",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/CapsLock.gif")},
-        //
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/CapsLock.gif")},
         {"3dFx",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/3dFx.gif")},
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/3dFx.gif")},
         {"Copy",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/Copy.gif")},
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/Copy.gif")},
         {"Paste",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/Paste.gif")},
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/Paste.gif")},
         {"RefCursor",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/RefCursor.gif")},
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/RefCursor.gif")},
         {"Print",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/Print.gif")},
-        //
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/Print.gif")},
         {"Logo",
-         XIUtil.createImage(
-             XIImagesBdl.class, "resources/Logo.gif")},
-      };
-    }
-    catch (RuntimeException ex) {
-      throw ex;
-    }
+            XIUtil.createImage(
+                XIImagesBdl.class, "resources/Logo.gif")},
+    };
   }
-
 
   private XIImagesBdl() {
   }
-
 
   public static XIImagesBdl getImagesBdl() {
     if (cvImagesBdl == null) {
@@ -95,30 +81,24 @@ public class XIImagesBdl extends ListResourceBundle {
     return cvImagesBdl;
   }
 
-
   @Override
   public Object[][] getContents() {
     return cvContents;
   }
 
-
-  /**
-   */
   public final Image getImage(String anImageName) {
-    return ((ImageIcon)getIcon(anImageName)).getImage();
+    return ((ImageIcon) getIcon(anImageName)).getImage();
   }
 
+  private Map<String, Icon> ivIcons = new HashMap<>();
 
-  private Map<String, Icon> ivIcons = new HashMap<String, Icon>();
-
-  /**
-   */
   public synchronized final Icon getIcon(String anImageName) {
-    Icon icon = (Icon)ivIcons.get(anImageName);
+    Icon icon = ivIcons.get(anImageName);
     if (icon == null) {
-      icon = new ImageIcon((Image)getObject(anImageName));
+      icon = new ImageIcon((Image) getObject(anImageName));
       ivIcons.put(anImageName, icon);
     }
     return icon;
   }
+
 }

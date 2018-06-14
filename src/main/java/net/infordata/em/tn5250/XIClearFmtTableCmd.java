@@ -18,20 +18,14 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
+
 package net.infordata.em.tn5250;
 
-
 import java.io.InputStream;
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Clear Format Table
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIClearFmtTableCmd extends XI5250Cmd {
@@ -39,7 +33,6 @@ public class XIClearFmtTableCmd extends XI5250Cmd {
   @Override
   protected void readFrom5250Stream(InputStream inStream) {
   }
-
 
   @Override
   protected void execute() {
@@ -50,4 +43,5 @@ public class XIClearFmtTableCmd extends XI5250Cmd {
     ivEmulator.removeFields();
     ivEmulator.setErrorRow(ivEmulator.getCrtSize().height - 1);
   }
+
 }

@@ -19,32 +19,22 @@ limitations under the License.
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
  
- 
 package net.infordata.em.tn5250;
-
 
 import java.io.IOException;
 import java.io.InputStream;
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * MC - Move cursor
  * 
  * see: http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.6?DT=19950629163252
- *
- * @version  
+
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIMCOrd extends XI5250Ord {
 
   protected int ivRow, ivCol;
-
   
-  /**
-   * @exception    XI5250Exception    raised if order parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
@@ -57,15 +47,14 @@ public class XIMCOrd extends XI5250Ord {
           XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
-
   @Override
   protected void execute() {
     ivEmulator.setCursorPos(ivCol - 1, ivRow - 1);
   }
 
-
   @Override
   public String toString() {
     return super.toString() + " [" + ivRow + "," + ivCol + "]";
   }
+
 }

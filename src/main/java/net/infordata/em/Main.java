@@ -18,7 +18,6 @@ import net.infordata.em.tn5250ext.XI5250EmulatorExt;
 import net.infordata.em.tn5250ext.XI5250PanelHandler;
 import net.infordata.em.tn5250ext.XI5250PanelsDispatcher;
 
-
 /**
  * Command line startup utility. 
  * @author valentino.proietti
@@ -42,8 +41,6 @@ public class Main {
     System.exit(1);
   }
   
-  /**
-   */
   public static void main(String[] args) {
 
     boolean pUse3dFX = false;
@@ -54,7 +51,6 @@ public class Main {
     boolean wkToolBar = true;
     boolean wkMenuBar = true;
 
-    String arg;
     String pHost = null;
     boolean expectCP = false;
     boolean expectDevName = false;
@@ -62,56 +58,53 @@ public class Main {
     String cp = null;
     String devName = null;
     LogonInfo logonInfo = null;
-    for (int i = 0; i < args.length; i++) {
-      arg = args[i];
+    for (String arg : args) {
       if (arg.startsWith("-")) {
-        if ("-3dfx".equalsIgnoreCase(arg))
+        if ("-3dfx".equalsIgnoreCase(arg)) {
           pUse3dFX = true;
-        else if ("-PSHBTNCHC".equalsIgnoreCase(arg))
+        } else if ("-PSHBTNCHC".equalsIgnoreCase(arg)) {
           pPSHBTNCHC = true;
-        else if ("-STRPCCMD".equalsIgnoreCase(arg))
+        } else if ("-STRPCCMD".equalsIgnoreCase(arg)) {
           pSTRPCCMD = true;
-        else if ("-maximized".equalsIgnoreCase(arg))
+        } else if ("-maximized".equalsIgnoreCase(arg)) {
           pMaximized = true;
-        else if ("-altFKeyRemap".equalsIgnoreCase(arg))
+        } else if ("-altFKeyRemap".equalsIgnoreCase(arg)) {
           pAltFKeyRemap = true;
-        else if ("-cp".equalsIgnoreCase(arg))
+        } else if ("-cp".equalsIgnoreCase(arg)) {
           expectCP = true;
-        else if ("-devName".equalsIgnoreCase(arg))
+        } else if ("-devName".equalsIgnoreCase(arg)) {
           expectDevName = true;
-        else if ("-autoLogon".equalsIgnoreCase(arg))
+        } else if ("-autoLogon".equalsIgnoreCase(arg)) {
           expectLogonInfo = true;
-        else if ("-hideToolBar".equalsIgnoreCase(arg))
+        } else if ("-hideToolBar".equalsIgnoreCase(arg)) {
           wkToolBar = false;
-        else if ("-hideMenuBar".equalsIgnoreCase(arg))
+        } else if ("-hideMenuBar".equalsIgnoreCase(arg)) {
           wkMenuBar = false;
-        else
+        } else {
           usageError("Wrong option: " + arg);
-      }
-      else if (expectCP) {
+        }
+      } else if (expectCP) {
         expectCP = false;
-        if (XIEbcdicTranslator.getTranslator(arg) == null)
+        if (XIEbcdicTranslator.getTranslator(arg) == null) {
           usageError("Unknown codepage: " + arg);
+        }
         cp = arg;
-      }
-      else if (expectDevName) {
+      } else if (expectDevName) {
         expectDevName = false;
         devName = arg;
-      }
-      else if (expectLogonInfo) {
+      } else if (expectLogonInfo) {
         expectLogonInfo = false;
         try {
           logonInfo = new LogonInfo(arg);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
           usageError(ex.getMessage());
         }
-      }
-      else {
-        if (pHost == null)
+      } else {
+        if (pHost == null) {
           pHost = arg;
-        else
+        } else {
           usageError("Too many host names.");
+        }
       }
     }
     final boolean dspToolBar = wkToolBar;
@@ -129,77 +122,70 @@ public class Main {
     final String deviceName = devName;
     final LogonInfo autoLogonInfo = logonInfo;
     try {
-      SwingUtilities.invokeAndWait(new Runnable() {
-        public void run() {
-          XI5250Emulator em;
-          if (enablePSHBTNCHC) {
-            XI5250EmulatorExt emext = new XI5250EmulatorExt();
-            PanelsDispatcher disp = new PanelsDispatcher();
-            disp.setEmulator(emext);
-            new PSHBTNCHCHandler(disp);
-            if (autoLogonInfo != null)
-              new AutoLogonHandler(disp, autoLogonInfo);
-            em = emext;
-          }
-          else if (autoLogonInfo != null) {
-            XI5250EmulatorExt emext = new XI5250EmulatorExt();
-            PanelsDispatcher disp = new PanelsDispatcher();
-            disp.setEmulator(emext);
+      SwingUtilities.invokeAndWait(() -> {
+        XI5250Emulator em;
+        if (enablePSHBTNCHC) {
+          XI5250EmulatorExt emext = new XI5250EmulatorExt();
+          PanelsDispatcher disp = new PanelsDispatcher();
+          disp.setEmulator(emext);
+          new PSHBTNCHCHandler(disp);
+          if (autoLogonInfo != null)
             new AutoLogonHandler(disp, autoLogonInfo);
-            em = emext;
-          }
-          else {
-            em = new XI5250Emulator();
-          }
-          em.setTerminalType("IBM-3477-FC");
-          em.setKeyboardQueue(true);
-
-          em.setStrPcCmdEnabled(enableSTRPCCMD);
-          em.setAltFKeyRemap(altFKeyRemap);
-          em.setCodePage(codePage);
-          
-          if (deviceName != null)
-            em.setTelnetEnv("\u0003DEVNAME\u0001" + deviceName);
-          
-          if (host != null) {
-            em.setHost(host);
-            em.setActive(true);
-          }
-
-          XI5250Frame frm = new XI5250Frame("tn5250" + " " +
-                                            XI5250Emulator.VERSION, em, dspToolBar, dspMenuBar);
-          frm.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-              System.exit(0);
-            }
-          });
-
-          //3D FX
-          if (use3dFX) {
-            em.setDefFieldsBorderStyle(XI5250Field.LOWERED_BORDER);
-            em.setDefBackground(UIManager.getColor("control"));
-          }
-
-          //frm.setBounds(0, 0, 570, 510);
-          frm.centerOnScreen(70);
-          if (maximized) {
-            frm.doNotPackOnStartup();
-            frm.setExtendedState(Frame.MAXIMIZED_BOTH);
-          }
-          frm.setVisible(true);
+          em = emext;
         }
+        else if (autoLogonInfo != null) {
+          XI5250EmulatorExt emext = new XI5250EmulatorExt();
+          PanelsDispatcher disp = new PanelsDispatcher();
+          disp.setEmulator(emext);
+          new AutoLogonHandler(disp, autoLogonInfo);
+          em = emext;
+        }
+        else {
+          em = new XI5250Emulator();
+        }
+        em.setTerminalType("IBM-3477-FC");
+        em.setKeyboardQueue(true);
+
+        em.setStrPcCmdEnabled(enableSTRPCCMD);
+        em.setAltFKeyRemap(altFKeyRemap);
+        em.setCodePage(codePage);
+
+        if (deviceName != null)
+          em.setTelnetEnv("\u0003DEVNAME\u0001" + deviceName);
+
+        if (host != null) {
+          em.setHost(host);
+          em.setActive(true);
+        }
+
+        XI5250Frame frm = new XI5250Frame("tn5250" + " " +
+                                          XI5250Emulator.VERSION, em, dspToolBar, dspMenuBar);
+        frm.addWindowListener(new WindowAdapter() {
+          @Override
+          public void windowClosed(WindowEvent e) {
+            System.exit(0);
+          }
+        });
+
+        //3D FX
+        if (use3dFX) {
+          em.setDefFieldsBorderStyle(XI5250Field.LOWERED_BORDER);
+          em.setDefBackground(UIManager.getColor("control"));
+        }
+
+        //frm.setBounds(0, 0, 570, 510);
+        frm.centerOnScreen(70);
+        if (maximized) {
+          frm.doNotPackOnStartup();
+          frm.setExtendedState(Frame.MAXIMIZED_BOTH);
+        }
+        frm.setVisible(true);
       });
     }
-    catch (InterruptedException ex) {
-      ex.printStackTrace();
-    }
-    catch (InvocationTargetException ex) {
+    catch (InterruptedException | InvocationTargetException ex) {
       ex.printStackTrace();
     }
   }
-  
-  //////
   
   private static class PanelsDispatcher extends XI5250PanelsDispatcher {
 
@@ -232,8 +218,6 @@ public class Main {
     }
   }
   
-  //////
-  
   private static class LogonInfo {
     
     final int fieldsCount;
@@ -242,7 +226,7 @@ public class Main {
     final String user;
     final String passwd;
     
-    LogonInfo(String info) {
+    private LogonInfo(String info) {
       String[] ss = info.split(";", 5);
       if (ss.length < 5)
         throw new IllegalArgumentException("Invalid autoLogon argument");
@@ -259,14 +243,12 @@ public class Main {
     }
   }
   
-  //////
-  
   private static class AutoLogonHandler extends XI5250PanelHandler {
     
     private final LogonInfo ivLogonInfo;
     private boolean ivLoggedOn;
 
-    public AutoLogonHandler(XI5250PanelsDispatcher aPanelDisp, LogonInfo info) {
+    private AutoLogonHandler(XI5250PanelsDispatcher aPanelDisp, LogonInfo info) {
       super(aPanelDisp);
       ivLogonInfo = info;
     }
@@ -305,5 +287,7 @@ public class Main {
     @Override
     protected void stop() {
     }
+
   }
+
 }

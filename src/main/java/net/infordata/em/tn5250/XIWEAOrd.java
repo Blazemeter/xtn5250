@@ -18,18 +18,13 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import net.infordata.em.tnprot.XITelnet;
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * WEA - Write extended attribute
@@ -37,7 +32,6 @@ import net.infordata.em.tnprot.XITelnet;
  * 
  * see: http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.11?DT=19950629163252
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIWEAOrd extends XI5250Ord {
@@ -45,25 +39,11 @@ public class XIWEAOrd extends XI5250Ord {
   protected byte ivAttributeType;
   protected byte ivAttribute;
 
-  /**
-   * @exception    XI5250Exception    raised if order parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
     // If not in enhanced mode ...
-    if (true)
-      throw new XI5250Exception("Not supported", XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
-    {
-      byte[] buf = new byte[2];
-      if (inStream.read(buf) < buf.length)
-        throw new XI5250Exception("EOF reached", XI5250Emulator.ERR_INVALID_EXT_ATTR_TYPE);
-      ivAttributeType = buf[0];
-      ivAttribute = buf[1];
-      if (ivAttributeType != 0x01 && ivAttributeType != 0x03 && ivAttributeType != 0x05)
-        throw new XI5250Exception("Invalid attr type: " + XITelnet.toHex(ivAttributeType), 
-            XI5250Emulator.ERR_INVALID_EXT_ATTR_TYPE);
-    }
+    throw new XI5250Exception("Not supported", XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
 

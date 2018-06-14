@@ -4,7 +4,7 @@ This is a fork of [xtn5250 emulator](https://sourceforge.net/projects/xtn5250/) 
 
 ## Usage
 
-To run the emulator in GUI mode just run the generated jar with something like `java -jar xtn5250.jar`.
+To run the emulator in GUI mode just run the generated jar with something like `java -jar xtn5250.jar` (requires [JRE8+](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
 
 >Check latest version in [releases](https://github.com/abstracta/xtn5250/releases).
 

@@ -19,9 +19,7 @@ limitations under the License.
 !!V 15/06/99 rel. 1.13 - creation.
  */
 
-
 package net.infordata.em.crt5250;
-
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -29,7 +27,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ResourceBundle;
 
 import javax.swing.AbstractButton;
@@ -49,12 +46,7 @@ import net.infordata.em.util.XICommand;
 import net.infordata.em.util.XICommandMgr;
 import net.infordata.em.util.XIUtil;
 
-
-
-/**
- */
 public class XI5250CrtFrame extends JFrame {
-
 
   private static final long serialVersionUID = 1L;
 
@@ -67,38 +59,30 @@ public class XI5250CrtFrame extends JFrame {
   private boolean ivPending;
   private boolean ivOpened;
 
-  private boolean ivFirstTime = true;             //!!1.11
-  private boolean ivSizeControlledFrame = false;  //!!1.11
+  private boolean ivFirstTime = true;
+  private boolean ivSizeControlledFrame = false;
 
   private XI5250CrtCtrl ivCrtCtrl;
 
-  public static final   String EXIT_CMD             = "EXIT_CMD";
+  public static final String EXIT_CMD = "EXIT_CMD";
 
-
-  /**
-   */
   public XI5250CrtFrame(String aTitle, XI5250Crt aCrt) {
     this(aTitle, aCrt, false, true, true);
   }
 
-
-  /**
-   */
   public XI5250CrtFrame(String aTitle, XI5250Crt aCrt, boolean dspToolBar, boolean dspMenuBar) {
     this(aTitle, aCrt, false, dspToolBar, dspMenuBar);
   }
 
-
-  /**
-   */
   public XI5250CrtFrame(String aTitle, XI5250Crt aCrt,
-                        boolean sizeControlledFrame, boolean dspToolBar, boolean dspMenuBar) {
+      boolean sizeControlledFrame, boolean dspToolBar, boolean dspMenuBar) {
     super(aTitle);
 
     ivSizeControlledFrame = sizeControlledFrame;
 
-    if (aCrt == null)
+    if (aCrt == null) {
       throw new IllegalArgumentException("An XI5250Crt instance is required.");
+    }
 
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -110,13 +94,8 @@ public class XI5250CrtFrame extends JFrame {
     panel.setBackground(getCrt().getBackground());
     getContentPane().add(panel, BorderLayout.CENTER);
 
-    getCrt().addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt) {
-        emulatorPropertyChanged(evt);
-      }
-    });
+    getCrt().addPropertyChangeListener(this::emulatorPropertyChanged);
 
-    //
     if (dspToolBar) {
       JToolBar toolBar = createToolBar();
       getContentPane().add(toolBar, BorderLayout.NORTH);
@@ -127,129 +106,88 @@ public class XI5250CrtFrame extends JFrame {
     }
 
     // Exit command
-    getCommandMgr().setCommand(EXIT_CMD,  new XICommand() {
-      public void execute() {
-        processExitCmd();
-      }
-    });
+    getCommandMgr().setCommand(EXIT_CMD, this::processExitCmd);
   }
 
-  
   public void doNotPackOnStartup() {
     ivFirstTime = false;
   }
 
-  
-  /**
-   */
   protected void processExitCmd() {
     setVisible(false);
     dispose();
   }
 
-
-  /**
-   */
   protected XI5250CrtCtrl createController(XI5250Crt crt) {
     return new XI5250CrtCtrl(crt);
   }
 
-
-  /**
-   */
   protected final XI5250CrtCtrl getCrtCtrl() {
     return ivCrtCtrl;
   }
 
-
-  /**
-   */
   public final XI5250Crt getCrt() {
     return ivCrtCtrl.getCrt();
   }
 
-
-  /**
-   */
   private void emulatorPropertyChanged(PropertyChangeEvent evt) {
     String propertyName = evt.getPropertyName();
-    if ("background".equals(propertyName))
+    if ("background".equals(propertyName)) {
       getCrt().getParent().setBackground(getCrt().getBackground());
-    else if ("font".equals(propertyName) ||
-             XI5250Crt.CRT_SIZE.equals(propertyName)) {
+    } else if ("font".equals(propertyName) ||
+        XI5250Crt.CRT_SIZE.equals(propertyName)) {
       getCrt().revalidate();
       sizeChanged();
     }
   }
 
-
-  /**
-   */
   public final XICommandMgr getCommandMgr() {
     return ivCrtCtrl.getCommandMgr();
   }
 
-
-  /**
-   */
   @Override
   public void invalidate() {
     super.invalidate();
     sizeChanged();
   }
 
-
-  /**
-   */
   protected void sizeChanged() {
     if (ivOpened && !ivPending) {
       ivPending = true;
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            if (ivFirstTime || ivSizeControlledFrame) {
-              ivFirstTime = false;
-              pack();   //!!1.03b
-            }
+      SwingUtilities.invokeLater(() -> {
+        try {
+          if (ivFirstTime || ivSizeControlledFrame) {
+            ivFirstTime = false;
+            pack();
           }
-          finally {
-            ivPending = false;
-          }
+        } finally {
+          ivPending = false;
         }
       });
     }
   }
 
-
-  /**
-   */
   public void centerOnScreen() {
-    Dimension ss  = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension dim = getSize();
 
-    setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2 ,
-              dim.width, dim.height);
+    setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2,
+        dim.width, dim.height);
   }
 
-
-  /**
-   */
   public void centerOnScreen(int perc) {
-    Dimension ss  = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension dim = getSize();
     dim.width = (ss.width * perc) / 100;
     dim.height = (ss.height * perc) / 100;
 
-    setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2 ,
-              dim.width, dim.height);
+    setBounds((ss.width - dim.width) / 2, (ss.height - dim.height) / 2,
+        dim.width, dim.height);
   }
 
-
-  /**
-   */
   @Override
   protected void processWindowEvent(WindowEvent e) {
-    switch(e.getID()) {
+    switch (e.getID()) {
       case WindowEvent.WINDOW_OPENED:
         getCrt().requestFocus();
         ivOpened = true;
@@ -264,9 +202,6 @@ public class XI5250CrtFrame extends JFrame {
     super.processWindowEvent(e);
   }
 
-
-  /**
-   */
   protected JMenuBar createMenuBar() {
     String str;
 
@@ -287,11 +222,11 @@ public class XI5250CrtFrame extends JFrame {
       editMenu.add(printItem);
 
       getCommandMgr().handleCommand(copyItem,
-                                    XI5250CrtCtrl.COPY_CMD);
+          XI5250CrtCtrl.COPY_CMD);
       getCommandMgr().handleCommand(pasteItem,
-                                    XI5250CrtCtrl.PASTE_CMD);
+          XI5250CrtCtrl.PASTE_CMD);
       getCommandMgr().handleCommand(printItem,
-                                    XI5250EmulatorCtrl.PRINT_CMD);
+          XI5250EmulatorCtrl.PRINT_CMD);
     }
 
     str = cvRes.getString("TXT_Options");
@@ -307,9 +242,9 @@ public class XI5250CrtFrame extends JFrame {
       optionsMenu.add(referenceCursorItem);
 
       getCommandMgr().handleCommand(switch3DfxItem,
-                                    XI5250CrtCtrl.SWITCH_3DFX_CMD);
+          XI5250CrtCtrl.SWITCH_3DFX_CMD);
       getCommandMgr().handleCommand(referenceCursorItem,
-                                    XI5250CrtCtrl.REFERENCE_CURSOR_CMD);
+          XI5250CrtCtrl.REFERENCE_CURSOR_CMD);
     }
 
     JMenuBar menuBar = new JMenuBar();
@@ -318,40 +253,41 @@ public class XI5250CrtFrame extends JFrame {
     return menuBar;
   }
 
-
   /**
    * Inserisce nella tool-bar i bottoni di default.
+   *
+   * @return created tool bar
    */
   protected JToolBar createToolBar() {
     // bottoni della tool-bar
-    AbstractButton[] buttons = new AbstractButton[] {
-      new JButton(cvImagesBdl.getIcon("Copy")),
-      new JButton(cvImagesBdl.getIcon("Paste")),
-      null,
-      new JButton(cvImagesBdl.getIcon("Print")),
-      null,
-      new JToggleButton(cvImagesBdl.getIcon("3dFx")),
-      new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
+    AbstractButton[] buttons = new AbstractButton[]{
+        new JButton(cvImagesBdl.getIcon("Copy")),
+        new JButton(cvImagesBdl.getIcon("Paste")),
+        null,
+        new JButton(cvImagesBdl.getIcon("Print")),
+        null,
+        new JToggleButton(cvImagesBdl.getIcon("3dFx")),
+        new JToggleButton(cvImagesBdl.getIcon("RefCursor")),
     };
     // action commands associati con i bottoni della tool-bar.
-    String[]   buttonsActCmd = new String[] {
-      XI5250CrtCtrl.COPY_CMD,
-      XI5250CrtCtrl.PASTE_CMD,
-      null,
-      XI5250EmulatorCtrl.PRINT_CMD,
-      null,
-      XI5250CrtCtrl.SWITCH_3DFX_CMD,
-      XI5250CrtCtrl.REFERENCE_CURSOR_CMD,
+    String[] buttonsActCmd = new String[]{
+        XI5250CrtCtrl.COPY_CMD,
+        XI5250CrtCtrl.PASTE_CMD,
+        null,
+        XI5250EmulatorCtrl.PRINT_CMD,
+        null,
+        XI5250CrtCtrl.SWITCH_3DFX_CMD,
+        XI5250CrtCtrl.REFERENCE_CURSOR_CMD,
     };
     // Hint associati ad i vari bottoni.
-    String[] buttonHints = new String[] {
-      cvRes.getString("TXT_Copy"),
-      cvRes.getString("TXT_Paste"),
-      null,
-      cvRes.getString("TXT_Print"),
-      null,
-      cvRes.getString("TXT_3dFx"),
-      cvRes.getString("TXT_RefCursor"),
+    String[] buttonHints = new String[]{
+        cvRes.getString("TXT_Copy"),
+        cvRes.getString("TXT_Paste"),
+        null,
+        cvRes.getString("TXT_Print"),
+        null,
+        cvRes.getString("TXT_3dFx"),
+        cvRes.getString("TXT_RefCursor"),
     };
 
     JToolBar toolBar = new JToolBar();
@@ -361,7 +297,7 @@ public class XI5250CrtFrame extends JFrame {
 
     for (int i = 0; i < buttons.length; i++) {
       if (buttons[i] != null) {
-        AbstractButton button = (AbstractButton)buttons[i];
+        AbstractButton button = buttons[i];
         toolBar.add(button);
         button.setToolTipText(buttonHints[i]);
         button.setMinimumSize(size);
@@ -369,13 +305,12 @@ public class XI5250CrtFrame extends JFrame {
         button.setMaximumSize(size);
         button.setRequestFocusEnabled(false);
         getCommandMgr().handleCommand(button, buttonsActCmd[i]);
-      }
-      else
+      } else {
         toolBar.addSeparator();
+      }
     }
 
     return toolBar;
   }
+
 }
-
-

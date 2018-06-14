@@ -36,8 +36,6 @@ import javax.swing.border.Border;
 
 import net.infordata.em.util.XIRatioLayout;
 
-
- 
 /**
  * The 5250 status bar.
  */
@@ -45,15 +43,12 @@ public class XI5250StatusBar extends JPanel {
 
   private static final long serialVersionUID = 1L;
 
-  //
   public final static int SHIFT_UP             =  0;
   public final static int SHIFT_DOWN           =  1;
 
-  //
   public final static int CAPS_LOCK_UP         =  0;
   public final static int CAPS_LOCK_DOWN       =  1;
 
-  //
   public final static int MESSAGE_OFF          =  0;
   public final static int MESSAGE_ON           =  1;
 
@@ -87,9 +82,6 @@ public class XI5250StatusBar extends JPanel {
   private int     ivShiftAreaState = -1;
   private int     ivState          = XI5250Emulator.ST_NULL;
 
-
-  /**
-   */
   public XI5250StatusBar() {
     super(new XIRatioLayout(4));
     setBorder(BorderFactory.createRaisedBevelBorder());
@@ -98,17 +90,11 @@ public class XI5250StatusBar extends JPanel {
     addComponents();
   }
 
-
-  /**
-   */
   @Override
   public boolean isValidateRoot() {
     return true;
   }
 
-
-  /**
-	 */
   public void addComponents() {
     Border border = BorderFactory.createEtchedBorder();
 
@@ -147,16 +133,10 @@ public class XI5250StatusBar extends JPanel {
     add(ivCoordArea, new XIRatioLayout.Constraints(0.15f, XIRatioLayout.RIGHT));
   }
 
-
-  /**
-	 */
 	public void setCoordArea(int aCol, int aRow) {
 	  ivCoordArea.setText(aRow + " / " + aCol + " ");
 	}
 
-
-  /**
-	 */
 	public void setFlashArea(boolean flag) {
 	  if (flag == ivFlashOn)
 	    return;
@@ -169,9 +149,6 @@ public class XI5250StatusBar extends JPanel {
 	    ivFlashArea.setImage(null);
 	}
 
-
-  /**
-	 */
 	public void setShiftArea(int aState) {
 	  if (aState == ivShiftAreaState)
 	    return;
@@ -184,9 +161,6 @@ public class XI5250StatusBar extends JPanel {
 	    ivShiftArea.setImage(null);
 	}
 
-
-	/**
-	 */
 	public void setCapsLockArea(int aState)	{
 	  if (aState == CAPS_LOCK_DOWN) {
 	    ivCapsLockArea.setImage(cvCapsLockImage);
@@ -196,9 +170,6 @@ public class XI5250StatusBar extends JPanel {
     }
 	}
 
-
-	/**
-	 */
 	public void setMessageArea(int aState) {
 	  if (aState == MESSAGE_ON) {
 	    ivMessageArea.setImage(cvMessageImage);
@@ -208,9 +179,6 @@ public class XI5250StatusBar extends JPanel {
     }
   }
 
-
-	/**
-	 */
 	public void setStateArea(int aState) {
 	  if (aState == ivState)
 	    return;
@@ -264,19 +232,6 @@ public class XI5250StatusBar extends JPanel {
     }
   }
 
-
-  /**
-  public void revalidate() {
-    // otherwise causes interferences with the emulator when it tries to
-    // force the position and the size of the status bar
-  }
-   */
-
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   protected static class TextAndImage extends JComponent {
 
     private static final long serialVersionUID = 1L;
@@ -291,28 +246,23 @@ public class XI5250StatusBar extends JPanel {
 
     private final int ivHGap = 2;
 
-
     public TextAndImage(int alignment) {
       ivAlignment = alignment;
     }
 
-
     public TextAndImage() {
       this(LEFT);
     }
-
 
     public void setText(String aText) {
       ivText = aText;
       repaint();
     }
 
-
     public void setImage(Image aImage) {
       ivImage = aImage;
       repaint();
     }
-
 
     @Override
     public void paintComponent(Graphics gr) {
@@ -355,4 +305,6 @@ public class XI5250StatusBar extends JPanel {
       }
     }
   }
+
 }
+

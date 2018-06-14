@@ -18,31 +18,21 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Restore screen command
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIRestoreScreenCmd extends XI5250Cmd {
 
   protected int ivPos;
 
-
-  /**
-   * @exception    XI5250Exception    raised if command parameters are wrong.
-   */
   @Override
   protected void readFrom5250Stream(InputStream inStream)
       throws IOException, XI5250Exception {
@@ -52,15 +42,9 @@ public class XIRestoreScreenCmd extends XI5250Cmd {
           XI5250Emulator.ERR_INVALID_COMMAND);
   }
 
-
   @Override
   protected void execute() {
     try {
-    	/*!!1.06a
-      XI5250EmulatorMemento mm = (XI5250EmulatorMemento)ivEmulator.ivSavedScreenList.elementAt(ivPos);
-      ivEmulator.ivSavedScreenList.setSize(ivPos + 1);
-      */
-      //!!1.06a
       XI5250EmulatorMemento mm = ivEmulator.ivSavedScreens[ivPos];
 
       ivEmulator.restoreMemento(mm);
@@ -68,4 +52,5 @@ public class XIRestoreScreenCmd extends XI5250Cmd {
     catch (ArrayIndexOutOfBoundsException ex) {
     }
   }
+
 }

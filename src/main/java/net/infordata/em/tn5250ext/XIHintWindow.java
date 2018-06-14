@@ -19,9 +19,7 @@ limitations under the License.
     10/07/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
 
-
 package net.infordata.em.tn5250ext;
-
 
 import java.awt.*;
 import java.awt.event.*;
@@ -30,22 +28,14 @@ import javax.swing.*;
 
 import net.infordata.em.util.*;
 
-
-
-/**
- */
 public class XIHintWindow extends JWindow {
 
   private static final long serialVersionUID = 1L;
 
-//  private XIHint     ivHint;
-  private Component  ivComponent;
+  private Component ivComponent;
 
-  private WinAdapter   ivWinAdapter  = new WinAdapter();
+  private WinAdapter ivWinAdapter = new WinAdapter();
 
-
-  /**
-   */
   public XIHintWindow(XIHint aHint, Component aComponent) {
 
     super(XIUtil.getFrame(aComponent));
@@ -60,33 +50,28 @@ public class XIHintWindow extends JWindow {
 
     ivComponent = aComponent;
 
-    vLocation     = ivComponent.getLocationOnScreen();
-    vLocation.y  += ivComponent.getSize().height + 4;
+    vLocation = ivComponent.getLocationOnScreen();
+    vLocation.y += ivComponent.getSize().height + 4;
 
     setLocation(vLocation);
 
-    getContentPane().setBackground(new Color(255, 250 , 180));
+    getContentPane().setBackground(new Color(255, 250, 180));
 
     getContentPane().add(aHint);
     setSize(aHint.getPreferredSize());
   }
 
-
   /**
-   * Visibile solo se la frame associata � attiva
+   * Visibile solo se la frame associata attiva
+   *
+   * @param b true to set visible, false to set invisible.
    */
   @Override
   public void setVisible(boolean b) {
     //!!V TODO dovrebbe essere visibile solo se la frame alla quale � associato
-    // � attiva
     super.setVisible(b);
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   */
   class CompAdapter extends ComponentAdapter {
 
     @Override
@@ -106,7 +91,7 @@ public class XIHintWindow extends JWindow {
     @Override
     public void componentShown(ComponentEvent aEvent) {
       if (aEvent.getSource() == XIHintWindow.this) {
-        Frame frm = (Frame)getParent();
+        Frame frm = (Frame) getParent();
         frm.addComponentListener(this);
         frm.addWindowListener(ivWinAdapter);
       }
@@ -115,22 +100,20 @@ public class XIHintWindow extends JWindow {
     @Override
     public void componentHidden(ComponentEvent aEvent) {
       if (aEvent.getSource() == XIHintWindow.this) {
-        Frame frm = (Frame)getParent();
+        Frame frm = (Frame) getParent();
         frm.removeWindowListener(ivWinAdapter);
         frm.removeComponentListener(this);
       }
     }
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 */
   class WinAdapter extends WindowAdapter {
+
     @Override
     public void windowDeactivated(WindowEvent aEvent) {
       setVisible(false);
     }
+
   }
+
 }

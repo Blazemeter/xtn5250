@@ -18,28 +18,21 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 RA Order
  *
- * @version  
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XIRAOrd extends XI5250Ord {
 
   protected int  ivEndRow, ivEndCol;
   protected char ivChar;
-
 
   @Override
   protected void readFrom5250Stream(InputStream inStream) throws IOException, XI5250Exception {
@@ -53,7 +46,6 @@ public class XIRAOrd extends XI5250Ord {
           XI5250Emulator.ERR_INVALID_ROW_COL_ADDR);
   }
 
-
   @Override
   protected void execute() {
     int start = ivEmulator.toLinearPos(ivEmulator.getSBACol(), ivEmulator.getSBARow());
@@ -66,10 +58,10 @@ public class XIRAOrd extends XI5250Ord {
     ivEmulator.setSBA(ivEmulator.getSBA() + (end - start + 1));
   }
 
-
   @Override
   public String toString() {
     return super.toString() +
            " [" + ivEndRow + "," + ivEndCol + ",'" + ivChar + "'" + "]";
   }
+
 }

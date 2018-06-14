@@ -20,16 +20,11 @@ limitations under the License.
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
 
-
 package net.infordata.em.crt5250;
-
 
 import java.awt.event.KeyEvent;
 import java.util.EventObject;
 
-
-/**
- */
 public class XI5250CrtEvent extends EventObject {
 
   private static final long serialVersionUID = 1L;
@@ -72,9 +67,6 @@ public class XI5250CrtEvent extends EventObject {
   private XI5250Field ivField;
   private KeyEvent    ivKeyEvent;
 
-
-  /**
-   */
   protected XI5250CrtEvent(int aId, XI5250Crt aCrt, XI5250Field aField,
                            KeyEvent aKeyEvent) {
     super(aCrt);
@@ -83,46 +75,29 @@ public class XI5250CrtEvent extends EventObject {
     ivKeyEvent = aKeyEvent;
   }
 
-
-  /**
-   */
   public XI5250CrtEvent(int aId, XI5250Crt aCrt, XI5250Field aField) {
     this(aId, aCrt, aField, null);
   }
 
-
-  /**
-   */
   public final int getID() {
     return ivId;
   }
 
-
-  /**
-   */
   public final XI5250Crt getCrt() {
     return (XI5250Crt)getSource();
   }
 
-
-  /**
-   */
   public final XI5250Field getField() {
     return ivField;
   }
 
-
-  /**
-   */
   public final KeyEvent getKeyEvent() {
     return ivKeyEvent;
   }
 
-
-  /**
-   */
   @Override
   public String toString() {
     return super.toString() + "[" + cvIdDescr[getID()] + "," + ivField + "]";
   }
+
 }

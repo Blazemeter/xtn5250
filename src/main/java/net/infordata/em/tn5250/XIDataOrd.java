@@ -19,10 +19,8 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,29 +28,25 @@ import java.io.InputStream;
 import net.infordata.em.crt5250.XIEbcdicTranslator;
 import net.infordata.em.tnprot.XITelnet;
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * 5250 Data Order
  *
- * @version  
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public class XIDataOrd extends XI5250Ord {
 
   protected String ivData;
-  protected byte   ivColor;
+  protected byte ivColor;
 
   /**
-   * see http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.2?SHELF=&DT=19950629163252&CASE=
-   * and IBM SA21-9247-6 pg. 2.13
+   * see <a href="http://publibfp.boulder.ibm.com/cgi-bin/bookmgr/BOOKS/co2e2001/15.6.2?SHELF=&DT=19950629163252&CASE=">IBM
+   * functions reference</a> and IBM SA21-9247-6 pg. 2.13
+   *
+   * @param bb byte representation to check if is a data character or not
+   * @return true if is a data character, false otherwise.
    */
-  public static final boolean isDataCharacter(int bb) {
+  public static boolean isDataCharacter(int bb) {
     // 0x1F instead of 0x20 and keep 0xFF chars
-//    return (bb == 0x00 || bb == 0x1C || bb == 0x1E || bb == 0x0E || bb == 0x0F ||
-//        (bb >= 0x1F && bb <= 0xFF));
     switch (bb) {
       case XI5250Emulator.ORD_IC:
       case XI5250Emulator.ORD_RA:
@@ -79,29 +73,29 @@ public class XIDataOrd extends XI5250Ord {
     ivColor = 0;
     StringBuilder sb = new StringBuilder(128);
 
-    for (int i = 0;  ; i++) {
+    for (int i = 0; ; i++) {
       inStream.mark(1);
       bb = inStream.read();
 
-      if (bb == -1)
+      if (bb == -1) {
         break;
+      }
 
       // see IBM SA21-9247-6 pg. 2.13
       if (isDataCharacter(bb)) {
         // is it a color ?
         if (bb > 0x1F && bb <= 0x3F) {
-          if (i == 0)
-            ivColor = (byte)bb;
-          else {
+          if (i == 0) {
+            ivColor = (byte) bb;
+          } else {
             // cut string if different color
             inStream.reset();
             break;
           }
+        } else {
+          sb.append(translator.toChar((byte) bb));
         }
-        else
-          sb.append(translator.toChar((byte)bb));
-      }
-      else {
+      } else {
         inStream.reset();
         break;
       }
@@ -109,22 +103,21 @@ public class XIDataOrd extends XI5250Ord {
     ivData = sb.toString();
   }
 
-
   @Override
   protected void execute() {
     if (ivColor != 0) {
       ivEmulator.setDefAttr(XITelnet.toInt(ivColor));
       ivEmulator.drawString(String.valueOf(XI5250Emulator.ATTRIBUTE_PLACE_HOLDER),
-                            ivEmulator.getSBACol(), ivEmulator.getSBARow());
+          ivEmulator.getSBACol(), ivEmulator.getSBARow());
       ivEmulator.setSBA(ivEmulator.getSBA() + 1);
     }
     ivEmulator.drawString(ivData, ivEmulator.getSBACol(), ivEmulator.getSBARow());
     ivEmulator.setSBA(ivEmulator.getSBA() + ivData.length());
   }
 
-
   @Override
   public String toString() {
     return super.toString() + " [" + XITelnet.toHex(ivColor) + "," + ",\"" + ivData + "\"" + "]";
   }
+
 }

@@ -29,9 +29,7 @@ limitations under the License.
     29/07/99 rel. 1.14 - Rework on 3d look&feel.
  */
 
-
 package net.infordata.em.crt;
-
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,9 +45,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Implements an off-screen image buffer.
@@ -79,16 +74,16 @@ public class XICrtBuffer implements Serializable {
   private char[][] ivCharBuffer;
   private int[][]  ivAttrBuffer;
 
-  //!!1.06
-  transient private List<Rectangle> ivDirtyAreas = new ArrayList<Rectangle>(20);
+  transient private List<Rectangle> ivDirtyAreas = new ArrayList<>(20);
 
-  //!!1.14
   transient private XICrt  ivCrt;
-
 
   /**
    * Creates a XICrtBuffer with the given dimensions expressed in number of
    * chars.
+   *
+   * @param nCols number of columns for the buffer.
+   * @param nRows number of rows for the buffer.
    */
   public XICrtBuffer(int nCols, int nRows) {
     ivNCols = nCols;
@@ -99,9 +94,14 @@ public class XICrtBuffer implements Serializable {
     clear();
   }
 
-
   /**
    * Creates a XICrtBuffer filling it with a portion of another one.
+   *
+   * @param from buffer from where to create the new buffer
+   * @param aC column from where to extract from the given buffer.
+   * @param aR row from where to extract from the given buffer.
+   * @param aW number of columns to extract from the given buffer.
+   * @param aH number of rows to extract from the given buffer.
    */
   public XICrtBuffer(XICrtBuffer from, int aC, int aR, int aW, int aH) {
     this(aW, aH);
@@ -109,38 +109,29 @@ public class XICrtBuffer implements Serializable {
     setDefAttr(from.getDefAttr());
   }
 
-
   /**
    * Returns a cloned XICrtBuffer (the new one needs initGraphics() to be
    * displayed).
+   *
+   * @return cloned XICrtBuffer.
    */
   @Override
   public Object clone() {
-    XICrtBuffer aClone = new XICrtBuffer(this, 0, 0, ivNCols, ivNRows);
-    /* !!1.04
-    XICrtBuffer aClone = new XICrtBuffer(ivNCols, ivNRows);
-    aClone.copyFrom(this);
-     */
-    return aClone;
+    return new XICrtBuffer(this, 0, 0, ivNCols, ivNRows);
   }
 
-
-  /**
-   */
   final void setCrt(XICrt crt) {
     ivCrt = crt;
   }
 
-
-  /**
-   */
   public final XICrt getCrt() {
     return ivCrt;
   }
 
-
   /**
    * Initializes the graphics area.
+   *
+   * @param gr graphics to use.
    */
   public synchronized void setGraphics(Graphics gr) {
     ivGr = gr;
@@ -152,10 +143,9 @@ public class XICrtBuffer implements Serializable {
       ivGrW = ivNCols * ivCharW;
       ivGrH = ivNRows * ivCharH;
 
-      copyFrom(this);   // refresh !!1.06 required
+      copyFrom(this);   // refresh required
     }
     else {
-      //!!1.03b
       ivCharW = 1;    // to avoid possible division by 0 in pending events
       ivCharH = 1;
       ivCharD = 1;
@@ -164,10 +154,11 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
-
   /**
-   * Dumps the buffer on System.out stream.
+   * Dumps the buffer on print stream.
    * Useful for debugging.
+   *
+   * @param out stream where to dump the buffer
    */
   public void dumpBuffer(PrintStream out) {
     out.println("BUFFER DUMP");
@@ -184,14 +175,14 @@ public class XICrtBuffer implements Serializable {
     out.println("END BUFFER DUMP");
   }
 
-
   /**
    * Copy contents from another XICrtBuffer (can be itself).
+   *
+   * @param from buffer to copy content from.
    */
   public void copyFrom(XICrtBuffer from) {
     copyFrom(0, 0, from, 0, 0, from.ivNCols, from.ivNRows);
   }
-
 
   /**
    * Copy contents from another XICrtBuffer (can be itself).
@@ -248,7 +239,7 @@ public class XICrtBuffer implements Serializable {
     ivDirtyAreas.clear();
 
     if (ivGr != null) {
-      Graphics gr = ivGr.create();  //!!1.05d
+      Graphics gr = ivGr.create();
       try {
         gr.setColor(getBackground(ivDefAttr));
         gr.fillRect(0, 0, ivGrW, ivGrH);
@@ -259,9 +250,6 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
-
-  /**
-   */
   public synchronized void scrollDown(int r1, int r2, int nRows) {
     if ((r1 >= r2) || (nRows == 0))
       throw new IllegalArgumentException("ScrollDown()");
@@ -283,7 +271,7 @@ public class XICrtBuffer implements Serializable {
       }
 
     if (ivGr != null) {
-      Graphics gr = ivGr.create();  //!!1.05d
+      Graphics gr = ivGr.create();
       try {
         gr.copyArea(0, r1 * ivCharH, ivNCols * ivCharW, (r2 - r1) * ivCharH,
             0, ivCharH * nRows);
@@ -296,9 +284,6 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
-
-  /**
-   */
   public synchronized void scrollUp(int r1, int r2, int nRows) {
     if ((r1 >= r2) || (nRows == 0))
       throw new IllegalArgumentException("ScrollUp()");
@@ -320,7 +305,7 @@ public class XICrtBuffer implements Serializable {
       }
 
     if (ivGr != null) {
-      Graphics gr = ivGr.create();  //!!1.05d
+      Graphics gr = ivGr.create();
       try {
         gr.copyArea(0, (r1 + 1) * ivCharH, ivNCols * ivCharW, (r2 - r1) * ivCharH,
             0, -ivCharH * nRows);
@@ -333,48 +318,57 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
-
   /**
    * Returns the dimensions in chars.
+   *
+   * @return dimensions in chars.
    */
   public Dimension getCrtSize() {
     return new Dimension(ivNCols, ivNRows);
   }
 
-
   /**
    * Returns the dimensions in pixels.
+   *
+   * @return dimensions in pixels.
    */
   public Dimension getSize() {
     return new Dimension(ivGrW, ivGrH);
   }
 
-
-  /**
-   */
   public Dimension getCharSize() {
     return new Dimension(ivCharW, ivCharH);
   }
 
-
   /**
    * Converts characters coordinates in pixels coordinates.
+   *
+   * @param col column of the position to convert to pixel coordinates.
+   * @param row row of the position to convert to pixel coordinates.
+   * @return pixel coordinates for the given position.
    */
   public Point toPoint(int col, int row) {
     return new Point(col * ivCharW, (row + 1) * ivCharH);
   }
 
-
   /**
    * Uses the default attribute.
+   *
+   * @param str string to print
+   * @param col column where to print the string
+   * @param row row where to print the string
    */
   public void drawString(String str, int col, int row) {
     drawString(str, col, row, ivDefAttr);
   }
 
-
   /**
    * Uses the given attribute.
+   *
+   * @param aStr string to print
+   * @param col column where to print the string
+   * @param row row where to print the string
+   * @param aAttr attribute of the string
    */
   public synchronized void drawString(String aStr, int col, int row,
       int aAttr) {
@@ -393,16 +387,13 @@ public class XICrtBuffer implements Serializable {
     addDirtyArea(new Rectangle(col, row, len, 1));
   }
 
-
-  /**
-   */
   private void addDirtyArea(Rectangle newRt) {
     Rectangle rt;
     Rectangle rtG;
-    Rectangle res = new Rectangle(newRt);   //!!V 03/03/98
+    Rectangle res = new Rectangle(newRt);
     int       count = 0;
     for (Iterator<Rectangle> e = ivDirtyAreas.iterator(); e.hasNext(); ) {
-      rt = (Rectangle)e.next();
+      rt = e.next();
       // used to see if rectangles are adiacent (x coord)
       rtG = new Rectangle(rt);
       rtG.grow(1, 0);
@@ -417,7 +408,6 @@ public class XICrtBuffer implements Serializable {
     ivDirtyAreas.add(res);
   }
 
-
   /**
    * To be called just before painting the offscreen image.
    */
@@ -425,12 +415,9 @@ public class XICrtBuffer implements Serializable {
     if (ivGr == null || ivDirtyAreas.isEmpty())
       return;
 
-    Graphics gr = ivGr.create();  //!!1.05d
+    Graphics gr = ivGr.create();
     try {
-      Rectangle rt;
-      for (Iterator<Rectangle> e = ivDirtyAreas.iterator(); e.hasNext(); ) {
-        rt = (Rectangle)e.next();
-
+      for (Rectangle rt : ivDirtyAreas) {
         int          lastAttr;
         int          lastCol;
         int          lastRow;
@@ -465,12 +452,17 @@ public class XICrtBuffer implements Serializable {
     }
   }
 
-
   /**
    * Draws the given string on the graphics context (called by sync()).
+   *
+   * @param gr graphics where to draw the string
+   * @param aStr string to print
+   * @param col column where to print the string
+   * @param row row where to print the string
+   * @param aAttr attribute of the string
    */
   protected void _drawString(Graphics gr, String aStr, int col, int row,
-      int aAttr) { //!!1.06
+      int aAttr) {
     int len = aStr.length();
 
     gr.setColor(getBackground(aAttr));
@@ -489,9 +481,6 @@ public class XICrtBuffer implements Serializable {
         (row + 1) * ivCharH - ivCharD);
   }
 
-
-  /**
-   */
   public String getString(int col, int row, int nChars) {
     StringBuilder str = new StringBuilder();
     for (int i = 0; i < nChars; i++) {
@@ -500,9 +489,6 @@ public class XICrtBuffer implements Serializable {
     return new String(str);
   }
 
-
-  /**
-   */
   public String getString() {
     char[] buf = new char[ivNRows * ivNCols];
 
@@ -512,25 +498,26 @@ public class XICrtBuffer implements Serializable {
     return new String(buf);
   }
 
-
   /**
    * Background attribute to color mapping.
+   *
+   * @param aAttribute attribute from where to get the color.
+   * @return background color.
    */
   protected Color getBackground(int aAttribute){
     return Color.black;
   }
 
-
   /**
    * Foreground attribute to color mapping.
+   *
+   * @param aAttribute attribute from where to get the color.
+   * @return foreground color.
    */
   protected Color getForeground(int aAttribute) {
     return Color.green;
   }
 
-
-  /**
-   */
   public final int getAttrInternal(int col, int row) {
     col = Math.max(0, Math.min(ivNCols - 1, col));
     row = Math.max(0, Math.min(ivNRows - 1, row));
@@ -538,16 +525,10 @@ public class XICrtBuffer implements Serializable {
     return ivAttrBuffer[row][col];
   }
 
-
-  /**
-   */
   public int getAttr(int col, int row) {
     return getAttrInternal(col, row);
   }
 
-
-  /**
-   */
   public final char getChar(int col, int row) {
     col = Math.max(0, Math.min(ivNCols - 1, col));
     row = Math.max(0, Math.min(ivNRows - 1, row));
@@ -555,40 +536,33 @@ public class XICrtBuffer implements Serializable {
     return ivCharBuffer[row][col];
   }
 
-
   /**
    * Sets the default attribute.
+   *
+   * @param aAttr default attribute to set
    */
   public void setDefAttr(int aAttr) {
     ivDefAttr = aAttr;
   }
 
-
   /**
    * Returns the default attribute.
+   *
+   * @return default attribute.
    */
   public final int getDefAttr() {
     return ivDefAttr;
   }
 
-
-  /**
-   */
   public Point toPoints(int aCol, int aRow) {
     return new Point(aCol * ivCharW, aRow * ivCharH);
   }
 
-
-  /**
-   */
   public Rectangle toPoints(int aCol, int aRow, int aNCols, int aNRows) {
     return new Rectangle(aCol * ivCharW, aRow * ivCharH,
         aNCols * ivCharW, aNRows * ivCharH);
   }
 
-
-  /**
-   */
   void writeObject(ObjectOutputStream oos) throws IOException {
     oos.defaultWriteObject();
   }
@@ -596,4 +570,5 @@ public class XICrtBuffer implements Serializable {
   void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
     ois.defaultReadObject();
   }
+
 }

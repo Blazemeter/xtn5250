@@ -21,48 +21,48 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
+
 package net.infordata.em.crt5250;
 
-
 import java.util.EventListener;
-
 
 /**
  * Listener for XI5250FieldEvent.
  *
- * @version  
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public interface XI5250FieldListener extends EventListener {
+
   /**
    * Input cursor enters in the field area
+   *
+   * @param e triggered event.
    */
-  public void activated(XI5250FieldEvent e);
-
+  void activated(XI5250FieldEvent e);
 
   /**
    * Input cursor exits from the input area
+   *
+   * @param e triggered event.
    */
-  public void deactivated(XI5250FieldEvent e);
-
+  void deactivated(XI5250FieldEvent e);
 
   /**
    * Field value is changed
+   *
+   * @param e triggered event.
    */
-  public void valueChanged(XI5250FieldEvent e);
-  
-  
+  void valueChanged(XI5250FieldEvent e);
+
   /**
    * Field enabled state is changed using setEnabled method
-   * @see    XI5250Field#setEnabled
-   * @see    XI5250Field#isEnabled
+   *
+   * @param e triggered event.
+   * @see XI5250Field#setEnabled
+   * @see XI5250Field#isEnabled
    */
-  public void enabledStateChanged(XI5250FieldEvent e);
-  
-  
-  /**
-   */
-  public void keyEvent(XI5250FieldEvent e);
+  void enabledStateChanged(XI5250FieldEvent e);
+
+  void keyEvent(XI5250FieldEvent e);
+
 }

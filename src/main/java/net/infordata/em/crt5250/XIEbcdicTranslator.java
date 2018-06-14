@@ -24,28 +24,23 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
+
 package net.infordata.em.crt5250;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 /**
- * @version
- * @author   Valentino Proietti - Infordata S.p.A.
+ * @author Valentino Proietti - Infordata S.p.A.
  */
 public abstract class XIEbcdicTranslator {
 
-
-  private static final Map<String,XIEbcdicTranslator> cvRegistry = 
-      Collections.synchronizedMap(new LinkedHashMap<String,XIEbcdicTranslator>());
-  private static final Map<String,XIEbcdicTranslator> cvRORegistry = 
+  private static final Map<String, XIEbcdicTranslator> cvRegistry =
+      Collections.synchronizedMap(new LinkedHashMap<>());
+  private static final Map<String, XIEbcdicTranslator> cvRORegistry =
       Collections.unmodifiableMap(cvRegistry);
 
-  
   static {
     registerTranslator("CP37", XIEbcdicNTranslator.TRANSLATOR_CP37);
     registerTranslator("CP273", XIEbcdicNTranslator.TRANSLATOR_CP273);
@@ -66,193 +61,223 @@ public abstract class XIEbcdicTranslator {
     registerTranslator("CP1147", XIEbcdicNTranslator.TRANSLATOR_CP1147);
     registerTranslator("CP1153", XIEbcdicNTranslator.TRANSLATOR_CP1153);
     registerTranslator("CP1160", XIEbcdicNTranslator.TRANSLATOR_CP1160);
-    //
     registerTranslator("CP1025", XIEbcdicNTranslator.TRANSLATOR_CP1025);
     registerTranslator("CP1026", XIEbcdicNTranslator.TRANSLATOR_CP1026);
-    
+
     registerTranslator("CP1112", XIEbcdicNTranslator.TRANSLATOR_CP1112);
     registerTranslator("CP1122", XIEbcdicNTranslator.TRANSLATOR_CP1122);
     registerTranslator("CP1123", XIEbcdicNTranslator.TRANSLATOR_CP1123);
     registerTranslator("CP1125", XIEbcdicNTranslator.TRANSLATOR_CP1125);
-    
+
     registerTranslator("CP1130", XIEbcdicNTranslator.TRANSLATOR_CP1130);
     registerTranslator("CP1132", XIEbcdicNTranslator.TRANSLATOR_CP1132);
     registerTranslator("CP1137", XIEbcdicNTranslator.TRANSLATOR_CP1137);
-    
+
     registerTranslator("CP1142", XIEbcdicNTranslator.TRANSLATOR_CP1142);
     registerTranslator("CP1145", XIEbcdicNTranslator.TRANSLATOR_CP1145);
     registerTranslator("CP1146", XIEbcdicNTranslator.TRANSLATOR_CP1146);
     registerTranslator("CP1148", XIEbcdicNTranslator.TRANSLATOR_CP1148);
     registerTranslator("CP1149", XIEbcdicNTranslator.TRANSLATOR_CP1149);
-    
+
     registerTranslator("CP1154", XIEbcdicNTranslator.TRANSLATOR_CP1154);
     registerTranslator("CP1155", XIEbcdicNTranslator.TRANSLATOR_CP1155);
     registerTranslator("CP1156", XIEbcdicNTranslator.TRANSLATOR_CP1156);
     registerTranslator("CP1157", XIEbcdicNTranslator.TRANSLATOR_CP1157);
     registerTranslator("CP1158", XIEbcdicNTranslator.TRANSLATOR_CP1158);
-    
+
     registerTranslator("CP1164", XIEbcdicNTranslator.TRANSLATOR_CP1164);
 
     registerTranslator("CP420", XIEbcdicNTranslator.TRANSLATOR_CP420);
     registerTranslator("CP871", XIEbcdicNTranslator.TRANSLATOR_CP871);
     registerTranslator("CP875", XIEbcdicNTranslator.TRANSLATOR_CP875);
   }
-  
-  
-  /**
-   */
+
   protected XIEbcdicTranslator() {
   }
-  
-  
-  /**
-   */
-  public static synchronized void registerTranslator(String id, 
+
+  public static synchronized void registerTranslator(String id,
       XIEbcdicTranslator tr) {
-    if (id == null)
+    if (id == null) {
       throw new NullPointerException("id is null");
-    if (tr == null)
+    }
+    if (tr == null) {
       throw new NullPointerException("tr is null");
-    if (cvRegistry.containsKey(id.toLowerCase()))
+    }
+    if (cvRegistry.containsKey(id.toLowerCase())) {
       throw new IllegalArgumentException("Translator " + id.toLowerCase() + " already registered");
+    }
     cvRegistry.put(id.toLowerCase(), tr);
   }
-  
-  
+
   /**
    * @return a read-only map of registered translators
    */
-  public static Map<String,XIEbcdicTranslator> getRegisteredTranslators() {
+  public static Map<String, XIEbcdicTranslator> getRegisteredTranslators() {
     return cvRORegistry;
   }
 
-  
   /**
    * Returns the XIEbcdicTranslator.
+   *
+   * @param id of the translator
+   * @return the translator for the given id
    */
   public static XIEbcdicTranslator getTranslator(String id) {
     return cvRegistry.get(id.toLowerCase());
   }
 
-  
   /**
    * Converts byte to int without sign.
+   *
+   * @param bb the byte to get the int from
+   * @return integer representation of the byte
    */
-  public static final int toInt(byte bb) {
-    return ((int)bb & 0xff);
+  public static int toInt(byte bb) {
+    return ((int) bb & 0xff);
   }
 
 
   /**
-   * Converts byte to hex rapresentation
+   * Converts byte to hex representation
+   *
+   * @param bb the byte to get the hex representation from
+   * @return the hex representation of the byte
    */
-  public static final String toHex(byte bb) {
+  public static String toHex(byte bb) {
     String hex = Integer.toString(toInt(bb), 16);
     return "00".substring(hex.length()) + hex;
   }
 
-
   /**
    * From ebcdic code to char
+   *
+   * @param aEbcdicChar the ebcdic code to get the char from.
+   * @return the char obtained from the ebcdic code
    */
   public abstract char toChar(byte aEbcdicChar);
 
-
   /**
    * From char to ebcdic code
+   *
+   * @param aChar the the char to get ebcdic code from.
+   * @return the ebcdic code obtained from the char
    */
   public abstract byte toEBCDIC(char aChar);
 
-
   /**
    * From String to ebcdic string
+   *
+   * @param aString the string to get the ebcdic codes from
+   * @param aLen number of bytes to get from the string
+   * @return ebcdic code bytes for the given string and length
    */
   public byte[] toText(String aString, int aLen) {
     byte[] bb = new byte[aLen];
-    int    i;
-    int    len = Math.min(aLen, aString.length());
+    int i;
+    int len = Math.min(aLen, aString.length());
 
-    for (i = 0; i < len; i++)
+    for (i = 0; i < len; i++) {
       bb[i] = toEBCDIC(aString.charAt(i));
+    }
     // fill with space
-    for (i = len; i < aLen; i++)
+    for (i = len; i < aLen; i++) {
       bb[i] = toEBCDIC(' ');
+    }
 
     return bb;
   }
 
-
   /**
    * From int to ebcdic numeric not packed
+   *
+   * @param aNum number to get the ebcdic bytes from
+   * @param aLen number of bytes to get from the number
+   * @return not packed ebcdic code bytes for the given number and length
    */
   public byte[] toNumeric(int aNum, int aLen) {
     byte[] bb = new byte[aLen];
-    int    i;
+    int i;
 
     for (i = aLen - 1; i >= 0; i--) {
-      bb[i] = toEBCDIC((char)(((int)'0') + (aNum % 10)));
+      bb[i] = toEBCDIC((char) (((int) '0') + (aNum % 10)));
       aNum /= 10;
     }
 
     return bb;
   }
 
-
   /**
    * From int to packed
+   *
+   * @param aNum number to get the ebcdic bytes from
+   * @param aLen number of bytes to get from the number
+   * @return packed ebcdic code bytes for the given number and length
    */
   public byte[] toPacked(int aNum, int aLen) {
     byte[] res = new byte[(aLen + 1) / 2];
-    int    x;
+    int x;
 
     for (int i = res.length - 1; i >= 0; i--) {
       if (i == res.length - 1 && aNum < 0) {
-        res[i] = (byte)0x0D;
-      }
-      else {
+        res[i] = (byte) 0x0D;
+      } else {
         x = aNum % 10;
         aNum /= 10;
-        res[i] = (byte)x;
+        res[i] = (byte) x;
       }
 
       x = aNum % 10;
       aNum /= 10;
-      res[i] |= (byte)(x << 4);
+      res[i] |= (byte) (x << 4);
     }
 
     return res;
   }
 
-
   /**
    * From ebcdic string to String
+   *
+   * @param aBuf ebcdic code bytes to get the string from
+   * @param aOfs offset in the bytes from where to get the string from
+   * @param aLen number of bytes to get from the bytes
+   * @return string for the given ebcdic code bytes
    */
   public String toString(byte[] aBuf, int aOfs, int aLen) {
     String str = "";
-    int    i;
+    int i;
 
-    for (i = aOfs; i < (aOfs + aLen); i++)
+    for (i = aOfs; i < (aOfs + aLen); i++) {
       str += toChar(aBuf[i]);
+    }
 
     // strip trailing blanks
-    for (i = str.length() - 1; (i >= 0) && (str.charAt(i) == ' '); i--)
+    for (i = str.length() - 1; (i >= 0) && (str.charAt(i) == ' '); i--) {
       ;
+    }
 
     return str.substring(0, Math.max(0, Math.min(str.length(), i + 1)));
   }
 
-
   /**
    * From ebcdic numeric not packed to int
+   *
+   * @param aBuf not packed ebcdic code bytes to get the number from
+   * @param aOfs offset in the bytes from where to get the number from
+   * @param aLen number of bytes to get from the bytes
+   * @return number for the given ebcdic code bytes
    */
   public int toInt(byte[] aBuf, int aOfs, int aLen) {
     String str = toString(aBuf, aOfs, aLen);
     return Integer.parseInt(str);
   }
 
-
   /**
    * From ebcdic packed to int
+   *
+   * @param aBuf packed ebcdic code bytes to get the number from
+   * @param aOfs offset in the bytes from where to get the number from
+   * @param aLen number of bytes to get from the bytes
+   * @return number for the given ebcdic code bytes
    */
   public int toIntFromPacked(byte[] aBuf, int aOfs, int aLen) {
     int res = 0;
@@ -260,14 +285,16 @@ public abstract class XIEbcdicTranslator {
     for (int i = aOfs; i < (aOfs + aLen); i++) {
       res = (res * 100) + ((aBuf[i] >> 4 & 0x0F) * 10);
 
-      if ((aBuf[i] & 0x0F) == 0x0D)
+      if ((aBuf[i] & 0x0F) == 0x0D) {
         res /= -10;
-      else if ((aBuf[i] & 0x0F) == 0x0F)
+      } else if ((aBuf[i] & 0x0F) == 0x0F) {
         res /= 10;
-      else
+      } else {
         res += (aBuf[i] & 0x0F);
+      }
     }
 
     return res;
   }
+
 }

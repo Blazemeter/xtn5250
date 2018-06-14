@@ -18,24 +18,16 @@ limitations under the License.
     ***
     30/06/98 rel. _.___- Swing, JBuilder2 e VSS.
  */
- 
- 
-package net.infordata.em.tn5250;
 
+package net.infordata.em.tn5250;
 
 import net.infordata.em.crt5250.XI5250CrtBuffer;
 import net.infordata.em.crt5250.XI5250FieldsList;
-
-
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Used to store, without exposing it, the internal state of XI5250Emulator.
  *
  * @see    XI5250Emulator#createMemento
- *
- * @version
  * @author   Valentino Proietti - Infordata S.p.A.
  */
 public class XI5250EmulatorMemento {
@@ -56,7 +48,6 @@ public class XI5250EmulatorMemento {
 
   // from super classes
   protected XI5250CrtBuffer ivCrtBuffer;
-
 
   public XI5250EmulatorMemento(XI5250FieldsList aFieldList,
                                int aFunctionKeysMask, XI5250Cmd aPendingCmd,
@@ -80,4 +71,5 @@ public class XI5250EmulatorMemento {
 
     ivCrtBuffer = aCrtBuffer;
   }
+
 }
