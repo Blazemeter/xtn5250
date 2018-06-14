@@ -226,15 +226,15 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldGetUserMenuScreenWhenSendUserField() throws Exception {
+  public void shouldGetUserMenuScreenWhenLogin() throws Exception {
     awaitLoginScreen();
-    sendUserField();
+    login();
     awaitMenuScreen();
     assertThat(client.getScreenText())
         .isEqualTo(getFileContent("user-menu-screen.txt"));
   }
 
-  private void sendUserField() {
+  private void login() {
     client.setFieldText(6, 53, "TESTUSR");
     client.setFieldText(7, 53, "TESTPSW");
     client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
@@ -242,6 +242,29 @@ public class TerminalClientTest {
 
   private void awaitMenuScreen() throws InterruptedException, TimeoutException {
     awaitScreenContains("IBM i Main Menu");
+  }
+
+  @Test
+  public void shouldGetNotSoundedAlarmWhenWhenConnect() throws Exception {
+    awaitLoginScreen();
+    assertThat(client.resetAlarm()).isFalse();
+  }
+
+  @Test
+  public void shouldGetSoundedAlarmWhenWhenLogin() throws Exception {
+    awaitLoginScreen();
+    login();
+    awaitMenuScreen();
+    assertThat(client.resetAlarm()).isTrue();
+  }
+
+  @Test
+  public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarm() throws Exception {
+    awaitLoginScreen();
+    login();
+    awaitMenuScreen();
+    client.resetAlarm();
+    assertThat(client.resetAlarm()).isFalse();
   }
 
   @Test
@@ -291,10 +314,10 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldSendExceptionToExceptionHandlerWhenSendAndServerDown() throws Exception {
+  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDown() throws Exception {
     awaitLoginScreen();
     service.stop(TIMEOUT_MILLIS);
-    sendUserField();
+    login();
     exceptionWaiter.awaitException();
   }
 

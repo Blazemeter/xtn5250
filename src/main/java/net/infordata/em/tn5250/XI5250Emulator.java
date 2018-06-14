@@ -1795,6 +1795,10 @@ public class XI5250Emulator extends XI5250Crt implements Serializable {
     return wait ? proc.waitFor() : 0;
   }
 
+  public void soundAlarm() {
+    Toolkit.getDefaultToolkit().beep();
+  }
+
   /**
    * Multi-cast Listener for XI5250Emulator
    *

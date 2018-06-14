@@ -130,7 +130,7 @@ public abstract class XICCCmd extends XI5250Cmd {
     }
 
     if ((ivCC[1] & 0x04) != 0) {
-      Toolkit.getDefaultToolkit().beep();
+      ivEmulator.soundAlarm();
     }
   }
 

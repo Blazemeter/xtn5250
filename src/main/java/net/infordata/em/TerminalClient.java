@@ -21,12 +21,13 @@ public class TerminalClient {
   private static class TerminalClientEmulator extends XI5250Emulator {
 
     private ExceptionHandler exceptionHandler;
+    private boolean alarmSounded;
 
     private TerminalClientEmulator() {
       setDisconnectOnSocketException(false);
     }
 
-    public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+    private void setExceptionHandler(ExceptionHandler exceptionHandler) {
       this.exceptionHandler = exceptionHandler;
     }
 
@@ -49,6 +50,17 @@ public class TerminalClient {
       if (exceptionHandler != null && remote) {
         exceptionHandler.onConnectionClosed();
       }
+    }
+
+    @Override
+    public void soundAlarm() {
+      alarmSounded = true;
+    }
+
+    private boolean resetAlarm() {
+      boolean ret = alarmSounded;
+      alarmSounded = false;
+      return ret;
     }
 
   }
@@ -199,6 +211,15 @@ public class TerminalClient {
   public Optional<Point> getCursorPosition() {
     return emulator.isCursorVisible() ? Optional
         .of(new Point(emulator.getCursorCol() + 1, emulator.getCursorRow() + 1)) : Optional.empty();
+  }
+
+  /**
+   * Allows resetting and getting the status of the alarm triggered by the terminal server.
+   *
+   * @return True if the alarm has sounded, false otherwise.
+   */
+  public boolean resetAlarm() {
+    return emulator.resetAlarm();
   }
 
   /**
