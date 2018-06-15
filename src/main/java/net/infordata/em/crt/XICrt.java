@@ -122,8 +122,7 @@ public class XICrt extends JComponent implements Serializable {
   public XICrt() {
     setFreeze(true);
     setOpaque(true);
-
-    setFont(new Font("Monospaced", Font.PLAIN, MIN_FONT_SIZE));
+    setFont(new Font(Font.MONOSPACED, Font.PLAIN, MIN_FONT_SIZE));
     setLayout(null);
     setCrtBuffer(createCrtBuffer(80, 24));
     setBackground(Color.black);
@@ -148,11 +147,6 @@ public class XICrt extends JComponent implements Serializable {
    */
   @Override
   public void setFont(Font aFont) {
-    FontMetrics fontMetrics = getFontMetrics(aFont);
-    if (fontMetrics.charWidth('W') != fontMetrics.charWidth('i')) {
-      throw new IllegalArgumentException("Accept only monospaced font");
-    }
-
     if (aFont.getSize() < MIN_FONT_SIZE) {
       throw new IllegalArgumentException("Font too small");
     }
@@ -243,7 +237,7 @@ public class XICrt extends JComponent implements Serializable {
     setFreeze(true);
     super.removeNotify();
     ivCrtBuffer.setGraphics(null);
-    setFont(new Font("Monospaced", Font.PLAIN, MIN_FONT_SIZE));
+    setFont(new Font(Font.MONOSPACED, Font.PLAIN, MIN_FONT_SIZE));
   }
 
   /**
@@ -457,10 +451,9 @@ public class XICrt extends JComponent implements Serializable {
    * Can be used to verify the presence of a string in the buffer.
    *
    * @param col column from where to get the string
-   * @param row  row from where to get the string
+   * @param row row from where to get the string
    * @param nChars number of chars to get from the given position
    * @return string with the given length from the given position
-   *
    * @see String#indexOf
    */
   public String getString(int col, int row, int nChars) {
@@ -469,8 +462,8 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Can be used to verify the presence of a string in the buffer.
-   * @return gets the entire screen text.
    *
+   * @return gets the entire screen text.
    * @see String#indexOf
    */
   public String getString() {
@@ -479,8 +472,9 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the attribute at the given position.
+   *
    * @param col column of the position to get the attribute from
-   * @param row  row of the position to get the attribute from
+   * @param row row of the position to get the attribute from
    * @return attribute for the given position
    */
   public int getAttr(int col, int row) {
@@ -489,8 +483,9 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the character present at the given position.
+   *
    * @param col column of the position to get the character from
-   * @param row  row of the position to get the character from
+   * @param row row of the position to get the character from
    * @return character at the given position
    */
   public char getChar(int col, int row) {
@@ -518,6 +513,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Forces the row coord in crt bounds
+   *
    * @param aRow row position to force to bounds
    * @return the position within the crt bounds for the given row
    */
@@ -527,6 +523,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Moves the cursor at the give position.
+   *
    * @param aCol column to move the cursor to
    * @param aRow row to move the cursor to
    */
@@ -536,6 +533,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the cursor column position.
+   *
    * @return cursor column position.
    */
   public int getCursorCol() {
@@ -544,6 +542,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the cursor row position.
+   *
    * @return cursor row position.
    */
   public int getCursorRow() {
@@ -581,6 +580,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the dimensions in chars.
+   *
    * @return dimensions in chars
    */
   public Dimension getCrtSize() {
@@ -589,6 +589,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Sets the off-screen buffer.
+   *
    * @param aCrt off-screen buffer to set.
    */
   protected final void setCrtBuffer(XICrtBuffer aCrt) {
@@ -615,6 +616,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the dimension in pixels of the off-screen buffer.
+   *
    * @return dimension in pixels of the off-screen buffer
    */
   public Dimension getCrtBufferSize() {
@@ -623,6 +625,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the current char size in pixels.
+   *
    * @return current char size in pixels.
    */
   public Dimension getCharSize() {
@@ -631,6 +634,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the minimum char size in pixels.
+   *
    * @return minimum char size in pixels.
    */
   public Dimension getMinCharSize() {
@@ -639,6 +643,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * Returns the cursor bounding rectangle.
+   *
    * @return cursor bounding rectangle.
    */
   protected Rectangle getCursorRect() {
@@ -768,6 +773,7 @@ public class XICrt extends JComponent implements Serializable {
 
   /**
    * From char coords to point coords.
+   *
    * @param aCol column to get the rectangle from
    * @param aRow row to get the rectangle from
    * @param aNCols number of columns for the rectangle
