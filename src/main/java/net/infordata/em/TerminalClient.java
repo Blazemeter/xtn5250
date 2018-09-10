@@ -125,7 +125,7 @@ public class TerminalClient {
    * @param column column number where to set the field text. First column is 1.
    * @param text the text to set on the field.
    */
-  public void setFieldText(int row, int column, String text) {
+  public void setFieldTextByCoord(int row, int column, String text) {
     XI5250Field field = emulator.getFieldFromPos(column - 1, row - 1);
     if (field == null) {
       throw new IllegalArgumentException("Invalid field position " + row + "," + column);
@@ -133,6 +133,16 @@ public class TerminalClient {
     field.setString(text);
     emulator.setCursorPos((column - 1 + text.length()) % emulator.getCrtSize().width,
         row - 1 + (column - 1 + text.length()) / emulator.getCrtSize().width);
+  }
+
+  public void setFieldTextByLabel(String label, String text) {
+    XI5250Field field = emulator.getFieldNextTo(label);
+    if (field == null) {
+      throw new IllegalArgumentException("Invalid label" + label);
+    }
+    field.setString(text);
+    emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
+        field.getRow() + (field.getCol() + text.length()) / emulator.getCrtSize().width);
   }
 
   /**

@@ -226,17 +226,32 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldGetUserMenuScreenWhenLogin() throws Exception {
+  public void shouldGetUserMenuScreenWhenLoginByCoord() throws Exception {
     awaitLoginScreen();
-    login();
+    loginByCoord();
     awaitMenuScreen();
     assertThat(client.getScreenText())
         .isEqualTo(getFileContent("user-menu-screen.txt"));
   }
 
-  private void login() {
-    client.setFieldText(6, 53, "TESTUSR");
-    client.setFieldText(7, 53, "TESTPSW");
+  @Test
+  public void shouldGetUserMenuScreenWhenLoginByLabel() throws Exception {
+    awaitLoginScreen();
+    loginByLabel();
+    awaitMenuScreen();
+    assertThat(client.getScreenText())
+        .isEqualTo(getFileContent("user-menu-screen.txt"));
+  }
+
+  private void loginByCoord() {
+    client.setFieldTextByCoord(6, 53, "TESTUSR");
+    client.setFieldTextByCoord(7, 53, "TESTPSW");
+    client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
+  }
+
+  private void loginByLabel() {
+    client.setFieldTextByLabel("User","TESTUSR");
+    client.setFieldTextByLabel("Password","TESTPSW");
     client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
   }
 
@@ -251,17 +266,34 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldGetSoundedAlarmWhenWhenLogin() throws Exception {
+  public void shouldGetSoundedAlarmWhenWhenLoginByCoord() throws Exception {
     awaitLoginScreen();
-    login();
+    loginByCoord();
     awaitMenuScreen();
     assertThat(client.resetAlarm()).isTrue();
   }
 
   @Test
-  public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarm() throws Exception {
+  public void shouldGetSoundedAlarmWhenWhenLoginByLabel() throws Exception {
     awaitLoginScreen();
-    login();
+    loginByLabel();
+    awaitMenuScreen();
+    assertThat(client.resetAlarm()).isTrue();
+  }
+
+  @Test
+  public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarmByCoord() throws Exception {
+    awaitLoginScreen();
+    loginByCoord();
+    awaitMenuScreen();
+    client.resetAlarm();
+    assertThat(client.resetAlarm()).isFalse();
+  }
+
+  @Test
+  public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarmByLabel() throws Exception {
+    awaitLoginScreen();
+    loginByLabel();
     awaitMenuScreen();
     client.resetAlarm();
     assertThat(client.resetAlarm()).isFalse();
@@ -303,7 +335,14 @@ public class TerminalClientTest {
   public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldPosition()
       throws Exception {
     awaitLoginScreen();
-    client.setFieldText(0, 1, "test");
+    client.setFieldTextByCoord(0, 1, "test");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldLabel()
+      throws Exception {
+    awaitLoginScreen();
+    client.setFieldTextByLabel("test","test");
   }
 
   @Test
@@ -314,10 +353,18 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDown() throws Exception {
+  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByCoord() throws Exception {
     awaitLoginScreen();
     service.stop(TIMEOUT_MILLIS);
-    login();
+    loginByCoord();
+    exceptionWaiter.awaitException();
+  }
+
+  @Test
+  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByLabel() throws Exception {
+    awaitLoginScreen();
+    service.stop(TIMEOUT_MILLIS);
+    loginByLabel();
     exceptionWaiter.awaitException();
   }
 
