@@ -1,10 +1,23 @@
 package net.infordata.em;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.awt.Point;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import us.abstracta.wiresham.Flow;
+import us.abstracta.wiresham.VirtualTcpService;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -12,21 +25,9 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import net.infordata.em.tn5250.XI5250EmulatorEvent;
-import net.infordata.em.tn5250.XI5250EmulatorListener;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import us.abstracta.wiresham.Flow;
-import us.abstracta.wiresham.VirtualTcpService;
+import java.util.concurrent.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TerminalClientTest {
 
@@ -38,6 +39,21 @@ public class TerminalClientTest {
   private VirtualTcpService service = new VirtualTcpService();
   private TerminalClient client;
   private ExceptionWaiter exceptionWaiter;
+  private ScheduledExecutorService stableTimeoutExecutor = Executors
+          .newSingleThreadScheduledExecutor();
+
+  @Rule
+  public TestRule watchman = new TestWatcher() {
+    @Override
+    public void starting(Description description) {
+      LOG.debug("Starting {}", description.getMethodName());
+    }
+
+    @Override
+    public void finished(Description description) {
+      LOG.debug("Finished {}", description.getMethodName());
+    }
+  };
 
   @Before
   public void setup() throws IOException {
@@ -94,84 +110,14 @@ public class TerminalClientTest {
   }
 
   private void awaitKeyboardUnlock() throws InterruptedException, TimeoutException {
-    CountDownLatch latch = new CountDownLatch(1);
-    client.addEmulatorListener(new EmulatorListener() {
-      @Override
-      public void stateChanged(XI5250EmulatorEvent e) {
-        if (!client.isKeyboardLocked()) {
-          latch.countDown();
-        }
-      }
-    });
-    if (!client.isKeyboardLocked()) {
-      latch.countDown();
-    }
-    if (!latch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
-      throw new TimeoutException();
-    }
-  }
-
-  private static abstract class EmulatorListener implements XI5250EmulatorListener {
-
-    @Override
-    public void connecting(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void connected(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void disconnected(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void stateChanged(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void newPanelReceived(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void fieldsRemoved(XI5250EmulatorEvent e) {
-    }
-
-    @Override
-    public void dataSended(XI5250EmulatorEvent e) {
-    }
-
+    new UnlockWaiter(client, stableTimeoutExecutor).await(TIMEOUT_MILLIS);
   }
 
   @Test
   public void shouldGetWelcomeScreenWhenConnect() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     assertThat(client.getScreenText())
         .isEqualTo(getWelcomeScreen());
-  }
-
-  private void awaitLoginScreen() throws TimeoutException, InterruptedException {
-    awaitScreenContains("Sign On");
-  }
-
-  private void awaitScreenContains(String text) throws InterruptedException, TimeoutException {
-    CountDownLatch latch = new CountDownLatch(1);
-    client.addEmulatorListener(new EmulatorListener() {
-      @Override
-      public void stateChanged(XI5250EmulatorEvent e) {
-        String screen = client.getScreenText();
-        LOG.debug("Received screen {}", screen);
-        if (screen.contains(text)) {
-          latch.countDown();
-        }
-      }
-    });
-    if (client.getScreenText().contains(text)) {
-      latch.countDown();
-    }
-    if (!latch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
-      throw new TimeoutException();
-    }
   }
 
   private String getWelcomeScreen() throws IOException {
@@ -185,9 +131,8 @@ public class TerminalClientTest {
 
   @Test
   public void shouldGetWelcomeScreenWhenConnectWithSsl() throws Exception {
-    awaitLoginScreen();
-    client.disconnect();
-    service.stop(TIMEOUT_MILLIS);
+    awaitKeyboardUnlock();
+    teardown();
 
     service.setSslEnabled(true);
     System.setProperty("javax.net.ssl.keyStore", getResourceFilePath("/keystore.jks"));
@@ -199,7 +144,7 @@ public class TerminalClientTest {
     client.setSocketFactory(buildSslContext().getSocketFactory());
     client.connect(SERVICE_HOST, service.getPort());
 
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     assertThat(client.getScreenText())
         .isEqualTo(getWelcomeScreen());
   }
@@ -227,18 +172,18 @@ public class TerminalClientTest {
 
   @Test
   public void shouldGetUserMenuScreenWhenLoginByCoord() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByCoord();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     assertThat(client.getScreenText())
         .isEqualTo(getFileContent("user-menu-screen.txt"));
   }
 
   @Test
   public void shouldGetUserMenuScreenWhenLoginByLabel() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByLabel();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     assertThat(client.getScreenText())
         .isEqualTo(getFileContent("user-menu-screen.txt"));
   }
@@ -255,46 +200,42 @@ public class TerminalClientTest {
     client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
   }
 
-  private void awaitMenuScreen() throws InterruptedException, TimeoutException {
-    awaitScreenContains("IBM i Main Menu");
-  }
-
   @Test
   public void shouldGetNotSoundedAlarmWhenWhenConnect() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     assertThat(client.resetAlarm()).isFalse();
   }
 
   @Test
   public void shouldGetSoundedAlarmWhenWhenLoginByCoord() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByCoord();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     assertThat(client.resetAlarm()).isTrue();
   }
 
   @Test
   public void shouldGetSoundedAlarmWhenWhenLoginByLabel() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByLabel();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     assertThat(client.resetAlarm()).isTrue();
   }
 
   @Test
   public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarmByCoord() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByCoord();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     client.resetAlarm();
     assertThat(client.resetAlarm()).isFalse();
   }
 
   @Test
   public void shouldGetNotSoundedAlarmWhenWhenLoginAndResetAlarmByLabel() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     loginByLabel();
-    awaitMenuScreen();
+    awaitKeyboardUnlock();
     client.resetAlarm();
     assertThat(client.resetAlarm()).isFalse();
   }
@@ -302,27 +243,8 @@ public class TerminalClientTest {
   @Test
   public void shouldGetFieldPositionWhenGetCursorPositionAfterConnect() throws Exception {
     Point fieldPosition = new Point(53, 6);
-    awaitCursorPosition(fieldPosition);
+    awaitKeyboardUnlock();
     assertThat(client.getCursorPosition()).isEqualTo(Optional.of(fieldPosition));
-  }
-
-  private void awaitCursorPosition(Point position) throws InterruptedException, TimeoutException {
-    CountDownLatch latch = new CountDownLatch(1);
-    client.addEmulatorListener(new EmulatorListener() {
-      @Override
-      public void stateChanged(XI5250EmulatorEvent e) {
-        LOG.debug("Cursor is at {}", client.getCursorPosition());
-        if (position.equals(client.getCursorPosition().orElse(null))) {
-          latch.countDown();
-        }
-      }
-    });
-    if (!client.isKeyboardLocked()) {
-      latch.countDown();
-    }
-    if (!latch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
-      throw new TimeoutException();
-    }
   }
 
   @Test
@@ -334,27 +256,27 @@ public class TerminalClientTest {
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldPosition()
       throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     client.setFieldTextByCoord(0, 1, "test");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldLabel()
       throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     client.setFieldTextByLabel("test","test");
   }
 
   @Test
   public void shouldSendCloseToExceptionHandlerWhenServerDown() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
     exceptionWaiter.awaitClose();
   }
 
   @Test
   public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByCoord() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
     loginByCoord();
     exceptionWaiter.awaitException();
@@ -362,7 +284,7 @@ public class TerminalClientTest {
 
   @Test
   public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByLabel() throws Exception {
-    awaitLoginScreen();
+    awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
     loginByLabel();
     exceptionWaiter.awaitException();
