@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import javax.net.SocketFactory;
 import net.infordata.em.crt5250.XI5250Field;
@@ -55,6 +56,10 @@ public class TerminalClient {
     @Override
     public void soundAlarm() {
       alarmSounded = true;
+    }
+
+    private boolean isAlarmOn() {
+      return alarmSounded;
     }
 
     private boolean resetAlarm() {
@@ -176,6 +181,10 @@ public class TerminalClient {
     return screen.toString();
   }
 
+  public List<XI5250Field> getFields() {
+    return emulator.getFields();
+  }
+
   /**
    * Get the screen dimensions of the terminal emulator screen.
    *
@@ -221,6 +230,16 @@ public class TerminalClient {
   public Optional<Point> getCursorPosition() {
     return emulator.isCursorVisible() ? Optional
         .of(new Point(emulator.getCursorCol() + 1, emulator.getCursorRow() + 1)) : Optional.empty();
+  }
+
+  /**
+   * Gets the status of the alarm.
+   *
+   * Prefer using resetAlarm so it is properly reset when checking value. Use this operation only if
+   * you are implementing some tracing or debugging and don't want to change the alarm flag status.
+   */
+  public boolean isAlarmOn() {
+    return emulator.isAlarmOn();
   }
 
   /**
