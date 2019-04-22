@@ -2,6 +2,8 @@ package net.infordata.em;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import net.infordata.em.crt5250.XI5250Crt;
+import net.infordata.em.crt5250.XI5250Field;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -9,6 +11,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.abstracta.wiresham.Flow;
@@ -24,9 +27,19 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TerminalClientTest {
@@ -35,12 +48,11 @@ public class TerminalClientTest {
   private static final long TIMEOUT_MILLIS = 10000;
   private static final String SERVICE_HOST = "localhost";
   private static final String TERMINAL_TYPE = "IBM-3477-FC";
-
-  private VirtualTcpService service = new VirtualTcpService();
-  private TerminalClient client;
-  private ExceptionWaiter exceptionWaiter;
-  private ScheduledExecutorService stableTimeoutExecutor = Executors
-          .newSingleThreadScheduledExecutor();
+  private static final String FIELD_STRING_OUTPUT = "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";
+  private static final byte[] BYTES = {64, 0};
+  @Mock
+  public XI5250Crt screenMock;
+  
 
   @Rule
   public TestRule watchman = new TestWatcher() {
@@ -54,6 +66,11 @@ public class TerminalClientTest {
       LOG.debug("Finished {}", description.getMethodName());
     }
   };
+  private VirtualTcpService service = new VirtualTcpService();
+  private TerminalClient client;
+  private ExceptionWaiter exceptionWaiter;
+  private ScheduledExecutorService stableTimeoutExecutor = Executors
+      .newSingleThreadScheduledExecutor();
 
   @Before
   public void setup() throws IOException {
@@ -70,31 +87,6 @@ public class TerminalClientTest {
 
   private String getResourceFilePath(String resourcePath) {
     return getClass().getResource(resourcePath).getFile();
-  }
-
-  private static class ExceptionWaiter implements ExceptionHandler {
-
-    private CountDownLatch exceptionLatch = new CountDownLatch(1);
-    private CountDownLatch closeLatch = new CountDownLatch(1);
-
-    @Override
-    public void onException(Throwable ex) {
-      exceptionLatch.countDown();
-    }
-
-    @Override
-    public void onConnectionClosed() {
-      closeLatch.countDown();
-    }
-
-    private void awaitException() throws InterruptedException {
-      assertThat(exceptionLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-    }
-
-    private void awaitClose() throws InterruptedException {
-      assertThat(closeLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-    }
-
   }
 
   @After
@@ -153,19 +145,19 @@ public class TerminalClientTest {
     SSLContext sslContext = SSLContext.getInstance("TLS");
     TrustManager trustManager = new X509TrustManager() {
 
-      public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+      public X509Certificate[] getAcceptedIssuers() {
         return new X509Certificate[0];
       }
 
       public void checkClientTrusted(
-          java.security.cert.X509Certificate[] certs, String authType) {
+          X509Certificate[] certs, String authType) {
       }
 
       public void checkServerTrusted(
-          java.security.cert.X509Certificate[] certs, String authType) {
+          X509Certificate[] certs, String authType) {
       }
     };
-    sslContext.init(null, new TrustManager[]{trustManager},
+    sslContext.init(null, new TrustManager[] {trustManager},
         new SecureRandom());
     return sslContext;
   }
@@ -195,8 +187,8 @@ public class TerminalClientTest {
   }
 
   private void loginByLabel() {
-    client.setFieldTextByLabel("User","TESTUSR");
-    client.setFieldTextByLabel("Password","TESTPSW");
+    client.setFieldTextByLabel("User", "TESTUSR");
+    client.setFieldTextByLabel("Password", "TESTPSW");
     client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
   }
 
@@ -264,7 +256,7 @@ public class TerminalClientTest {
   public void shouldThrowIllegalArgumentExceptionWhenSendIncorrectFieldLabel()
       throws Exception {
     awaitKeyboardUnlock();
-    client.setFieldTextByLabel("test","test");
+    client.setFieldTextByLabel("test", "test");
   }
 
   @Test
@@ -290,4 +282,182 @@ public class TerminalClientTest {
     exceptionWaiter.awaitException();
   }
 
+  @Test
+  public void shouldGetCorrectFieldsWhenGetFields() throws Exception {
+    awaitKeyboardUnlock();
+   List<TestField> actualFields = client.getFields().stream().map(TestField::new).collect(Collectors.toList());
+    assertEquals(buildExpectedFields(), actualFields);
+  }
+
+  private List<TestField> buildExpectedFields() {
+    List<TestField> testFieldList = new ArrayList<>();
+    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(5))));
+    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(39).withDefaultColumn().withRow(6))));
+    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(7).withFfwModified())));
+    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(8).withFfwModified())));
+    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(9).withFfwModified())));
+  return testFieldList;
+  
+  }
+
+  private static class TestField {
+
+    private int row;
+    private int column;
+    private byte[] ffw;
+    private byte[] fcw;
+    private int attr;
+    private String text;
+    
+    private TestField(FieldBuilder builder) {
+      row = builder.row;
+      column = builder.column;
+      attr = builder.attr;
+      text = builder.text;
+      ffw = builder.ffw;
+      fcw = builder.fcw;
+
+    }
+
+    private TestField(XI5250Field field){
+     column = field.getCol();
+     row = field.getRow();
+     attr = field.getAttr();
+     text = field.getString();
+     ffw = field.getFFW();
+     fcw = field.getFCW();
+    }
+    static final class FieldBuilder {
+
+      private int row;
+
+      private int column;
+      private int attr;
+      private String text;
+      private byte[] ffw = {64, 32};
+      private byte[] fcw = {0, 0};
+      FieldBuilder(String text) {
+        this.text = text;
+      }
+      FieldBuilder withFfwModified() {
+        ffw[0] = 64;
+        ffw[1] = 0; 
+        return this;
+      }
+
+      FieldBuilder withRow(int val) {
+        row = val;
+        return this;
+      }
+
+       FieldBuilder withDefaultColumn() {
+        column = 52;
+        return this;
+      }
+
+       FieldBuilder withAttr(int val) {
+        attr = val;
+        return this;
+      }
+
+
+
+    }
+    @Override
+    public String toString() {
+      return "TestField{" +
+          "row=" + row +
+          ", column=" + column +
+          ", ffw=" + Arrays.toString(ffw) +
+          ", fcw=" + Arrays.toString(fcw) +
+          ", attr=" + attr +
+          ", text='" + text + '\'' +
+          '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      TestField testField = (TestField) o;
+      return row == testField.row &&
+          column == testField.column &&
+          attr == testField.attr &&
+          Arrays.equals(ffw, testField.ffw) &&
+          Arrays.equals(fcw, testField.fcw) &&
+          Objects.equals(text, testField.text);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = Objects.hash(row, column, attr, text);
+      result = 31 * result + Arrays.hashCode(ffw);
+      result = 31 * result + Arrays.hashCode(fcw);
+      return result;
+    }
+
+
+  }
+  private static class ExceptionWaiter implements ExceptionHandler {
+
+    private CountDownLatch exceptionLatch = new CountDownLatch(1);
+    private CountDownLatch closeLatch = new CountDownLatch(1);
+
+    @Override
+    public void onException(Throwable ex) {
+      exceptionLatch.countDown();
+    }
+
+    @Override
+    public void onConnectionClosed() {
+      closeLatch.countDown();
+    }
+
+    private void awaitException() throws InterruptedException {
+      assertThat(exceptionLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+    }
+
+    private void awaitClose() throws InterruptedException {
+      assertThat(closeLatch.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+    }
+
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
