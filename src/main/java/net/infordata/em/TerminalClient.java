@@ -162,7 +162,8 @@ public class TerminalClient {
    */
   public void sendKeyEvent(int keyCode, int modifiers) {
     emulator.processRawKeyEvent(
-        new KeyEvent(emulator, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED));
+        new KeyEvent(emulator, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode,
+            KeyEvent.CHAR_UNDEFINED));
   }
 
   /**
@@ -181,6 +182,13 @@ public class TerminalClient {
     return screen.toString();
   }
 
+  /**
+   * Gets the fields present on the current screen.
+   *
+   * @return fields of the screen. Take into consideration that this only returns fields that hold
+   * some information to be sent to the server. The screen is composed by its textual representation
+   * plus these fields.
+   */
   public List<XI5250Field> getFields() {
     return emulator.getFields();
   }

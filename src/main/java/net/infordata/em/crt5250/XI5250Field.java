@@ -234,11 +234,21 @@ public class XI5250Field implements XI5250BaseField {
         break;
     }
   }
-
+  
+  public int getAttr() {
+    return ivAttr;
+  }
   public final XI5250Crt getCrt() {
     return ivCrt;
   }
-
+  
+  public byte[] getFFW() {
+    return ivFFW;
+  }
+  
+  public byte[] getFCW() {
+    return ivFCW;
+  }
   /**
    * Initializes the field. It is called after that the 5250 panel construction has ended to let the
    * field refresh its color attribute.
@@ -316,10 +326,11 @@ public class XI5250Field implements XI5250BaseField {
    *
    * @return value of the field as String
    */
+  
   public String getString() {
     return ivCrt.getString(ivCol, ivRow, ivLength);
   }
-
+  
   /**
    * Returns value of the field as String, all trailing nulls and blanks are cut off. NOTE: signed
    * numeric are followed by sign char
