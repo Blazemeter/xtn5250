@@ -2,7 +2,6 @@ package net.infordata.em;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import net.infordata.em.crt5250.XI5250Crt;
 import net.infordata.em.crt5250.XI5250Field;
 import org.junit.After;
 import org.junit.Before;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.abstracta.wiresham.Flow;
@@ -27,20 +25,13 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class TerminalClientTest {
 
@@ -48,11 +39,6 @@ public class TerminalClientTest {
   private static final long TIMEOUT_MILLIS = 10000;
   private static final String SERVICE_HOST = "localhost";
   private static final String TERMINAL_TYPE = "IBM-3477-FC";
-  private static final String FIELD_STRING_OUTPUT = "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";
-  private static final byte[] BYTES = {64, 0};
-  @Mock
-  public XI5250Crt screenMock;
-  
 
   @Rule
   public TestRule watchman = new TestWatcher() {
@@ -157,7 +143,7 @@ public class TerminalClientTest {
           X509Certificate[] certs, String authType) {
       }
     };
-    sslContext.init(null, new TrustManager[] {trustManager},
+    sslContext.init(null, new TrustManager[]{trustManager},
         new SecureRandom());
     return sslContext;
   }
@@ -267,7 +253,8 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByCoord() throws Exception {
+  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByCoord()
+      throws Exception {
     awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
     loginByCoord();
@@ -275,7 +262,8 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByLabel() throws Exception {
+  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByLabel()
+      throws Exception {
     awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
     loginByLabel();
@@ -285,84 +273,97 @@ public class TerminalClientTest {
   @Test
   public void shouldGetCorrectFieldsWhenGetFields() throws Exception {
     awaitKeyboardUnlock();
-   List<TestField> actualFields = client.getFields().stream().map(TestField::new).collect(Collectors.toList());
+    List<TestField> actualFields = client.getFields().stream()
+        .map(TestField::new)
+        .collect(Collectors.toList());
     assertEquals(buildExpectedFields(), actualFields);
   }
 
   private List<TestField> buildExpectedFields() {
     List<TestField> testFieldList = new ArrayList<>();
-    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(5))));
-    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(39).withDefaultColumn().withRow(6))));
-    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(7).withFfwModified())));
-    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(8).withFfwModified())));
-    testFieldList.add((new TestField(new TestField.FieldBuilder(FIELD_STRING_OUTPUT).withAttr(36).withDefaultColumn().withRow(9).withFfwModified())));
-  return testFieldList;
-  
+    int fieldsColumn = 52;
+    String fieldsText = "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";
+    testFieldList.add(new TestField.Builder(5, fieldsColumn, fieldsText).withMonocase().build());
+    testFieldList.add(
+        new TestField.Builder(6, fieldsColumn, fieldsText).withMonocase().withHighIntensity()
+            .withReverseImage()
+            .build());
+    testFieldList.add(new TestField.Builder(7, fieldsColumn, fieldsText).build());
+    testFieldList.add(new TestField.Builder(8, fieldsColumn, fieldsText).build());
+    testFieldList.add(new TestField.Builder(9, fieldsColumn, fieldsText).build());
+    return testFieldList;
   }
 
   private static class TestField {
 
-    private int row;
-    private int column;
-    private byte[] ffw;
-    private byte[] fcw;
-    private int attr;
-    private String text;
-    
-    private TestField(FieldBuilder builder) {
+    private static final byte FIELD_FORMAT_MASK = 0x40;
+    private static final byte MONOCASE_MASK = 0x20;
+    private static final byte SCREEN_ATTRIBUTE_MASK = 0x20;
+    private static final byte UNDERSCORE_MASK = 0x04;
+    private static final byte HIGH_INTENSITY_MASK = 0x02;
+    private static final byte REVERSE_IMAGE_MASK = 0x01;
+
+    private final int row;
+    private final int column;
+    private final String text;
+    private final byte[] ffw;
+    private final byte[] fcw;
+    private final int attr;
+
+    private TestField(Builder builder) {
       row = builder.row;
       column = builder.column;
       attr = builder.attr;
       text = builder.text;
       ffw = builder.ffw;
       fcw = builder.fcw;
-
     }
 
-    private TestField(XI5250Field field){
-     column = field.getCol();
-     row = field.getRow();
-     attr = field.getAttr();
-     text = field.getString();
-     ffw = field.getFFW();
-     fcw = field.getFCW();
+    private TestField(XI5250Field field) {
+      column = field.getCol();
+      row = field.getRow();
+      attr = field.getAttr();
+      text = field.getString();
+      ffw = field.getFFW();
+      fcw = field.getFCW();
     }
-    static final class FieldBuilder {
 
-      private int row;
+    private static final class Builder {
 
-      private int column;
-      private int attr;
-      private String text;
-      private byte[] ffw = {64, 32};
-      private byte[] fcw = {0, 0};
-      FieldBuilder(String text) {
+      private final int row;
+      private final int column;
+      private final String text;
+      private final byte[] fcw = {0, 0};
+      private byte[] ffw = {FIELD_FORMAT_MASK, 0};
+      private byte attr = SCREEN_ATTRIBUTE_MASK | UNDERSCORE_MASK;
+
+      private Builder(int row, int column, String text) {
+        this.row = row;
+        this.column = column;
         this.text = text;
       }
-      FieldBuilder withFfwModified() {
-        ffw[0] = 64;
-        ffw[1] = 0; 
+
+      private Builder withMonocase() {
+        ffw[1] |= MONOCASE_MASK;
         return this;
       }
 
-      FieldBuilder withRow(int val) {
-        row = val;
+      private Builder withHighIntensity() {
+        attr |= HIGH_INTENSITY_MASK;
         return this;
       }
 
-       FieldBuilder withDefaultColumn() {
-        column = 52;
+      private Builder withReverseImage() {
+        attr |= REVERSE_IMAGE_MASK;
         return this;
       }
 
-       FieldBuilder withAttr(int val) {
-        attr = val;
-        return this;
+      private TestField build() {
+        return new TestField(this);
       }
-
-
 
     }
+
     @Override
     public String toString() {
       return "TestField{" +
@@ -374,6 +375,7 @@ public class TerminalClientTest {
           ", text='" + text + '\'' +
           '}';
     }
+
     @Override
     public boolean equals(Object o) {
       if (this == o) {
@@ -399,8 +401,8 @@ public class TerminalClientTest {
       return result;
     }
 
-
   }
+
   private static class ExceptionWaiter implements ExceptionHandler {
 
     private CountDownLatch exceptionLatch = new CountDownLatch(1);
@@ -427,37 +429,3 @@ public class TerminalClientTest {
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
