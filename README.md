@@ -6,7 +6,31 @@ This is a fork of [xtn5250 emulator](https://sourceforge.net/projects/xtn5250/) 
 
 To run the emulator in GUI mode just run the generated jar with something like `java -jar xtn5250.jar` (requires [JRE8+](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
 
-Download the library from [releases](https://github.com/blazemeter/xtn5250/releases) and include it in your project (either including on IDE, or in your build tool).
+To use the emulator as maven dependency include in `pom.xml`:
+
+```xml
+<project>
+...
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+...
+<dependencies>
+  <dependency>
+      <groupId>com.github.blazemeter</groupId>
+      <artifactId>xtn5250</artifactId>
+      <version>1.20</version>
+  </dependency>
+  ...
+</dependencies>
+...
+</project>
+```
+
+>Check latest version in [releases](https://github.com/blazemeter/xtn5250/releases).
 
 An example usage can be found in [TerminalClientTest](src/test/java/net/infordata/em/TerminalClientTest.java).
 
