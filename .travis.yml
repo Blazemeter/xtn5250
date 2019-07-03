@@ -1,15 +1,18 @@
 language: java
 jdk: oraclejdk8
 cache:
- directories:
-   - $HOME/.m2
+  directories:
+  - "$HOME/.m2"
 before_deploy:
-  - mvn --batch-mode versions:set -DnewVersion=${TRAVIS_TAG:1}
-  - mvn clean package -DskipTests
+- mvn --batch-mode versions:set -DnewVersion=${TRAVIS_TAG:1}
+- mvn clean package -DskipTests
 deploy:
   provider: releases
-  api_key: "${GITHUB_OAUTH_TOKEN}"
-  file: "target/dm3270-lib-*.jar"
+  api_key:
+    secure: Uy78ZqKuAC4Jm0fTcKEfHbY+ArSKNd2Tta/zvOpmv4ieKyCjzlwKdZztH86j8acdVjP1XCnDBaodwb/mjkRuIvvfAYHS6ZdOOaKB7KtUf3HR923XvkSSu/iHD53t1XvvcCEm+KaPYlesixqp0/mABEovTbIWTS2AOzeO0npehjVBY/qf9cIaNiWTolvJIZ9zxNEaNfz+Aimhqv05UH9REHR3Kav79vbebG5gpSzML0hKDeqCUUAfiFym+sQoJ9NKf8fBsEKBkF6vND63z80DisiX6qKL6dTaikZur5lDSeZX1wHEqnfIevZ3eV16Mf7wlCkETpN/i/qbUFmptILtgHdKKKGHyD145MwDjWG0UjNBFQiPCSaZuhoDuk9trk/vFTKWBLZgTRKVZKN7SFFkFKEZ43TuRimZH8cVDN+9QFoTv0vVVTuyfXng7slzjT+cVFcUpW6AL2TjAvDVJ6R39FGEmDcd+V1dCTEuPUeFSuYqgVT3Y70+5gNZnjyhDSu29SZHDrlYuYoWy0GU+uqzScI5ryPj07zzIJXuk7lp7Pycf0CTapxQ/i/ReD1jzmWVpAhyW7TeI60EWgKZaxd33+4GCfgDh4GU4ceNVtoNJieVAM311uLS0fdIXCIKwoqVZrMgNXbc2qiJDekMe3A+s1P+fgxZfbqKcdCr3XkUJrM=
+  file_glob: true
+  file: target/xtn5250-*.jar
   skip_cleanup: true
   on:
     tags: true
+    repo: Blazemeter/xtn5250
