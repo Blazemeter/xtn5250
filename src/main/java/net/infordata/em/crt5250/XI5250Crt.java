@@ -826,10 +826,10 @@ public class XI5250Crt extends XICrt implements Serializable {
   }
 
   public String getStringSelectedArea() {
-    StringBuilder strBuf = new StringBuilder();
     if (ivSelectedArea == null) {
       return null;
     }
+    StringBuilder strBuf = new StringBuilder();
     
     for (int r = ivSelectedArea.y;
         r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
@@ -1256,13 +1256,12 @@ public class XI5250Crt extends XICrt implements Serializable {
    * Copies the selected area into the clipboard.
    */
   protected synchronized void doCopy() {
-    if (getStringSelectedArea() == null) {
+    String str = getStringSelectedArea();
+    if (str == null) {
       return;
     }
 
     Clipboard clipboard = getToolkit().getSystemClipboard();
-
-    String str = getStringSelectedArea();
 
     StringSelection contents = new StringSelection(str);
     clipboard.setContents(contents, contents);
