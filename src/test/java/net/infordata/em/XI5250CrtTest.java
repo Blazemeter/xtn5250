@@ -17,20 +17,19 @@ public class XI5250CrtTest {
 
   @Before
   public void setup() {
-    xi5250Crt = new XI5250Crt(); 
+    xi5250Crt = new XI5250Crt();
     xi5250Crt.setCrtSize(COLUMNS, ROWS);
     buildScreen();
   }
 
   private void buildScreen() {
-    
-    XI5250Field field1 = new XI5250Field(xi5250Crt, 2, 2, 9,1);
-    XI5250Field field2 = new XI5250Field(xi5250Crt, 3, 4, 4,1);
-    XI5250Field field3 = new XI5250Field(xi5250Crt, 2, 6, 9,1);
+
+    XI5250Field field1 = new XI5250Field(xi5250Crt, 2, 2, 9, 1);
+    XI5250Field field2 = new XI5250Field(xi5250Crt, 3, 4, 4, 1);
+    XI5250Field field3 = new XI5250Field(xi5250Crt, 2, 6, 9, 1);
     xi5250Crt.addField(field1);
     xi5250Crt.addField(field2);
     xi5250Crt.addField(field3);
-    
     xi5250Crt.drawString("********", 2, 2);
     xi5250Crt.drawString("TEST", 3, 4);
     xi5250Crt.drawString("********", 2, 6);
@@ -38,8 +37,7 @@ public class XI5250CrtTest {
 
   @Test
   public void shouldMatchObtainedTextWithStringSelectedAreaWhenGetStringSelectedArea() {
-  String expected = "TEST";
-  xi5250Crt.setSelectedArea(new Rectangle(3, 4, 4, 1));
-  assertThat(xi5250Crt.getStringSelectedArea()).isEqualTo(expected);
+    xi5250Crt.setSelectedArea(new Rectangle(3, 4, 4, 1));
+    assertThat(xi5250Crt.getStringSelectedArea()).isEqualTo("TEST");
   }
 }

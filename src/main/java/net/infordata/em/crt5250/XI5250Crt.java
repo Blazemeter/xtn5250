@@ -63,15 +63,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.swing.JPanel;
 import javax.swing.UIManager;
-
 import net.infordata.em.crt.XICrt;
 import net.infordata.em.crt.XICrtBuffer;
 
@@ -829,26 +826,26 @@ public class XI5250Crt extends XICrt implements Serializable {
   }
 
   public String getStringSelectedArea() {
-      StringBuilder strBuf = new StringBuilder();
-    if (ivSelectedArea!=null) {
-      for (int r = ivSelectedArea.y;
-          r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
-        strBuf.append(getString(ivSelectedArea.x, r, ivSelectedArea.width));
-
-        if (r < (ivSelectedArea.y + ivSelectedArea.height - 1)) {
-          strBuf.append("\n");
-        }
-      }
-
-      for (int i = 0; i < strBuf.length(); i++) {
-        if (strBuf.charAt(i) < ' ' && strBuf.charAt(i) != '\n') {
-          strBuf.setCharAt(i, ' ');
-        }
-      }
-      return new String(strBuf);
-    } else {
+    StringBuilder strBuf = new StringBuilder();
+    if (ivSelectedArea == null) {
       return null;
     }
+    for (int r = ivSelectedArea.y;
+        r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
+      strBuf.append("\n");
+      strBuf.append(getString(ivSelectedArea.x, r, ivSelectedArea.width));
+    }
+
+    for (int i = 0; i < strBuf.length(); i++) {
+      if (strBuf.charAt(i) < ' ' && strBuf.charAt(i) != '\n') {
+        strBuf.setCharAt(i, ' ');
+      }
+    }
+    return strBuf.substring(1);
+  }
+  
+  public void clearSelectedArea() {
+    setSelectedArea(null);
   }
   
   private static void drawHorzLine(int inc, Graphics gc, int x, int y, int dx) {
@@ -1258,16 +1255,17 @@ public class XI5250Crt extends XICrt implements Serializable {
    * Copies the selected area into the clipboard.
    */
   protected synchronized void doCopy() {
-    
-    Clipboard clipboard = getToolkit().getSystemClipboard();
-    
-    if(getStringSelectedArea()!=null) {
-      String str = getStringSelectedArea();
-
-      StringSelection contents = new StringSelection(str);
-      clipboard.setContents(contents, contents);
-      setSelectedArea(null);
+    if (getStringSelectedArea() == null) {
+      return;
     }
+
+    Clipboard clipboard = getToolkit().getSystemClipboard();
+
+    String str = getStringSelectedArea();
+
+    StringSelection contents = new StringSelection(str);
+    clipboard.setContents(contents, contents);
+    setSelectedArea(null);
   }
 
   public boolean isPasteable() {
