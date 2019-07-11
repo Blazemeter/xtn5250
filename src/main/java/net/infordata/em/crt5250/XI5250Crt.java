@@ -830,6 +830,7 @@ public class XI5250Crt extends XICrt implements Serializable {
     if (ivSelectedArea == null) {
       return null;
     }
+    
     for (int r = ivSelectedArea.y;
         r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
       strBuf.append("\n");
@@ -1265,7 +1266,7 @@ public class XI5250Crt extends XICrt implements Serializable {
 
     StringSelection contents = new StringSelection(str);
     clipboard.setContents(contents, contents);
-    setSelectedArea(null);
+    clearSelectedArea();
   }
 
   public boolean isPasteable() {
