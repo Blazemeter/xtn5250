@@ -63,6 +63,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
@@ -827,6 +828,29 @@ public class XI5250Crt extends XICrt implements Serializable {
     return (ivSelectedArea == null) ? null : new Rectangle(ivSelectedArea);
   }
 
+  public String getStringSelectedArea() {
+      StringBuilder strBuf = new StringBuilder();
+    if (ivSelectedArea!=null) {
+      for (int r = ivSelectedArea.y;
+          r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
+        strBuf.append(getString(ivSelectedArea.x, r, ivSelectedArea.width));
+
+        if (r < (ivSelectedArea.y + ivSelectedArea.height - 1)) {
+          strBuf.append("\n");
+        }
+      }
+
+      for (int i = 0; i < strBuf.length(); i++) {
+        if (strBuf.charAt(i) < ' ' && strBuf.charAt(i) != '\n') {
+          strBuf.setCharAt(i, ' ');
+        }
+      }
+      return new String(strBuf);
+    } else {
+      return null;
+    }
+  }
+  
   private static void drawHorzLine(int inc, Graphics gc, int x, int y, int dx) {
     Graphics2D g2 = (Graphics2D) gc;
     float dash[] = {6f};
@@ -1234,35 +1258,16 @@ public class XI5250Crt extends XICrt implements Serializable {
    * Copies the selected area into the clipboard.
    */
   protected synchronized void doCopy() {
-    if (ivSelectedArea == null) {
-      return;
-    }
-
+    
     Clipboard clipboard = getToolkit().getSystemClipboard();
+    
+    if(getStringSelectedArea()!=null) {
+      String str = getStringSelectedArea();
 
-    //To be replaced
-    StringBuilder strBuf = new StringBuilder();
-    for (int r = ivSelectedArea.y;
-        r < (ivSelectedArea.y + ivSelectedArea.height); r++) {
-      strBuf.append(getString(ivSelectedArea.x, r, ivSelectedArea.width));
-
-      if (r < (ivSelectedArea.y + ivSelectedArea.height - 1)) {
-        strBuf.append("\n");
-      }
+      StringSelection contents = new StringSelection(str);
+      clipboard.setContents(contents, contents);
+      setSelectedArea(null);
     }
-
-    for (int i = 0; i < strBuf.length(); i++) {
-      if (strBuf.charAt(i) < ' ' && strBuf.charAt(i) != '\n') {
-        strBuf.setCharAt(i, ' ');
-      }
-    }
-
-    String str = new String(strBuf);
-
-    StringSelection contents = new StringSelection(str);
-    clipboard.setContents(contents, contents);
-
-    setSelectedArea(null);
   }
 
   public boolean isPasteable() {
