@@ -1,4 +1,6 @@
 language: java
+# we use this distro to avoid issue when installing oraclejdk8
+dist: trusty
 jdk: oraclejdk8
 cache:
   directories:
