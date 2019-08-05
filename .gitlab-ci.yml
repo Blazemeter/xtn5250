@@ -12,9 +12,9 @@ build:
   except:
     - master
   script: 
-    - mvn -e -X clean install
+    - mvn -e -X clean verify
   artifacts:
     paths:
       - target/xtn5250-*.jar
+      - target/surefire-reports
     expire_in: 1 month
-    when: always
