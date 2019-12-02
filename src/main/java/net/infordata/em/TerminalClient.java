@@ -19,57 +19,6 @@ public class TerminalClient {
 
   private TerminalClientEmulator emulator = new TerminalClientEmulator();
 
-  private static class TerminalClientEmulator extends XI5250Emulator {
-
-    private ExceptionHandler exceptionHandler;
-    private boolean alarmSounded;
-
-    private TerminalClientEmulator() {
-      setDisconnectOnSocketException(false);
-    }
-
-    private void setExceptionHandler(ExceptionHandler exceptionHandler) {
-      this.exceptionHandler = exceptionHandler;
-    }
-
-    @Override
-    protected void caughtIOException(IOException ex) {
-      if (exceptionHandler != null) {
-        exceptionHandler.onException(ex);
-      }
-    }
-
-    @Override
-    protected void caughtException(Throwable ex) {
-      if (exceptionHandler != null) {
-        exceptionHandler.onException(ex);
-      }
-    }
-
-    @Override
-    protected void disconnected(boolean remote) {
-      if (exceptionHandler != null && remote) {
-        exceptionHandler.onConnectionClosed();
-      }
-    }
-
-    @Override
-    public void soundAlarm() {
-      alarmSounded = true;
-    }
-
-    private boolean isAlarmOn() {
-      return alarmSounded;
-    }
-
-    private boolean resetAlarm() {
-      boolean ret = alarmSounded;
-      alarmSounded = false;
-      return ret;
-    }
-
-  }
-
   /**
    * Sets the type of terminal to emulate.
    *
@@ -144,6 +93,20 @@ public class TerminalClient {
     XI5250Field field = emulator.getFieldNextTo(label);
     if (field == null) {
       throw new IllegalArgumentException("Invalid label" + label);
+    }
+    field.setString(text);
+    emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
+        field.getRow() + (field.getCol() + text.length()) / emulator.getCrtSize().width);
+  }
+
+  public void setFieldTextByTabulator(String text, int tabs) {
+    int row = emulator.getCursorRow();
+    int col = emulator.getCursorCol();
+    XI5250Field field = emulator.getFieldFromPos(col, row);
+    for (int i = 0; i < tabs; i++) {
+      field = emulator.getNextFieldFromPos(col, row);
+      row = field.getRow();
+      col = field.getCol();
     }
     field.setString(text);
     emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
@@ -283,6 +246,57 @@ public class TerminalClient {
    */
   public void disconnect() {
     emulator.setActive(false);
+  }
+
+  private static class TerminalClientEmulator extends XI5250Emulator {
+
+    private ExceptionHandler exceptionHandler;
+    private boolean alarmSounded;
+
+    private TerminalClientEmulator() {
+      setDisconnectOnSocketException(false);
+    }
+
+    private void setExceptionHandler(ExceptionHandler exceptionHandler) {
+      this.exceptionHandler = exceptionHandler;
+    }
+
+    @Override
+    protected void caughtIOException(IOException ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void caughtException(Throwable ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void disconnected(boolean remote) {
+      if (exceptionHandler != null && remote) {
+        exceptionHandler.onConnectionClosed();
+      }
+    }
+
+    @Override
+    public void soundAlarm() {
+      alarmSounded = true;
+    }
+
+    private boolean isAlarmOn() {
+      return alarmSounded;
+    }
+
+    private boolean resetAlarm() {
+      boolean ret = alarmSounded;
+      alarmSounded = false;
+      return ret;
+    }
+
   }
 
 }

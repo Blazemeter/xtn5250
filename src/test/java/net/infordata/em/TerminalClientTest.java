@@ -294,6 +294,18 @@ public class TerminalClientTest {
     return testFieldList;
   }
 
+  @Test
+  public void shouldGetSuccessScreenWhenLoginByTabulator()
+      throws TimeoutException, InterruptedException, IOException {
+    awaitKeyboardUnlock();
+    client.setFieldTextByTabulator("TESTUSR", 5);
+    client.setFieldTextByTabulator("TESTPSW", 1);
+    client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
+    awaitKeyboardUnlock();
+    assertThat(client.getScreenText())
+        .isEqualTo(getFileContent("user-menu-screen.txt"));
+    
+  }
   private static class TestField {
 
     private static final byte FIELD_FORMAT_MASK = 0x40;
