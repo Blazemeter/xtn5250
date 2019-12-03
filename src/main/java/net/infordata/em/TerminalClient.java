@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.net.SocketFactory;
 import net.infordata.em.crt5250.XI5250Field;
@@ -85,8 +86,12 @@ public class TerminalClient {
       throw new IllegalArgumentException("Invalid field position " + row + "," + column);
     }
     field.setString(text);
-    emulator.setCursorPos((column - 1 + text.length()) % emulator.getCrtSize().width,
-        row - 1 + (column - 1 + text.length()) / emulator.getCrtSize().width);
+    updateCursorPosition(text, column - 1, row - 1);
+  }
+
+  private void updateCursorPosition(String text, int col, int row) {
+    emulator.setCursorPos((col + text.length()) % emulator.getCrtSize().width,
+        row + (col + text.length()) / emulator.getCrtSize().width);
   }
 
   public void setFieldTextByLabel(String label, String text) {
@@ -95,11 +100,10 @@ public class TerminalClient {
       throw new IllegalArgumentException("Invalid label" + label);
     }
     field.setString(text);
-    emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
-        field.getRow() + (field.getCol() + text.length()) / emulator.getCrtSize().width);
+    updateCursorPosition(text, field.getCol(), field.getRow());
   }
 
-  public void setFieldTextByTabulator(String text, int tabs) {
+  public void setFieldTextByTabulator(int tabs, String text) {
     int row = emulator.getCursorRow();
     int col = emulator.getCursorCol();
     XI5250Field field = emulator.getFieldFromPos(col, row);
@@ -108,9 +112,11 @@ public class TerminalClient {
       row = field.getRow();
       col = field.getCol();
     }
+    if (field==null){
+      throw new NoSuchElementException("No field found");
+    }
     field.setString(text);
-    emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
-        field.getRow() + (field.getCol() + text.length()) / emulator.getCrtSize().width);
+    updateCursorPosition(text, field.getCol(), field.getRow());
   }
 
   /**

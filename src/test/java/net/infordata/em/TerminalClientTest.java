@@ -1,7 +1,31 @@
 package net.infordata.em;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import net.infordata.em.crt5250.XI5250Field;
 import org.junit.After;
 import org.junit.Before;
@@ -14,24 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.abstracta.wiresham.Flow;
 import us.abstracta.wiresham.VirtualTcpService;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class TerminalClientTest {
 
@@ -298,14 +304,15 @@ public class TerminalClientTest {
   public void shouldGetSuccessScreenWhenLoginByTabulator()
       throws TimeoutException, InterruptedException, IOException {
     awaitKeyboardUnlock();
-    client.setFieldTextByTabulator("TESTUSR", 5);
-    client.setFieldTextByTabulator("TESTPSW", 1);
+    client.setFieldTextByTabulator(5, "TESTUSR");
+    client.setFieldTextByTabulator(1, "TESTPSW");
     client.sendKeyEvent(KeyEvent.VK_ENTER, 0);
     awaitKeyboardUnlock();
     assertThat(client.getScreenText())
         .isEqualTo(getFileContent("user-menu-screen.txt"));
-    
+
   }
+  
   private static class TestField {
 
     private static final byte FIELD_FORMAT_MASK = 0x40;
@@ -338,42 +345,6 @@ public class TerminalClientTest {
       text = field.getString();
       ffw = field.getFFW();
       fcw = field.getFCW();
-    }
-
-    private static final class Builder {
-
-      private final int row;
-      private final int column;
-      private final String text;
-      private final byte[] fcw = {0, 0};
-      private byte[] ffw = {FIELD_FORMAT_MASK, 0};
-      private byte attr = SCREEN_ATTRIBUTE_MASK | UNDERSCORE_MASK;
-
-      private Builder(int row, int column, String text) {
-        this.row = row;
-        this.column = column;
-        this.text = text;
-      }
-
-      private Builder withMonocase() {
-        ffw[1] |= MONOCASE_MASK;
-        return this;
-      }
-
-      private Builder withHighIntensity() {
-        attr |= HIGH_INTENSITY_MASK;
-        return this;
-      }
-
-      private Builder withReverseImage() {
-        attr |= REVERSE_IMAGE_MASK;
-        return this;
-      }
-
-      private TestField build() {
-        return new TestField(this);
-      }
-
     }
 
     @Override
@@ -411,6 +382,42 @@ public class TerminalClientTest {
       result = 31 * result + Arrays.hashCode(ffw);
       result = 31 * result + Arrays.hashCode(fcw);
       return result;
+    }
+
+    private static final class Builder {
+
+      private final int row;
+      private final int column;
+      private final String text;
+      private final byte[] fcw = {0, 0};
+      private byte[] ffw = {FIELD_FORMAT_MASK, 0};
+      private byte attr = SCREEN_ATTRIBUTE_MASK | UNDERSCORE_MASK;
+
+      private Builder(int row, int column, String text) {
+        this.row = row;
+        this.column = column;
+        this.text = text;
+      }
+
+      private Builder withMonocase() {
+        ffw[1] |= MONOCASE_MASK;
+        return this;
+      }
+
+      private Builder withHighIntensity() {
+        attr |= HIGH_INTENSITY_MASK;
+        return this;
+      }
+
+      private Builder withReverseImage() {
+        attr |= REVERSE_IMAGE_MASK;
+        return this;
+      }
+
+      private TestField build() {
+        return new TestField(this);
+      }
+
     }
 
   }
