@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.net.SocketFactory;
 import net.infordata.em.crt5250.XI5250Field;
@@ -18,57 +19,6 @@ public class TerminalClient {
   private static final Logger LOG = LoggerFactory.getLogger(TerminalClient.class);
 
   private TerminalClientEmulator emulator = new TerminalClientEmulator();
-
-  private static class TerminalClientEmulator extends XI5250Emulator {
-
-    private ExceptionHandler exceptionHandler;
-    private boolean alarmSounded;
-
-    private TerminalClientEmulator() {
-      setDisconnectOnSocketException(false);
-    }
-
-    private void setExceptionHandler(ExceptionHandler exceptionHandler) {
-      this.exceptionHandler = exceptionHandler;
-    }
-
-    @Override
-    protected void caughtIOException(IOException ex) {
-      if (exceptionHandler != null) {
-        exceptionHandler.onException(ex);
-      }
-    }
-
-    @Override
-    protected void caughtException(Throwable ex) {
-      if (exceptionHandler != null) {
-        exceptionHandler.onException(ex);
-      }
-    }
-
-    @Override
-    protected void disconnected(boolean remote) {
-      if (exceptionHandler != null && remote) {
-        exceptionHandler.onConnectionClosed();
-      }
-    }
-
-    @Override
-    public void soundAlarm() {
-      alarmSounded = true;
-    }
-
-    private boolean isAlarmOn() {
-      return alarmSounded;
-    }
-
-    private boolean resetAlarm() {
-      boolean ret = alarmSounded;
-      alarmSounded = false;
-      return ret;
-    }
-
-  }
 
   /**
    * Sets the type of terminal to emulate.
@@ -136,8 +86,12 @@ public class TerminalClient {
       throw new IllegalArgumentException("Invalid field position " + row + "," + column);
     }
     field.setString(text);
-    emulator.setCursorPos((column - 1 + text.length()) % emulator.getCrtSize().width,
-        row - 1 + (column - 1 + text.length()) / emulator.getCrtSize().width);
+    updateCursorPosition(text, column - 1, row - 1);
+  }
+
+  private void updateCursorPosition(String text, int col, int row) {
+    emulator.setCursorPos((col + text.length()) % emulator.getCrtSize().width,
+        row + (col + text.length()) / emulator.getCrtSize().width);
   }
 
   public void setFieldTextByLabel(String label, String text) {
@@ -146,8 +100,23 @@ public class TerminalClient {
       throw new IllegalArgumentException("Invalid label" + label);
     }
     field.setString(text);
-    emulator.setCursorPos((field.getCol() + text.length()) % emulator.getCrtSize().width,
-        field.getRow() + (field.getCol() + text.length()) / emulator.getCrtSize().width);
+    updateCursorPosition(text, field.getCol(), field.getRow());
+  }
+
+  public void setFieldTextByTabulator(int tabs, String text) {
+    int row = emulator.getCursorRow();
+    int col = emulator.getCursorCol();
+    XI5250Field field = emulator.getFieldFromPos(col, row);
+    for (int i = 0; i < tabs; i++) {
+      field = emulator.getNextFieldFromPos(col, row);
+      row = field.getRow();
+      col = field.getCol();
+    }
+    if (field==null){
+      throw new NoSuchElementException("No field found");
+    }
+    field.setString(text);
+    updateCursorPosition(text, field.getCol(), field.getRow());
   }
 
   /**
@@ -283,6 +252,57 @@ public class TerminalClient {
    */
   public void disconnect() {
     emulator.setActive(false);
+  }
+
+  private static class TerminalClientEmulator extends XI5250Emulator {
+
+    private ExceptionHandler exceptionHandler;
+    private boolean alarmSounded;
+
+    private TerminalClientEmulator() {
+      setDisconnectOnSocketException(false);
+    }
+
+    private void setExceptionHandler(ExceptionHandler exceptionHandler) {
+      this.exceptionHandler = exceptionHandler;
+    }
+
+    @Override
+    protected void caughtIOException(IOException ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void caughtException(Throwable ex) {
+      if (exceptionHandler != null) {
+        exceptionHandler.onException(ex);
+      }
+    }
+
+    @Override
+    protected void disconnected(boolean remote) {
+      if (exceptionHandler != null && remote) {
+        exceptionHandler.onConnectionClosed();
+      }
+    }
+
+    @Override
+    public void soundAlarm() {
+      alarmSounded = true;
+    }
+
+    private boolean isAlarmOn() {
+      return alarmSounded;
+    }
+
+    private boolean resetAlarm() {
+      boolean ret = alarmSounded;
+      alarmSounded = false;
+      return ret;
+    }
+
   }
 
 }
