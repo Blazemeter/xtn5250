@@ -738,8 +738,7 @@ public class XI5250Crt extends XICrt implements Serializable {
         }
         ivMousePressed = true;
         // sets the start dragging row and col
-        ivStartDragging = new Point(assureColIn(e.getX() / getCharSize().width),
-            assureRowIn(e.getY() / getCharSize().height));
+        setIvStartDragging(e);
         break;
       case MouseEvent.MOUSE_RELEASED:
         if (!ivMousePressed) {
@@ -780,6 +779,15 @@ public class XI5250Crt extends XICrt implements Serializable {
     }
     super.processMouseMotionEvent(e);
     checkFieldUnderMouse(e);
+  }
+
+  public void setIvMousePressed(boolean pressed) {
+    ivMousePressed = pressed;
+  }
+
+  public void setIvStartDragging(MouseEvent e) {
+    this.ivStartDragging = new Point(assureColIn(e.getX() / getCharSize().width),
+        assureRowIn(e.getY() / getCharSize().height));
   }
 
   private void setSelectedArea(Point p1, Point p2) {

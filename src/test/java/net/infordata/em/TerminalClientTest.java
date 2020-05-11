@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -312,7 +313,14 @@ public class TerminalClientTest {
         .isEqualTo(getFileContent("user-menu-screen.txt"));
 
   }
-  
+
+  @Test(expected = NoSuchElementException.class)
+  public void shouldThrowExceptionWhenSetTabFieldAndCurrentPositionLacksField() throws Exception {
+    awaitKeyboardUnlock();
+    client.updateCursorPosition("", 1, 1);
+    client.setFieldTextByTabulator(0, "TESTUSR");
+  }
+
   private static class TestField {
 
     private static final byte FIELD_FORMAT_MASK = 0x40;

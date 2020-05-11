@@ -7,7 +7,7 @@
   <artifactId>xtn5250</artifactId>
   <!-- This version has no relation to the released version since the release version is extracted
   from git tag by Travis -->
-  <version>0.1-SNAPSHOT</version>
+  <version>3.2.2-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>This is a fork of https://sourceforge.net/projects/xtn5250/</description>
@@ -71,7 +71,7 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>24.0-jre</version>
-      <scope>test</scope>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 

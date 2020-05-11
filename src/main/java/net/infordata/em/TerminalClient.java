@@ -1,5 +1,6 @@
 package net.infordata.em;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -89,7 +90,8 @@ public class TerminalClient {
     updateCursorPosition(text, column - 1, row - 1);
   }
 
-  private void updateCursorPosition(String text, int col, int row) {
+  @VisibleForTesting
+  public void updateCursorPosition(String text, int col, int row) {
     emulator.setCursorPos((col + text.length()) % emulator.getCrtSize().width,
         row + (col + text.length()) / emulator.getCrtSize().width);
   }
@@ -107,15 +109,17 @@ public class TerminalClient {
     int row = emulator.getCursorRow();
     int col = emulator.getCursorCol();
     XI5250Field field = emulator.getFieldFromPos(col, row);
-    for (int i = 0; i < tabs; i++) {
+    for (int i = tabs; i > 0; i--) {
       field = emulator.getNextFieldFromPos(col, row);
       row = field.getRow();
       col = field.getCol();
     }
-    if (field==null){
-      throw new NoSuchElementException("No field found");
+    if (field == null) {
+      throw new NoSuchElementException("No field found ");
     }
-    field.setString(text);
+
+    String str = field.getTrimmedString() + text;
+    field.setString(str);
     updateCursorPosition(text, field.getCol(), field.getRow());
   }
 

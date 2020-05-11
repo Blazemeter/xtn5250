@@ -22,7 +22,7 @@ To use the emulator as maven dependency include in `pom.xml`:
   <dependency>
       <groupId>com.github.blazemeter</groupId>
       <artifactId>xtn5250</artifactId>
-      <version>1.20</version>
+      <version>3.2.1</version>
   </dependency>
   ...
 </dependencies>
