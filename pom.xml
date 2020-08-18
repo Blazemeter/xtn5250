@@ -7,7 +7,7 @@
   <artifactId>xtn5250</artifactId>
   <!-- This version has no relation to the released version since the release version is extracted
   from git tag by Travis -->
-  <version>3.2.2-SNAPSHOT</version>
+  <version>3.2.3-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>This is a fork of https://sourceforge.net/projects/xtn5250/</description>
