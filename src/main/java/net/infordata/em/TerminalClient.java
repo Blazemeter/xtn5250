@@ -61,7 +61,7 @@ public class TerminalClient {
   public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
     emulator.setConnectionTimeoutMillis(connectionTimeoutMillis);
   }
-
+  
   /**
    * Connect to a terminal server.
    *
@@ -213,6 +213,10 @@ public class TerminalClient {
         .of(new Point(emulator.getCursorCol() + 1, emulator.getCursorRow() + 1)) : Optional.empty();
   }
 
+  public void setCursorPosition(int row, int column) {
+    emulator.setCursorPos(column, row);
+  }
+  
   /**
    * Gets the status of the alarm.
    *
