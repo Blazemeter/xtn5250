@@ -260,21 +260,11 @@ public class TerminalClientTest {
   }
 
   @Test
-  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByCoord()
+  public void shouldGetConnectionClosedWhenServerDisconnects()
       throws Exception {
     awaitKeyboardUnlock();
     service.stop(TIMEOUT_MILLIS);
-    loginByCoord();
-    exceptionWaiter.awaitException();
-  }
-
-  @Test
-  public void shouldSendExceptionToExceptionHandlerWhenLoginAndServerDownByLabel()
-      throws Exception {
-    awaitKeyboardUnlock();
-    service.stop(TIMEOUT_MILLIS);
-    loginByLabel();
-    exceptionWaiter.awaitException();
+    exceptionWaiter.awaitClose();
   }
 
   @Test
@@ -321,7 +311,7 @@ public class TerminalClientTest {
     client.setFieldTextByTabulator(0, "TESTUSR");
   }
 
-  private static class TestField {
+  public static class TestField {
 
     private static final byte FIELD_FORMAT_MASK = 0x40;
     private static final byte MONOCASE_MASK = 0x20;

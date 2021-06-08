@@ -294,6 +294,7 @@ public class TerminalClient {
       if (exceptionHandler != null && remote) {
         exceptionHandler.onConnectionClosed();
       }
+      super.disconnected(remote);
     }
 
     @Override
