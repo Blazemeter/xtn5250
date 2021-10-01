@@ -1,0 +1,27 @@
+ -------------------- z/OS 2.05.00  TIME SHARING OPTION -------------------------                                                   
+                                                                                                                                    
+                                                                                                                                    
+    ENTER LOGON PARAMETERS BELOW:                                                                                                   
+                                                                                                                                    
+    USERID    ===> TPXQA05               MSGCLASS  ===>                                                                             
+                                                                                                                                    
+    SOURCE    ===> U49IPG00              UNIT      ===> SYSDA                                                                       
+                                                                                                                                    
+    PROCEDURE ===> PROC394               TIME      ===> 0000                                                                        
+                                                                                                                                    
+    REGION    ===> 0004096               DEST      ===>                                                                             
+                                                                                                                                    
+    ACCT NMBR ===> 1                                                                                                                
+                                                                                                                                    
+    PERFORM   ===> 000                   GROUP     ===> OMVSGRP                                                                     
+                                                                                                                                    
+    ENTER AN 'S' BEFORE EACH OPTION DESIRED BELOW:                                                                                  
+                                                                                                                                    
+        S  -NOMAIL   S  -NONOTICE   S  -RECOVER       -RECONNECT     -NEW PSWD                                                      
+                                                                                                                                    
+    USER KEYS ===>                                                                                                                  
+    SECLABEL  ===>                                                                                                                  
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
