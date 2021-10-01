@@ -58,11 +58,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
 import net.infordata.em.util.XIUtil;
 
 /**
@@ -85,7 +83,7 @@ public class XICrt extends JComponent implements Serializable {
    * @see #setFont
    */
   public static final int MIN_FONT_SIZE = 1;
-  public static final int MAX_FONT_SIZE = 30;
+  public static final int MAX_FONT_SIZE = 50;
 
   transient private VolatileImage ivImage;
 
@@ -454,7 +452,7 @@ public class XICrt extends JComponent implements Serializable {
    * @param row row from where to get the string
    * @param nChars number of chars to get from the given position
    * @return string with the given length from the given position
-   * @see String#indexOf
+   * @see String#indexOf(int) 
    */
   public String getString(int col, int row, int nChars) {
     return ivCrtBuffer.getString(col, row, nChars);
@@ -706,7 +704,8 @@ public class XICrt extends JComponent implements Serializable {
     Font ft;
 
     int startIdx = 1;
-    if (size.width < ivCrtBuffer.getSize().width) {
+    if (size.width < ivCrtBuffer.getSize().width || (font.getSize() > MIN_FONT_SIZE
+        && getTestSize(ivFontsCache.getFont(font.getSize() - 1)).width >= size.width)) {
       for (i = xFont.getSize(); i >= MIN_FONT_SIZE; i -= 4) {
         ft = ivFontsCache.getFont(i);
         if (getTestSize(ft).width <= size.width) {
@@ -721,7 +720,7 @@ public class XICrt extends JComponent implements Serializable {
     // found max font (x dimension)
     // to speed up the search uses a two step algorythm
     for (int j = startIdx; j >= 0; j--) {
-      for (i = xFont.getSize(); i <= 30; i += (1 + j * 3)) {
+      for (i = xFont.getSize(); i <= MAX_FONT_SIZE; i += (1 + j * 3)) {
         ft = ivFontsCache.getFont(i);
         if (getTestSize(ft).width <= size.width) {
           xFont = ft;
@@ -733,7 +732,8 @@ public class XICrt extends JComponent implements Serializable {
 
     // found max font (y dimension)
     startIdx = 1;
-    if (size.height < ivCrtBuffer.getSize().height) {
+    if (size.height < ivCrtBuffer.getSize().height || (font.getSize() > MIN_FONT_SIZE
+        && getTestSize(ivFontsCache.getFont(font.getSize() - 1)).height >= size.height)) {
       for (i = yFont.getSize(); i >= MIN_FONT_SIZE; i -= 4) {
         ft = ivFontsCache.getFont(i);
         if (getTestSize(ft).height <= size.height) {
@@ -746,7 +746,7 @@ public class XICrt extends JComponent implements Serializable {
       startIdx = 0;
     }
     for (int j = startIdx; j >= 0; j--) {
-      for (i = yFont.getSize(); i <= 30; i += (1 + j * 3)) {
+      for (i = yFont.getSize(); i <= MAX_FONT_SIZE; i += (1 + j * 3)) {
         ft = ivFontsCache.getFont(i);
         if (getTestSize(ft).height <= size.height) {
           yFont = ft;
@@ -755,7 +755,6 @@ public class XICrt extends JComponent implements Serializable {
         }
       }
     }
-
     // try to use the smaller one
     setFont(ivFontsCache.getFont(Math.min(xFont.getSize(), yFont.getSize())));
   }

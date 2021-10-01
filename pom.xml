@@ -7,7 +7,7 @@
   <artifactId>xtn5250</artifactId>
   <!-- This version has no relation to the released version since the release version is extracted
   from git tag by Travis -->
-  <version>3.2.3</version>
+  <version>3.2.4</version>
 
   <name>${project.artifactId}</name>
   <description>This is a fork of https://sourceforge.net/projects/xtn5250/</description>
@@ -74,6 +74,12 @@
       <version>24.0-jre</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-swing</artifactId>
+      <version>3.9.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -103,6 +109,19 @@
             <useSystemClassLoader>false</useSystemClassLoader>
           </configuration>
         </plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-failsafe-plugin</artifactId>
+	    <version>2.20.1</version>
+	    <configuration>
+		<parallel>both</parallel>
+		<threadCount>10</threadCount>
+		<useSystemClassLoader>false</useSystemClassLoader>
+		<excludedGroups>
+		    net.infordata.em.XICrtIT
+		</excludedGroups>
+	    </configuration>
+	</plugin>
       </plugins>
     </pluginManagement>
   </build>
