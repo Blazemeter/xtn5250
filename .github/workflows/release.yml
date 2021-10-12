@@ -23,7 +23,7 @@ jobs:
           tag: ${{ github.ref }}
       - name: update Readme version
         run: |-
-          sed "s/<version>.*<\/version>/<version>${GITHUB_REF#refs/tags/v}<\/version>/g" README.md > README.md
+          sed -i "s/<version>.*<\/version>/<version>${GITHUB_REF#refs/tags/v}<\/version>/g" README.md
           git add README.md
           git config --local user.email "$(git log --format='%ae' HEAD^!)"
           git config --local user.name "$(git log --format='%an' HEAD^!)"
