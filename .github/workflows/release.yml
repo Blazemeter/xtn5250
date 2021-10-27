@@ -21,6 +21,15 @@ jobs:
           file: target/*.jar
           file_glob: true
           tag: ${{ github.ref }}
+      - name: publish to Nexus
+        run: .github/maven-central-deploy.sh
+        env:
+          GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
+          GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+          GPG_EXECUTABLE: gpg
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       - name: update Readme version
         run: |-
           sed -i "s/<version>.*<\/version>/<version>${GITHUB_REF#refs/tags/v}<\/version>/g" README.md
