@@ -12,8 +12,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Get version
+        id: version
+        run: echo "release_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Check version
+        run: .github/semver-check.sh ${{ env.release_version }}
+      - name: set maven project version
+        run: mvn --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ env.release_version }} --settings .github/settings.xml
       - name: package release
-        run: mvn --batch-mode --no-transfer-progress clean package 
+        run: mvn --batch-mode --no-transfer-progress clean package --settings .github/settings.xml
       - name: Upload built jar into release
         uses: svenstaro/upload-release-action@v2
         with:
