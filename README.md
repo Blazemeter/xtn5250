@@ -9,25 +9,11 @@ To run the emulator in GUI mode just run the generated jar with something like `
 To use the emulator as maven dependency include in `pom.xml`:
 
 ```xml
-<project>
-...
-<repositories>
-  <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-...
-<dependencies>
   <dependency>
-      <groupId>com.github.blazemeter</groupId>
-      <artifactId>xtn5250</artifactId>
-      <version>3.2.4</version>
+    <groupId>com.blazemeter</groupId>
+    <artifactId>xtn5250</artifactId>
+    <version>3.2.4</version>
   </dependency>
-  ...
-</dependencies>
-...
-</project>
 ```
 
 >Check latest version in [releases](https://github.com/blazemeter/xtn5250/releases).
